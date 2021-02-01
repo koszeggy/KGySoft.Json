@@ -25,8 +25,8 @@ namespace TradeSystem.Json
 
         #region Static Fields
 
-        public static readonly JsonValue Null = default;
-
+        public static readonly JsonValue None = default;
+        public static readonly JsonValue Null = new JsonValue(JsonValueType.Null, _null);
         public static readonly JsonValue True = new JsonValue(JsonValueType.Boolean, _true);
         public static readonly JsonValue False = new JsonValue(JsonValueType.Boolean, _false);
 
@@ -40,17 +40,29 @@ namespace TradeSystem.Json
 
         #endregion
 
+        #region Properties and Indexers
+        
         #region Properties
 
         public JsonValueType Type { get; }
 
-        public string AsLiteral
-            => Type == JsonValueType.Null ? "null"
-                : Type <= JsonValueType.String ? (string)_value
-                : null;
+        public string AsLiteral => Type <= JsonValueType.String ? (string)_value : null;
         public IList<JsonValue> AsArray => _value as IList<JsonValue>;
-
         public IDictionary<string, JsonValue> AsObject => _value as IDictionary<string, JsonValue>;
+
+        #endregion
+
+        #region Indexers
+
+        public JsonValue this[int arrayIndex] => _value is IList<JsonValue> list && (uint)arrayIndex < (uint)list.Count
+            ? list[arrayIndex] 
+            : None;
+
+        public JsonValue this[string propertyName] => _value is IDictionary<string, JsonValue> dict
+            ? dict.GetValueOrDefault(propertyName)
+            : None;
+
+        #endregion
 
         #endregion
 
@@ -127,9 +139,9 @@ namespace TradeSystem.Json
                 ? throw new ArgumentOutOfRangeException(nameof(value))
                 : new JsonValue(JsonValueType.Number, value.ToRoundtripString());
 
-        public static JsonValue FromArray(IList<JsonValue> values) => new JsonValue(values ?? new List<JsonValue>());
+        public static JsonValue FromArray(IList<JsonValue> values = null) => new JsonValue(values ?? new List<JsonValue>());
 
-        public static JsonValue FromObject(IDictionary<string, JsonValue> properties) => new JsonValue(properties ?? new Dictionary<string, JsonValue>());
+        public static JsonValue FromObject(IDictionary<string, JsonValue> properties = null) => new JsonValue(properties ?? new Dictionary<string, JsonValue>());
 
         #endregion
 
