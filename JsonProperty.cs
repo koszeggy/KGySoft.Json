@@ -6,7 +6,7 @@
 
 namespace TradeSystem.Json
 {
-    internal readonly struct JsonProperty
+    public readonly struct JsonProperty
     {
         #region Properties
 
@@ -17,7 +17,7 @@ namespace TradeSystem.Json
 
         #region Constructors
 
-        internal JsonProperty(string name, JsonValue value)
+        public JsonProperty(string name, JsonValue value)
         {
             Name = name;
             Value = value;

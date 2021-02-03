@@ -2,8 +2,8 @@
 {
     public enum JsonValueType
     {
-        Undefined = -1,
-        None = 0,
+        UnknownLiteral = -1,
+        Undefined = 0,
         Null,
         Boolean,
         Number,

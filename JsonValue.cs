@@ -3,8 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+
 using KGySoft.CoreLibraries;
 
 #endregion
@@ -15,9 +17,9 @@ namespace TradeSystem.Json
     {
         #region Constants
 
-        private const string _null = "null";
-        private const string _true = "true";
-        private const string _false = "false";
+        internal const string NullLiteral = "null";
+        internal const string TrueLiteral = "true";
+        internal const string FalseLiteral = "false";
 
         #endregion
 
@@ -25,10 +27,10 @@ namespace TradeSystem.Json
 
         #region Static Fields
 
-        public static readonly JsonValue None = default;
-        public static readonly JsonValue Null = new JsonValue(JsonValueType.Null, _null);
-        public static readonly JsonValue True = new JsonValue(JsonValueType.Boolean, _true);
-        public static readonly JsonValue False = new JsonValue(JsonValueType.Boolean, _false);
+        public static readonly JsonValue Undefined = default;
+        public static readonly JsonValue Null = new JsonValue(JsonValueType.Null, NullLiteral);
+        public static readonly JsonValue True = new JsonValue(JsonValueType.Boolean, TrueLiteral);
+        public static readonly JsonValue False = new JsonValue(JsonValueType.Boolean, FalseLiteral);
 
         #endregion
 
@@ -41,26 +43,43 @@ namespace TradeSystem.Json
         #endregion
 
         #region Properties and Indexers
-        
+
         #region Properties
 
         public JsonValueType Type { get; }
 
-        public string AsLiteral => Type <= JsonValueType.String ? (string)_value : null;
+        public bool IsNull => Type == JsonValueType.Null;
+
+        public bool? AsBoolean => this == True ? true
+            : this == False ? false
+            : (bool?)null;
+
+        public string AsString => Type == JsonValueType.String ? (string)_value : null;
+
+        /// <summary>
+        /// Gets the value as a number if <see cref="Type"/> is <see cref="JsonValueType.Number"/>.
+        /// A valid JSON Number type is essentially a double. C# Long/Decimal type must be strings to ensure precision
+        /// but if they are number literals their string value still can be accessed by the <see cref="AsLiteral"/> property.
+        /// </summary>
+        public double? AsNumber => Type == JsonValueType.Number && Double.TryParse((string) _value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out double value)
+                ? value
+                : (double?)null;
+
+        public string AsLiteral => _value as string;
         public IList<JsonValue> AsArray => _value as IList<JsonValue>;
-        public IDictionary<string, JsonValue> AsObject => _value as IDictionary<string, JsonValue>;
+        public IList<JsonProperty> AsObject => _value as IList<JsonProperty>;
 
         #endregion
 
         #region Indexers
 
         public JsonValue this[int arrayIndex] => _value is IList<JsonValue> list && (uint)arrayIndex < (uint)list.Count
-            ? list[arrayIndex] 
-            : None;
+            ? list[arrayIndex]
+            : Undefined;
 
-        public JsonValue this[string propertyName] => _value is IDictionary<string, JsonValue> dict
-            ? dict.GetValueOrDefault(propertyName)
-            : None;
+        public JsonValue this[string propertyName] => _value is IList<JsonProperty> properties
+            ? properties.FirstOrDefault(p => p.Name == propertyName).Value
+            : Undefined;
 
         #endregion
 
@@ -75,48 +94,63 @@ namespace TradeSystem.Json
 
         #region Constructors
 
-        #region Internal Constructors
+        #region Public Constructors
 
-        internal JsonValue(StringBuilder value, bool isString)
-            : this(isString ? JsonValueType.String : JsonValueType.Undefined, value.ToString())
+        public JsonValue(bool value) => this = value ? True : False;
+
+        public JsonValue(string value)
         {
-            if (Type != JsonValueType.Undefined)
-                return;
-
-            string s = (string)_value;
-            if (s == _null)
-                this = Null;
-            else if (s == _true)
-                this = True;
-            else if (s == _false)
-                this = False;
-            else if (Double.TryParse(s, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, NumberFormatInfo.InvariantInfo, out double d)
-                && !Double.IsInfinity(d) && !Double.IsNaN(d))
+            if (value == null)
             {
-                Type = JsonValueType.Number;
+                this = Null;
+                return;
             }
+
+            Type = JsonValueType.String;
+            _value = value;
         }
 
-        internal JsonValue(IList<JsonValue> values)
+        public JsonValue(double value)
         {
+            // Note: JSON Number type is actually a double. Other numeric types (long/decimal) must be encoded as a string to
+            // prevent loss of precision at JS side.
+            // Note 2: This allows NaN and +-Infinity, which is also invalid JSON. Parsing those will work though type will be UnknownLiteral
+            Type = JsonValueType.Number;
+            _value = value.ToRoundtripString();
+        }
+
+        public JsonValue(IList<JsonValue> values)
+        {
+            if (values == null)
+            {
+                this = Null;
+                return;
+            }
+
             Type = JsonValueType.Array;
             _value = values;
         }
 
-        internal JsonValue(IDictionary<string, JsonValue> properties)
+        public JsonValue(IList<JsonProperty> properties)
         {
+            if (properties == null)
+            {
+                this = Null;
+                return;
+            }
+
             Type = JsonValueType.Object;
             _value = properties;
         }
 
         #endregion
 
-        #region Private Constructors
+        #region Internal Constructors
 
-        private JsonValue(JsonValueType type, string value)
+        internal JsonValue(JsonValueType type, string value)
         {
-            Type = type;
             _value = value;
+            Type = type;
         }
 
         #endregion
@@ -129,19 +163,8 @@ namespace TradeSystem.Json
 
         #region Public Methods
 
-        public static JsonValue FromBoolean(bool value) => value ? True : False;
-
-        public static JsonValue FromString(string value)
-            => new JsonValue(JsonValueType.String, value ?? throw new ArgumentNullException(nameof(value)));
-
-        public static JsonValue FromNumber(double value)
-            => Double.IsInfinity(value) || Double.IsNaN(value)
-                ? throw new ArgumentOutOfRangeException(nameof(value))
-                : new JsonValue(JsonValueType.Number, value.ToRoundtripString());
-
-        public static JsonValue FromArray(IList<JsonValue> values = null) => new JsonValue(values ?? new List<JsonValue>());
-
-        public static JsonValue FromObject(IDictionary<string, JsonValue> properties = null) => new JsonValue(properties ?? new Dictionary<string, JsonValue>());
+        public static JsonValue Parse(Stream utf8Stream) => JsonParser.Parse(utf8Stream ?? throw new ArgumentNullException(nameof(utf8Stream)));
+        public static JsonValue Parse(string s) => Parse(new MemoryStream(Encoding.UTF8.GetBytes(s ?? throw new ArgumentNullException(nameof(s)))));
 
         #endregion
 
@@ -199,9 +222,9 @@ namespace TradeSystem.Json
                 case JsonValueType.String:
                     return ToJsonString(AsLiteral);
                 case JsonValueType.Object:
-                    return $"{{{String.Join(",", AsObject.Select(p => new JsonProperty(p.Key, p.Value)))}}}";
+                    return $"{{{String.Join(",", AsObject.Where(p => p.Value.Type != JsonValueType.Undefined))}}}";
                 case JsonValueType.Array:
-                    return $"[{String.Join(",", AsArray)}]";
+                    return $"[{String.Join(",", AsArray.Where(i => i.Type != JsonValueType.Undefined))}]";
                 default:
                     return AsLiteral;
             }

@@ -11,13 +11,13 @@ using KGySoft.CoreLibraries;
 
 namespace TradeSystem.Json
 {
-    public static class JsonParser
+    internal static class JsonParser
     {
         #region Methods
 
         #region Internal Methods
 
-        public static JsonValue Parse(Stream stream)
+        internal static JsonValue Parse(Stream stream)
         {
             while (true)
             {
@@ -29,7 +29,7 @@ namespace TradeSystem.Json
                 switch (c)
                 {
                     case '{':
-                        var properties = new Dictionary<string, JsonValue>();
+                        var properties = new List<JsonProperty>();
                         ParseJsonObject(stream, properties);
                         return new JsonValue(properties);
                     case '[':
@@ -39,19 +39,23 @@ namespace TradeSystem.Json
                     case '"':
                         var value = new StringBuilder();
                         ParseJsonString(stream, value);
-                        return new JsonValue(value, true);
+                        return new JsonValue(JsonValueType.String, value.ToString());
                     default:
                         if (IsWhitespace(c))
                             continue;
-                        if (IsValidLiteral(c))
-                        {
-                            value = new StringBuilder();
-                            value.Append(c);
-                            ParseJsonLiteral(stream, value);
-                            return new JsonValue(value, false);
-                        }
+                        bool isNumber = true;
+                        if (!CanBeLiteral(c, ref isNumber))
+                            throw new ArgumentException($"Unexpected character in JSON value: {c}", nameof(stream));
 
-                        throw new ArgumentException($"Unexpected character in JSON value: {c}", nameof(stream));
+                        value = new StringBuilder();
+                        value.Append(c);
+                        ParseJsonLiteral(stream, value, ref isNumber);
+                        string s = value.ToString();
+                        return isNumber ? new JsonValue(JsonValueType.Number, s)
+                            : s == JsonValue.NullLiteral ? JsonValue.Null
+                            : s == JsonValue.TrueLiteral ? JsonValue.True
+                            : s == JsonValue.FalseLiteral ? JsonValue.False
+                            : new JsonValue(JsonValueType.UnknownLiteral, s);
                 }
             }
         }
@@ -60,7 +64,7 @@ namespace TradeSystem.Json
 
         #region Private Methods
 
-        private static void ParseJsonLiteral(Stream stream, StringBuilder value)
+        private static void ParseJsonLiteral(Stream stream, StringBuilder value, ref bool isNumber)
         {
             while (true)
             {
@@ -75,7 +79,7 @@ namespace TradeSystem.Json
                     return;
                 }
 
-                if (IsValidLiteral(c))
+                if (CanBeLiteral(c, ref isNumber))
                 {
                     value.Append(c);
                     continue;
@@ -133,6 +137,7 @@ namespace TradeSystem.Json
                         }
                         break;
                     default:
+                        // TODO: treat as UTF8!
                         value.Append(c);
                         break;
                 }
@@ -171,7 +176,7 @@ namespace TradeSystem.Json
             }
         }
 
-        private static void ParseJsonObject(Stream stream, Dictionary<string, JsonValue> properties)
+        private static void ParseJsonObject(Stream stream, List<JsonProperty> properties)
         {
             bool commaOrEndExpected = false;
             while (true)
@@ -193,8 +198,7 @@ namespace TradeSystem.Json
                     case '"':
                         if (commaOrEndExpected)
                             throw new ArgumentException("Missing comma between properties in JSON object", nameof(stream));
-                        JsonProperty property = ParseJsonProperty(stream);
-                        properties[property.Name] = property.Value;
+                        properties.Add(ParseJsonProperty(stream));
                         commaOrEndExpected = true;
                         continue;
                     default:
@@ -237,10 +241,18 @@ namespace TradeSystem.Json
 
         private static bool IsWhitespace(char c) => c.In(' ', '\t', '\r', '\n');
 
-        private static bool IsValidLiteral(char c) => c >= '0' && c <= '9'
-            || c >= 'a' && c <= 'z'
-            || c >= 'A' && c <= 'Z'
-            || c.In('-', '.');
+        private static bool CanBeLiteral(char c, ref bool canBeNumber)
+        {
+            // not a precise validation but works well for valid content
+            if (canBeNumber && (c >= '0' && c <= '9' || c == '-' || c == '.' || c == 'e' || c == 'E' || c == '+'))
+                return true;
+
+            canBeNumber = false;
+            return c >= '0' && c <= '9'
+                || c >= 'a' && c <= 'z'
+                || c >= 'A' && c <= 'Z'
+                || c == '-' || c == '.' || c == '+';
+        }
 
         #endregion
 
