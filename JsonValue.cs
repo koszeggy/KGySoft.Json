@@ -67,7 +67,7 @@ namespace TradeSystem.Json
                 ? value
                 : (double?)null;
 
-        public string AsLiteral => _value as string; // for undefined, returns null!
+        public string AsLiteral => _value as string; // for undefined, returns null! (unlike ToString, which returns undefined)
         public IList<JsonValue> AsArray => _value as IList<JsonValue>;
         public IList<JsonProperty> AsObject => _value as IList<JsonProperty>;
 
