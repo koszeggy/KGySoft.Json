@@ -55,6 +55,7 @@ namespace TradeSystem.Json
                             : s == JsonValue.NullLiteral ? JsonValue.Null
                             : s == JsonValue.TrueLiteral ? JsonValue.True
                             : s == JsonValue.FalseLiteral ? JsonValue.False
+                            : s == JsonValue.UndefinedLiteral ? JsonValue.Undefined // actually not valid in a JSON object
                             : new JsonValue(JsonValueType.UnknownLiteral, s);
                 }
             }

@@ -17,6 +17,7 @@ namespace TradeSystem.Json
     {
         #region Constants
 
+        internal const string UndefinedLiteral = "undefined";
         internal const string NullLiteral = "null";
         internal const string TrueLiteral = "true";
         internal const string FalseLiteral = "false";
@@ -48,6 +49,7 @@ namespace TradeSystem.Json
 
         public JsonValueType Type { get; }
 
+        public bool IsUndefined => Type == JsonValueType.Undefined;
         public bool IsNull => Type == JsonValueType.Null;
 
         public bool? AsBoolean => this == True ? true
@@ -65,7 +67,7 @@ namespace TradeSystem.Json
                 ? value
                 : (double?)null;
 
-        public string AsLiteral => _value as string;
+        public string AsLiteral => _value as string; // for undefined, returns null!
         public IList<JsonValue> AsArray => _value as IList<JsonValue>;
         public IList<JsonProperty> AsObject => _value as IList<JsonProperty>;
 
@@ -222,9 +224,11 @@ namespace TradeSystem.Json
                 case JsonValueType.String:
                     return ToJsonString(AsLiteral);
                 case JsonValueType.Object:
-                    return $"{{{String.Join(",", AsObject.Where(p => p.Value.Type != JsonValueType.Undefined))}}}";
+                    return $"{{{String.Join(",", AsObject.Where(p => !p.Value.IsUndefined))}}}";
                 case JsonValueType.Array:
-                    return $"[{String.Join(",", AsArray.Where(i => i.Type != JsonValueType.Undefined))}]";
+                    return $"[{String.Join(",", AsArray.Where(i => !i.IsUndefined))}]";
+                case JsonValueType.Undefined:
+                    return UndefinedLiteral;
                 default:
                     return AsLiteral;
             }
