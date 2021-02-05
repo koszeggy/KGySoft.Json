@@ -2,6 +2,7 @@
 
 using System;
 using System.Globalization;
+using KGySoft.CoreLibraries;
 
 #endregion
 
@@ -10,6 +11,33 @@ namespace TradeSystem.Json
     public static class JsonValueExtensions
     {
         #region Methods
+
+        public static bool? AsBoolean(this in JsonValue json, JsonValueType expectedType = default)
+        {
+            string s;
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
+                return null;
+
+            return s switch
+            {
+                JsonValue.TrueLiteral => true,
+                JsonValue.FalseLiteral => false,
+                _ => null
+            };
+        }
+
+        public static bool TryGetBoolean(this in JsonValue json, out bool value, JsonValueType expectedType = default)
+        {
+            string s;
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
+            {
+                value = default;
+                return false;
+            }
+
+            value = s == JsonValue.TrueLiteral;
+            return value || s == JsonValue.FalseLiteral;
+        }
 
         public static int? AsInt32(this in JsonValue json, JsonValueType expectedType = default)
         {
@@ -123,6 +151,31 @@ namespace TradeSystem.Json
 
             value = json.IsNull ? null : s;
             return true;
+        }
+
+        public static TEnum? AsEnum<TEnum>(this in JsonValue json, JsonValueType expectedType = default)
+            where TEnum : struct, Enum
+        {
+            string s;
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
+                return null;
+
+            return json.IsNull ? null : s.ToEnum<TEnum>();
+        }
+
+        public static bool TryGetEnum<TEnum>(this in JsonValue json, out TEnum value, JsonValueType expectedType = default)
+            where TEnum : struct, Enum
+        {
+            string s;
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
+            {
+                value = default;
+                return false;
+            }
+
+            TEnum? result = json.IsNull ? default(TEnum?) : s.ToEnum<TEnum>();
+            value = result.GetValueOrDefault();
+            return result.HasValue;
         }
 
         // TODO: for all other .NET types
