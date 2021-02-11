@@ -4,6 +4,8 @@
 
 #endregion
 
+using System;
+
 namespace TradeSystem.Json
 {
     public readonly struct JsonProperty
@@ -19,7 +21,7 @@ namespace TradeSystem.Json
 
         public JsonProperty(string name, JsonValue value)
         {
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             Value = value;
         }
 
