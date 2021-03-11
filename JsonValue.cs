@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -63,24 +64,24 @@ namespace TradeSystem.Json
         /// A valid JSON Number type is essentially a double. C# Long/Decimal type must be strings to ensure precision
         /// but if they are number literals their string value still can be accessed by the <see cref="AsLiteral"/> property.
         /// </summary>
-        public double? AsNumber => Type == JsonValueType.Number && Double.TryParse((string) _value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out double value)
+        public double? AsNumber => Type == JsonValueType.Number && Double.TryParse((string)_value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out double value)
                 ? value
                 : (double?)null;
 
         public string AsLiteral => _value as string; // for undefined, returns null! (unlike ToString, which returns undefined)
-        public IList<JsonValue> AsArray => _value as IList<JsonValue>;
-        public IList<JsonProperty> AsObject => _value as IList<JsonProperty>;
+        public JsonArray AsArray => _value as JsonArray;
+        public JsonObject AsObject => _value as JsonObject;
 
         #endregion
 
         #region Indexers
 
-        public JsonValue this[int arrayIndex] => _value is IList<JsonValue> list && (uint)arrayIndex < (uint)list.Count
-            ? list[arrayIndex]
+        public JsonValue this[int arrayIndex] => _value is JsonArray array
+            ? array[arrayIndex]
             : Undefined;
 
-        public JsonValue this[string propertyName] => _value is IList<JsonProperty> properties
-            ? properties.FirstOrDefault(p => p.Name == propertyName).Value
+        public JsonValue this[string propertyName] => _value is JsonObject obj
+            ? obj[propertyName]
             : Undefined;
 
         #endregion
@@ -91,6 +92,11 @@ namespace TradeSystem.Json
 
         public static bool operator ==(JsonValue left, JsonValue right) => left.Equals(right);
         public static bool operator !=(JsonValue left, JsonValue right) => !left.Equals(right);
+
+        public static implicit operator JsonValue(string value) => new JsonValue(value);
+        public static implicit operator JsonValue(double value) => new JsonValue(value);
+        public static implicit operator JsonValue(JsonArray array) => new JsonValue(array);
+        public static implicit operator JsonValue(JsonObject obj) => new JsonValue(obj);
 
         #endregion
 
@@ -112,37 +118,45 @@ namespace TradeSystem.Json
             _value = value;
         }
 
+        /// <summary>
+        /// Initializes a new <see cref="JsonValue"/> struct that represents a number.
+        /// <note><list type="bullet">
+        /// <item>JavaScript's Number type is actually a double. Other large numeric types (<see cref="long"/>/<see cref="decimal"/>) must be encoded as a string to
+        /// prevent loss of precision at a real JS side. If you are sure that you want to forcibly treat such types as numbers in the resulting JSON
+        /// use the <see cref="FromNumberUnchecked"/> method.</item>
+        /// <item>This method allows <see cref="Double.NaN"/> and <see cref="Double.PositiveInfinity"/>/<see cref="Double.NegativeInfinity"/>,
+        /// which are also invalid in JSON. Parsing these values works though their <see cref="Type"/> will be <see cref="JsonValueType.UnknownLiteral"/> after parsing.</item>
+        /// </list></note>
+        /// </summary>
+        /// <param name="value">The value.</param>
         public JsonValue(double value)
         {
-            // Note: JSON Number type is actually a double. Other numeric types (long/decimal) must be encoded as a string to
-            // prevent loss of precision at JS side.
-            // Note 2: This allows NaN and +-Infinity, which is also invalid JSON. Parsing those will work though type will be UnknownLiteral
             Type = JsonValueType.Number;
             _value = value.ToRoundtripString();
         }
 
-        public JsonValue(IList<JsonValue> values)
+        public JsonValue(JsonArray array)
         {
-            if (values == null)
+            if (array == null)
             {
                 this = Null;
                 return;
             }
 
             Type = JsonValueType.Array;
-            _value = values;
+            _value = array;
         }
 
-        public JsonValue(IList<JsonProperty> properties)
+        public JsonValue(JsonObject obj)
         {
-            if (properties == null)
+            if (obj == null)
             {
                 this = Null;
                 return;
             }
 
             Type = JsonValueType.Object;
-            _value = properties;
+            _value = obj;
         }
 
         #endregion
@@ -165,50 +179,60 @@ namespace TradeSystem.Json
 
         #region Public Methods
 
-        public static JsonValue Parse(Stream utf8Stream) => JsonParser.Parse(utf8Stream ?? throw new ArgumentNullException(nameof(utf8Stream)));
-        public static JsonValue Parse(string s) => Parse(new MemoryStream(Encoding.UTF8.GetBytes(s ?? throw new ArgumentNullException(nameof(s)))));
+        public static JsonValue Parse(TextReader reader) => JsonParser.Parse(reader ?? throw new ArgumentNullException(nameof(reader)));
+        public static JsonValue Parse(Stream stream, Encoding encoding = null) => Parse(new StreamReader(stream ?? throw new ArgumentNullException(nameof(stream)), encoding ?? Encoding.UTF8));
+        public static JsonValue Parse(string s) => Parse(new StringReader(s));
+
+        /// <summary>
+        /// Forces <paramref name="value"/> to be treated as a JSON number, even if it cannot be represented as a valid number in JavaScript.
+        /// <br/><note>
+        /// Please note that <see cref="AsNumber"/> property of the result may return a less precise value, or even <see langword="null"/>,
+        /// though serializing to JSON by the <see cref="ToString"/> method preserves the specified <paramref name="value"/>.
+        /// </note>
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static JsonValue FromNumberUnchecked(string value) => value == null ? Null : new JsonValue(JsonValueType.Number, value);
 
         #endregion
 
         #region Internal Methods
 
-        internal static string ToJsonString(string stringValue)
+        internal static void WriteJsonString(StringBuilder builder, string value)
         {
-            var result = new StringBuilder(stringValue.Length + 2);
-            result.Append('"');
-            foreach (char c in stringValue)
+            builder.Append('"');
+            foreach (char c in value)
             {
                 switch (c)
                 {
                     case '\b':
-                        result.Append(@"\b");
+                        builder.Append(@"\b");
                         break;
                     case '\f':
-                        result.Append(@"\f");
+                        builder.Append(@"\f");
                         break;
                     case '\n':
-                        result.Append(@"\n");
+                        builder.Append(@"\n");
                         break;
                     case '\r':
-                        result.Append(@"\r");
+                        builder.Append(@"\r");
                         break;
                     case '\t':
-                        result.Append(@"\t");
+                        builder.Append(@"\t");
                         break;
                     case '"':
-                        result.Append(@"\""");
+                        builder.Append(@"\""");
                         break;
                     case '\\':
-                        result.Append(@"\\");
+                        builder.Append(@"\\");
                         break;
                     default:
-                        result.Append(c);
+                        builder.Append(c);
                         break;
                 }
             }
 
-            result.Append('"');
-            return result.ToString();
+            builder.Append('"');
         }
 
         #endregion
@@ -217,21 +241,16 @@ namespace TradeSystem.Json
 
         #region Instance Methods
 
+        #region Public Methods
+        
         public override string ToString()
         {
-            switch (Type)
-            {
-                case JsonValueType.String:
-                    return ToJsonString(AsLiteral);
-                case JsonValueType.Object:
-                    return $"{{{String.Join(",", AsObject.Where(p => !p.Value.IsUndefined))}}}";
-                case JsonValueType.Array:
-                    return $"[{String.Join(",", AsArray.Where(i => !i.IsUndefined))}]";
-                case JsonValueType.Undefined:
-                    return UndefinedLiteral;
-                default:
-                    return AsLiteral;
-            }
+            if (Type <= JsonValueType.Number)
+                return Type == JsonValueType.Undefined ? UndefinedLiteral : AsLiteral;
+
+            var result = new StringBuilder(_value is string s ? s.Length + 2 : 64);
+            Dump(result);
+            return result.ToString();
         }
 
         public bool Equals(JsonValue other) => Type == other.Type && Equals(_value, other._value);
@@ -239,6 +258,36 @@ namespace TradeSystem.Json
         public override bool Equals(object obj) => obj is JsonValue other && Equals(other);
 
         public override int GetHashCode() => (Type, _value).GetHashCode();
+
+        #endregion
+
+        #region Internal Methods
+
+        internal void Dump(StringBuilder builder)
+        {
+            switch (Type)
+            {
+                case JsonValueType.String:
+                    WriteJsonString(builder, AsLiteral);
+                    return;
+
+                case JsonValueType.Object:
+                    AsObject.Dump(builder);
+                    return;
+
+                case JsonValueType.Array:
+                    AsArray.Dump(builder);
+                    return;
+
+                default:
+                    Debug.Assert(!IsUndefined, "Undefined value is not expected in Dump");
+                    builder.Append(AsLiteral);
+                    return;
+            }
+
+        }
+
+        #endregion
 
         #endregion
 

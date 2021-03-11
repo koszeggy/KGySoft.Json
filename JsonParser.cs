@@ -17,40 +17,47 @@ namespace TradeSystem.Json
 
         #region Internal Methods
 
-        internal static JsonValue Parse(Stream stream)
+        internal static JsonValue Parse(TextReader reader)
         {
+            char? _ = default;
+            return ParseValue(reader, ref _);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private static JsonValue ParseValue(TextReader reader, ref char? c)
+        {
+            if (c == null)
+            {
+                int nextChar = reader.Read();
+                if (nextChar == -1)
+                    throw new ArgumentException("Unexpected end of JSON stream.", nameof(reader));
+                c = (char)nextChar;
+            }
+
             while (true)
             {
-                int nextByte = stream.ReadByte();
-                if (nextByte == -1)
-                    throw new ArgumentException("Unexpected end of JSON message.", nameof(stream));
-
-                char c = (char)nextByte;
                 switch (c)
                 {
                     case '{':
-                        var properties = new List<JsonProperty>();
-                        ParseJsonObject(stream, properties);
-                        return new JsonValue(properties);
+                        c = null;
+                        return new JsonValue(ParseObject(reader));
                     case '[':
-                        var items = new List<JsonValue>();
-                        ParseJsonArray(stream, items);
-                        return new JsonValue(items);
+                        c = null;
+                        return new JsonValue(ParseArray(reader));
                     case '"':
-                        var value = new StringBuilder();
-                        ParseJsonString(stream, value);
-                        return new JsonValue(JsonValueType.String, value.ToString());
+                        c = null;
+                        return new JsonValue(JsonValueType.String, ParseString(reader));
                     default:
-                        if (IsWhitespace(c))
-                            continue;
+                        if (IsWhitespace(c.Value))
+                            break;
                         bool isNumber = true;
-                        if (!CanBeLiteral(c, ref isNumber))
-                            throw new ArgumentException($"Unexpected character in JSON value: {c}", nameof(stream));
+                        if (!CanBeLiteral(c.Value, ref isNumber))
+                            throw new ArgumentException($"Unexpected character in JSON value: {c}", nameof(reader));
 
-                        value = new StringBuilder();
-                        value.Append(c);
-                        ParseJsonLiteral(stream, value, ref isNumber);
-                        string s = value.ToString();
+                        string s = ParseLiteral(reader, ref c, ref isNumber);
                         return isNumber ? new JsonValue(JsonValueType.Number, s)
                             : s == JsonValue.NullLiteral ? JsonValue.Null
                             : s == JsonValue.TrueLiteral ? JsonValue.True
@@ -58,184 +65,209 @@ namespace TradeSystem.Json
                             : s == JsonValue.UndefinedLiteral ? JsonValue.Undefined // actually not valid in a JSON object
                             : new JsonValue(JsonValueType.UnknownLiteral, s);
                 }
+
+                int nextChar = reader.Read();
+                if (nextChar == -1)
+                    throw new ArgumentException("Unexpected end of JSON stream.", nameof(reader));
+                c = (char)nextChar;
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private static void ParseJsonLiteral(Stream stream, StringBuilder value, ref bool isNumber)
+        private static string ParseLiteral(TextReader reader, ref char? c, ref bool isNumber)
         {
+            var result = new StringBuilder();
+            result.Append(c);
+
             while (true)
             {
-                int nextByte = stream.ReadByte();
-                if (nextByte == -1)
-                    return;
-
-                char c = (char)nextByte;
-                if (IsWhitespace(c) || c.In(',', '}', ']'))
+                int nextChar = reader.Read();
+                if (nextChar == -1)
                 {
-                    stream.Position--;
-                    return;
+                    c = null;
+                    break;
                 }
 
-                if (CanBeLiteral(c, ref isNumber))
+                c = (char)nextChar;
+                if (IsWhitespace(c.Value) || c.Value.In(',', '}', ']'))
+                    break;
+
+                if (CanBeLiteral(c.Value, ref isNumber))
                 {
-                    value.Append(c);
+                    result.Append(c);
                     continue;
                 }
 
-                throw new ArgumentException($"Unexpected character in JSON literal: {c}", nameof(stream));
+                throw new ArgumentException($"Unexpected character in JSON literal: {c}", nameof(reader));
             }
+
+            return result.ToString();
         }
 
-        private static void ParseJsonString(Stream stream, StringBuilder value)
+        private static string ParseString(TextReader reader)
         {
+            var result = new StringBuilder();
             while (true)
             {
-                int nextByte = stream.ReadByte();
-                if (nextByte == -1)
-                    throw new ArgumentException("Unexpected end of JSON message.", nameof(stream));
+                int nextChar = reader.Read();
+                if (nextChar == -1)
+                    throw new ArgumentException("Unexpected end of JSON string.", nameof(reader));
 
-                char c = (char)nextByte;
+                char c = (char)nextChar;
                 switch (c)
                 {
                     case '"':
-                        return;
+                        return result.ToString();
                     case '\\':
-                        nextByte = stream.ReadByte();
-                        if (nextByte == -1)
+                        nextChar = reader.Read();
+                        if (nextChar == -1)
                             continue;
-                        c = (char)nextByte;
+                        c = (char)nextChar;
                         switch (c)
                         {
                             case 'b':
-                                value.Append('\b');
+                                result.Append('\b');
                                 break;
                             case 'f':
-                                value.Append('\f');
+                                result.Append('\f');
                                 break;
                             case 'n':
-                                value.Append('\n');
+                                result.Append('\n');
                                 break;
                             case 'r':
-                                value.Append('\r');
+                                result.Append('\r');
                                 break;
                             case 't':
-                                value.Append('\t');
+                                result.Append('\t');
                                 break;
                             case '"':
-                                value.Append('"');
+                                result.Append('"');
                                 break;
                             case '\\':
-                                value.Append(@"\\");
+                                result.Append(@"\\");
                                 break;
                             default:
                                 Logger.Warn(cb => cb($"Invalid JSON escape sequence: \\{c}"));
-                                value.Append($"\\{c}");
+                                result.Append($"\\{c}");
                                 break;
                         }
                         break;
                     default:
-                        // TODO: treat as UTF8!
-                        value.Append(c);
+                        result.Append(c);
                         break;
                 }
             }
         }
 
-        private static void ParseJsonArray(Stream stream, List<JsonValue> items)
+        private static JsonArray ParseArray(TextReader reader)
         {
+            var items = new List<JsonValue>();
             bool commaOrEndExpected = false;
+
+            int nextChar = reader.Read();
+            if (nextChar == -1)
+                throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+            var c = (char?)nextChar;
+
             while (true)
             {
-                int nextByte = stream.ReadByte();
-                if (nextByte == -1)
-                    throw new ArgumentException("Unexpected end of JSON message.", nameof(stream));
-
-                char c = (char)nextByte;
                 switch (c)
                 {
                     case ']':
-                        return;
+                        return new JsonArray(items);
                     case ',':
                         if (!commaOrEndExpected)
-                            throw new ArgumentException("Unexpected comma in JSON array", nameof(stream));
+                            throw new ArgumentException("Unexpected comma in JSON array", nameof(reader));
                         commaOrEndExpected = false;
-                        continue;
+                        break;
                     default:
-                        if (IsWhitespace(c))
-                            continue;
+                        if (IsWhitespace(c.Value))
+                            break;
                         if (commaOrEndExpected)
-                            throw new ArgumentException($"Comma expected but '{c}' found in JSON object", nameof(stream));
-                        stream.Position--;
-                        items.Add(Parse(stream));
+                            throw new ArgumentException($"Comma expected but '{c}' found in JSON array", nameof(reader));
+                        items.Add(ParseValue(reader, ref c));
                         commaOrEndExpected = true;
-                        continue;
+                        if (c == null)
+                            break;
+                        else
+                            continue;
                 }
+
+                nextChar = reader.Read();
+                if (nextChar == -1)
+                    throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+                c = (char)nextChar;
             }
         }
 
-        private static void ParseJsonObject(Stream stream, List<JsonProperty> properties)
+        private static JsonObject ParseObject(TextReader reader)
         {
+            var properties = new List<JsonProperty>();
             bool commaOrEndExpected = false;
+
+            int nextChar = reader.Read();
+            if (nextChar == -1)
+                throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+            var c = (char?)nextChar;
+
             while (true)
             {
-                int nextByte = stream.ReadByte();
-                if (nextByte == -1)
-                    throw new ArgumentException("Unexpected end of JSON message.", nameof(stream));
-
-                char c = (char)nextByte;
                 switch (c)
                 {
                     case '}':
-                        return;
+                        return new JsonObject(properties);
                     case ',':
                         if (!commaOrEndExpected)
-                            throw new ArgumentException("Unexpected comma in JSON property", nameof(stream));
+                            throw new ArgumentException("Unexpected comma in JSON property", nameof(reader));
                         commaOrEndExpected = false;
-                        continue;
+                        break;
                     case '"':
                         if (commaOrEndExpected)
-                            throw new ArgumentException("Missing comma between properties in JSON object", nameof(stream));
-                        properties.Add(ParseJsonProperty(stream));
+                            throw new ArgumentException("Missing comma between properties in JSON object", nameof(reader));
+                        properties.Add(ParseProperty(reader, ref c));
                         commaOrEndExpected = true;
-                        continue;
-                    default:
-                        if (IsWhitespace(c))
+                        if (c == null)
+                            break;
+                        else
                             continue;
+                    default:
+                        if (IsWhitespace(c.Value))
+                            break;
                         if (commaOrEndExpected)
-                            throw new ArgumentException($"Comma expected but '{c}' found in JSON object", nameof(stream));
-                        throw new ArgumentException($"Double quote or object end expected but '{c}' found in JSON object", nameof(stream));
+                            throw new ArgumentException($"Comma expected but '{c}' found in JSON object", nameof(reader));
+                        throw new ArgumentException($"Double quote or object end expected but '{c}' found in JSON object", nameof(reader));
                 }
+
+                nextChar = reader.Read();
+                if (nextChar == -1)
+                    throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+                c = (char)nextChar;
             }
         }
 
-        private static JsonProperty ParseJsonProperty(Stream stream)
+        private static JsonProperty ParseProperty(TextReader reader, ref char? c)
         {
-            StringBuilder name = new StringBuilder();
-            ParseJsonString(stream, name);
+            string name = ParseString(reader);
             bool colonExpected = true;
             while (true)
             {
-                int nextByte = stream.ReadByte();
-                if (nextByte == -1)
-                    throw new ArgumentException("Unexpected end of JSON message.", nameof(stream));
+                int nextChar = reader.Read();
+                if (nextChar == -1)
+                    throw new ArgumentException("Unexpected end of JSON object.", nameof(reader));
 
-                char c = (char)nextByte;
+                c = (char)nextChar;
                 switch (c)
                 {
                     case ':':
                         if (!colonExpected)
-                            throw new ArgumentException("Unexpected colon in JSON object", nameof(stream));
+                            throw new ArgumentException("Unexpected colon in JSON object", nameof(reader));
                         colonExpected = false;
                         continue;
                     default:
+                        if (IsWhitespace(c.Value))
+                            break;
                         if (colonExpected)
-                            throw new ArgumentException($"Colon expected but '{c}' found in JSON object", nameof(stream));
-                        stream.Position--;
-                        return new JsonProperty(name.ToString(), Parse(stream));
+                            throw new ArgumentException($"Colon expected but '{c}' found in JSON object", nameof(reader));
+                        return new JsonProperty(name, ParseValue(reader, ref c));
                 }
             }
         }
