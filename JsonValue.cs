@@ -93,6 +93,7 @@ namespace TradeSystem.Json
         public static bool operator ==(JsonValue left, JsonValue right) => left.Equals(right);
         public static bool operator !=(JsonValue left, JsonValue right) => !left.Equals(right);
 
+        public static implicit operator JsonValue(bool value) => new JsonValue(value);
         public static implicit operator JsonValue(string value) => new JsonValue(value);
         public static implicit operator JsonValue(double value) => new JsonValue(value);
         public static implicit operator JsonValue(JsonArray array) => new JsonValue(array);

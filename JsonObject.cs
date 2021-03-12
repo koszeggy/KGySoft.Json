@@ -2,26 +2,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-
-using KGySoft.Collections.ObjectModel;
-using KGySoft.CoreLibraries;
 
 #endregion
 
 namespace TradeSystem.Json
 {
-    // TODO: make VirtualCollection.Count virtual, too, and then
-    // - initialize base elements on demand only, too (ctor)
-    // - Maintain base list only if list is initialized, too (this[string].set, Remove(string))
-    // - Create base list on demand (Insert/Set/Remove)
-    // - Override Count (as list/dict), GetItem (EnsureList), GetEnumerator (as list/dict)
-    public sealed class JsonObject : VirtualCollection<JsonProperty>
+    public sealed class JsonObject : Collection<JsonProperty>
     {
         #region Fields
 
-        private IDictionary<string, JsonValue> _asDictionary;
+        private Dictionary<string, int> _nameToIndex;
 
         #endregion
 
@@ -33,18 +26,22 @@ namespace TradeSystem.Json
             {
                 if (propertyName == null)
                     throw new ArgumentNullException(nameof(propertyName));
-                return EnsureDictionary().GetValueOrDefault(propertyName);
+                return TryGetIndex(propertyName, out int index)
+                    ? Items[index].Value
+                    : JsonValue.Undefined;
             }
             set
             {
                 if (propertyName == null)
                     throw new ArgumentNullException(nameof(propertyName));
-                IDictionary<string, JsonValue> dict = EnsureDictionary();
-                // TODO: call this only if initialized as list; otherwise, as dict only
-                if (dict.TryGetValue(propertyName, out var oldValue))
-                    this[IndexOf((propertyName, oldValue))] = (propertyName, value);
-                else
-                    Add(new JsonProperty(propertyName, value));
+
+                if (TryGetIndex(propertyName, out int index))
+                {
+                    Items[index] = (propertyName, value);
+                    return;
+                }
+
+                InsertItem(Count, (propertyName, value));
             }
         }
 
@@ -52,22 +49,28 @@ namespace TradeSystem.Json
 
         #region Constructors
 
+        #region Public Constructors
+
         public JsonObject()
         {
         }
 
-        public JsonObject(IList<JsonProperty> properties) : base(properties ?? throw new ArgumentNullException(nameof(properties)))
+        public JsonObject(IEnumerable<JsonProperty> properties)
+            : this(new List<JsonProperty>(properties ?? throw new ArgumentNullException(nameof(properties))))
         {
-            // Not initializing _asDictionary here. It is initialized on demand when an element is accessed by name.
+            // Not initializing the dictionary here. It is initialized on demand when an element is accessed by name.
+            // The public constructor always copies the elements into a new list so no consistency check is needed when using the index map.
         }
 
-        public JsonObject(IDictionary<string, JsonValue> properties)
+        #endregion
+
+        #region Internal Constructors
+
+        internal JsonObject(List<JsonProperty> properties) : base(properties)
         {
-            _asDictionary = properties ?? throw new ArgumentNullException(nameof(properties));
-            // TODO: Do not initialize as list here. It is initialized on demand when an element is accessed by index.
-            foreach (KeyValuePair<string, JsonValue> property in properties)
-                Items.Add(new JsonProperty(property.Key, property.Value));
         }
+
+        #endregion
 
         #endregion
 
@@ -75,11 +78,7 @@ namespace TradeSystem.Json
 
         #region Public Methods
 
-        public void Add(string name, JsonValue value)
-        {
-            // TODO: call this only if already initialized as list; otherwise, as dict only
-            Add(new JsonProperty(name, value));
-        }
+        public void Add(string name, JsonValue value) => Add(new JsonProperty(name, value));
 
         public override int GetHashCode()
         {
@@ -138,42 +137,60 @@ namespace TradeSystem.Json
         {
             if (item.Name == null)
                 throw new ArgumentException($"{nameof(item.Name)} is null", nameof(item));
-            // TODO: EnsureList
             base.InsertItem(index, item);
-            _asDictionary?.Add(item.Name, item.Value);
+            if (_nameToIndex == null)
+                return;
+
+            // Maintaining index map dictionary only if inserting at the last position
+            // (by an offset field inserting at the first position could be maintained, too, but we don't want a field only for this)
+            if (index == Count - 1)
+                _nameToIndex[item.Name] = index;
+            else
+                _nameToIndex = null;
         }
 
         protected override void SetItem(int index, JsonProperty item)
         {
             if (item.Name == null)
                 throw new ArgumentException($"{nameof(item.Name)} is null", nameof(item));
-            // TODO: EnsureList
-            base.SetItem(index, item);
-            if (_asDictionary != null)
-                _asDictionary[item.Name] = item.Value;
+
+            Dictionary<string, int> map = _nameToIndex;
+            if (map == null)
+                return;
+            map[item.Name] = index;
         }
 
         protected override void RemoveItem(int index)
         {
-            if ((uint)index < (uint)Count)
-                _asDictionary?.Remove(this[index].Name);
-            // TODO: EnsureList
             base.RemoveItem(index);
+            _nameToIndex = null;
         }
 
         protected override void ClearItems()
         {
-            _asDictionary.Clear();
-            // TODO: call base only if initialized as list
             base.ClearItems();
+            _nameToIndex = null;
         }
 
         #endregion
 
         #region Private Methods
 
-        private IDictionary<string, JsonValue> EnsureDictionary()
-            => _asDictionary ??= this.ToDictionary(p => p.Name, p => p.Value);
+        private bool TryGetIndex(string name, out int index)
+        {
+            IList<JsonProperty> items = Items;
+            Dictionary<string, int> map = _nameToIndex;
+            if (map != null)
+                return map.TryGetValue(name, out index);
+
+            // Initializing index map. Duplicate names will map to the last occurrence.
+            int count = items.Count;
+            map = new Dictionary<string, int>(count);
+            for (int i = 0; i < count; i++)
+                map[items[i].Name] = i;
+            _nameToIndex = map;
+            return map.TryGetValue(name, out index);
+        }
 
         #endregion
 
