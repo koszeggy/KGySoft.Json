@@ -195,6 +195,9 @@ namespace TradeSystem.Json
         /// <returns></returns>
         public static JsonValue FromNumberUnchecked(string value) => value == null ? Null : new JsonValue(JsonValueType.Number, value);
 
+        // NOTE: This may allow produce invalid JSON (just like FromNumberUnchecked)
+        public static JsonValue FromLiteralUnchecked(string value) => value == null ? Null : new JsonValue(JsonValueType.UnknownLiteral, value);
+
         #endregion
 
         #region Internal Methods
