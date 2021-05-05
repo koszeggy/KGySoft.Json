@@ -163,6 +163,16 @@ namespace TradeSystem.Json
             return json.IsNull ? null : s.ToEnum<TEnum>();
         }
 
+        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreCase, JsonValueType expectedType = default)
+            where TEnum : struct, Enum
+        {
+            string s;
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
+                return null;
+
+            return json.IsNull ? null : Enum<TEnum>.TryParse(s, ignoreCase, out TEnum result) ? result : null;
+        }
+
         public static bool TryGetEnum<TEnum>(this in JsonValue json, out TEnum value, JsonValueType expectedType = default)
             where TEnum : struct, Enum
         {
@@ -176,6 +186,19 @@ namespace TradeSystem.Json
             TEnum? result = json.IsNull ? default(TEnum?) : s.ToEnum<TEnum>();
             value = result.GetValueOrDefault();
             return result.HasValue;
+        }
+
+        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreCase, out TEnum value, JsonValueType expectedType = default)
+            where TEnum : struct, Enum
+        {
+            string s;
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null || json.IsNull)
+            {
+                value = default;
+                return false;
+            }
+
+            return Enum<TEnum>.TryParse(s, ignoreCase, out value);
         }
 
         // TODO: for all other .NET types
