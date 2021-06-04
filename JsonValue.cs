@@ -96,6 +96,7 @@ namespace TradeSystem.Json
         public static implicit operator JsonValue(bool value) => new JsonValue(value);
         public static implicit operator JsonValue(string value) => new JsonValue(value);
         public static implicit operator JsonValue(double value) => new JsonValue(value);
+        public static implicit operator JsonValue(int value) => JsonValue.FromNumberUnchecked(value.ToString(CultureInfo.InvariantCulture)); // just for performance
         public static implicit operator JsonValue(JsonArray array) => new JsonValue(array);
         public static implicit operator JsonValue(JsonObject obj) => new JsonValue(obj);
 
@@ -123,8 +124,9 @@ namespace TradeSystem.Json
         /// Initializes a new <see cref="JsonValue"/> struct that represents a number.
         /// <note><list type="bullet">
         /// <item>JavaScript's Number type is actually a double. Other large numeric types (<see cref="long"/>/<see cref="decimal"/>) must be encoded as a string to
-        /// prevent loss of precision at a real JS side. If you are sure that you want to forcibly treat such types as numbers in the resulting JSON
-        /// use the <see cref="FromNumberUnchecked"/> method.</item>
+        /// prevent loss of precision at a real JS side (see the <see cref="FromNumber(decimal)"/> and other overloads).
+        /// If you are sure that you want to forcibly treat such types as numbers in the resulting JSON
+        /// use the <see cref="FromNumber(decimal)"/> overloads or the <see cref="FromNumberUnchecked"/> method.</item>
         /// <item>This method allows <see cref="Double.NaN"/> and <see cref="Double.PositiveInfinity"/>/<see cref="Double.NegativeInfinity"/>,
         /// which are also invalid in JSON. Parsing these values works though their <see cref="Type"/> will be <see cref="JsonValueType.UnknownLiteral"/> after parsing.</item>
         /// </list></note>
@@ -197,6 +199,23 @@ namespace TradeSystem.Json
 
         // NOTE: This may allow produce invalid JSON (just like FromNumberUnchecked)
         public static JsonValue FromLiteralUnchecked(string value) => value == null ? Null : new JsonValue(JsonValueType.UnknownLiteral, value);
+
+        // numbers as strings
+        public static JsonValue FromString(double value) => new JsonValue(value.ToRoundtripString());
+        public static JsonValue FromString(decimal value) => new JsonValue(value.ToRoundtripString());
+        public static JsonValue FromString(long value) => new JsonValue(value.ToString(CultureInfo.InvariantCulture));
+        public static JsonValue FromString(ulong value) => new JsonValue(value.ToString(CultureInfo.InvariantCulture));
+
+        // Just for completeness
+        public static JsonValue FromString(string value) => new JsonValue(value);
+
+        // Forced numbers, may lose precision in JS (see AsNumber vs. AsLiteral/ToString)
+        public static JsonValue FromNumber(decimal value) => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
+        public static JsonValue FromNumber(long value) => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
+        public static JsonValue FromNumber(ulong value) => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
+
+        // Just for completeness
+        public static JsonValue FromNumber(double value) => new JsonValue(value);
 
         #endregion
 
