@@ -1,4 +1,4 @@
-﻿namespace TradeSystem.Json
+﻿namespace KGySoft.Json
 {
     public enum JsonValueType
     {

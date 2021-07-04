@@ -1,20 +1,34 @@
-﻿#region Usings
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: JsonValue.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2021 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution. If not, then this file is considered as
+//  an illegal copy.
+//
+//  Unauthorized copying of this file, via any medium is strictly prohibited.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 using KGySoft.CoreLibraries;
 
 #endregion
 
-namespace TradeSystem.Json
+namespace KGySoft.Json
 {
-    public readonly struct JsonValue : IEquatable<JsonValue>
+    public struct JsonValue : IEquatable<JsonValue>
     {
         #region Constants
 
@@ -38,7 +52,7 @@ namespace TradeSystem.Json
 
         #region Instance Fields
 
-        private readonly object _value;
+        private readonly object value;
 
         #endregion
 
@@ -57,30 +71,30 @@ namespace TradeSystem.Json
             : this == False ? false
             : (bool?)null;
 
-        public string AsString => Type == JsonValueType.String ? (string)_value : null;
+        public string AsString => Type == JsonValueType.String ? (string)value : null;
 
         /// <summary>
         /// Gets the value as a number if <see cref="Type"/> is <see cref="JsonValueType.Number"/>.
         /// A valid JSON Number type is essentially a double. C# Long/Decimal type must be strings to ensure precision
         /// but if they are number literals their string value still can be accessed by the <see cref="AsLiteral"/> property.
         /// </summary>
-        public double? AsNumber => Type == JsonValueType.Number && Double.TryParse((string)_value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out double value)
+        public double? AsNumber => Type == JsonValueType.Number && Double.TryParse((string)this.value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out double value)
                 ? value
                 : (double?)null;
 
-        public string AsLiteral => _value as string; // for undefined, returns null! (unlike ToString, which returns undefined)
-        public JsonArray AsArray => _value as JsonArray;
-        public JsonObject AsObject => _value as JsonObject;
+        public string AsLiteral => value as string; // for undefined, returns null! (unlike ToString, which returns undefined)
+        public JsonArray AsArray => value as JsonArray;
+        public JsonObject AsObject => value as JsonObject;
 
         #endregion
 
         #region Indexers
 
-        public JsonValue this[int arrayIndex] => _value is JsonArray array
+        public JsonValue this[int arrayIndex] => value is JsonArray array
             ? array[arrayIndex]
             : Undefined;
 
-        public JsonValue this[string propertyName] => _value is JsonObject obj
+        public JsonValue this[string propertyName] => value is JsonObject obj
             ? obj[propertyName]
             : Undefined;
 
@@ -117,7 +131,7 @@ namespace TradeSystem.Json
             }
 
             Type = JsonValueType.String;
-            _value = value;
+            this.value = value;
         }
 
         /// <summary>
@@ -135,7 +149,7 @@ namespace TradeSystem.Json
         public JsonValue(double value)
         {
             Type = JsonValueType.Number;
-            _value = value.ToRoundtripString();
+            this.value = value.ToRoundtripString();
         }
 
         public JsonValue(JsonArray array)
@@ -147,7 +161,7 @@ namespace TradeSystem.Json
             }
 
             Type = JsonValueType.Array;
-            _value = array;
+            value = array;
         }
 
         public JsonValue(JsonObject obj)
@@ -159,7 +173,7 @@ namespace TradeSystem.Json
             }
 
             Type = JsonValueType.Object;
-            _value = obj;
+            value = obj;
         }
 
         #endregion
@@ -168,7 +182,7 @@ namespace TradeSystem.Json
 
         internal JsonValue(JsonValueType type, string value)
         {
-            _value = value;
+            this.value = value;
             Type = type;
         }
 
@@ -265,22 +279,22 @@ namespace TradeSystem.Json
         #region Instance Methods
 
         #region Public Methods
-        
+
         public override string ToString()
         {
             if (Type <= JsonValueType.Number)
                 return Type == JsonValueType.Undefined ? UndefinedLiteral : AsLiteral;
 
-            var result = new StringBuilder(_value is string s ? s.Length + 2 : 64);
+            var result = new StringBuilder(value is string s ? s.Length + 2 : 64);
             Dump(result);
             return result.ToString();
         }
 
-        public bool Equals(JsonValue other) => Type == other.Type && Equals(_value, other._value);
+        public bool Equals(JsonValue other) => Type == other.Type && Equals(value, other.value);
 
         public override bool Equals(object obj) => obj is JsonValue other && Equals(other);
 
-        public override int GetHashCode() => (Type, _value).GetHashCode();
+        public override int GetHashCode() => (Type, _value: value).GetHashCode();
 
         #endregion
 

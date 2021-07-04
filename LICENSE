@@ -1,0 +1,78 @@
+﻿                         KGy SOFT License, Version 1.0
+
+                                   OVERVIEW:
+                                   =========
+
+PERMISSIONS:          CONDITIONS:                           LIMITATIONS:
+[X] Commercial use    [X] License and copyright notice      [X] Liability
+[X] Distribution          for source                        [X] Warranty
+[X] Modification      [X] Attribution for reused sources
+[X] Private use       [X] Indicate source changes
+
+Regarding source codes this license is based on the zlib License, and is
+compatible with GPL.
+
+Regarding documentations and other non software-like materials this license is
+compatible with the Creative Commons Attribution 4.0 International License.
+
+                                    TL;DR:
+                                    ======
+
+1. USING THE BINARIES: NO RESTRICTIONS
+2. USING THE COMPLETE SOURCE: KEEP THE LICENSE AND INDICATE CHANGES
+3. USING A PORTION OF THE SOURCE: GIVE ATTRIBUTION (see the example below)
+4. USING NON SOFTWARE-LIKE MATERIALS: GIVE ATTRIBUTION
+
+==============================================================================
+
+This material is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this material.
+
+Permission is granted to anyone to use this material for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. USING THE BINARIES: NO RESTRICTIONS
+
+   You are allowed to use the published binaries of this material from any
+   source (including but not exclusively: version releases, NuGet packages,
+   archives) without any restriction. An acknowledgment in the product
+   documentation would be appreciated but is not required.
+
+2. USING THE COMPLETE SOURCE: KEEP THE LICENSE AND INDICATE CHANGES
+
+   If you clone, fork, download or obtain the sources via any material, then
+   this notice and also the copyright headers in source files may not be
+   removed or altered from any source distribution.
+
+   If you create a derivative product the origin of this material must not be
+   misrepresented; you must not claim that you wrote the original code base.
+   Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original code base.
+
+   Feel free to be a contributor of the original source code. You can create
+   pull requests for fixes, improvements and new features. It is not
+   guaranteed that they will be merged though.
+
+3. USING A PORTION OF THE SOURCE: GIVE ATTRIBUTION
+
+   If you re-use smaller portions of the source code (eg. a class or method),
+   then you must give appropriate credit and provide a link to the original
+   source and license. You may do so in any reasonable manner, but not in any
+   way that suggests the licensor endorses you or your use. Something like the
+   following example will perfectly do it.
+
+   ATTRIBUTION EXAMPLE (feel free to adjust):
+
+   // This class/member/code section was taken from/inspired by
+   // [repository name and link], which is under the KGy SOFT License.
+   // Original source code: [a permalink to the original source file/folder]
+   // The KGy SOFT License is available at [link to LICENSE in the repository]
+      
+4. USING NON SOFTWARE-LIKE MATERIALS: GIVE ATTRIBUTION
+
+   If you re-use the documentation and other non software-like materials,
+   then you must give appropriate credit and provide a link to the original
+   material. You may do so in any reasonable manner, but not in any
+   way that suggests the licensor endorses you or your use.

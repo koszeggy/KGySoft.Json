@@ -1,4 +1,20 @@
-﻿#region Usings
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: JsonParser.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2021 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution. If not, then this file is considered as
+//  an illegal copy.
+//
+//  Unauthorized copying of this file, via any medium is strictly prohibited.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +25,7 @@ using KGySoft.CoreLibraries;
 
 #endregion
 
-namespace TradeSystem.Json
+namespace KGySoft.Json
 {
     internal static class JsonParser
     {
@@ -146,7 +162,6 @@ namespace TradeSystem.Json
                                 result.Append(@"\\");
                                 break;
                             default:
-                                Logger.Warn(cb => cb($"Invalid JSON escape sequence: \\{c}"));
                                 result.Append($"\\{c}");
                                 break;
                         }
