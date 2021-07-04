@@ -21,6 +21,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -41,6 +42,7 @@ namespace KGySoft.Json
         public static bool operator !=(JsonProperty left, JsonProperty right) => !left.Equals(right);
 
         public static implicit operator JsonProperty((string Name, JsonValue Value) property) => new JsonProperty(property.Name, property.Value);
+        public static implicit operator JsonProperty(KeyValuePair<string, JsonValue> property) => new JsonProperty(property.Key, property.Value);
 
         #endregion
 
