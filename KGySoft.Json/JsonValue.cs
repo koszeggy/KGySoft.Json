@@ -22,8 +22,6 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-using KGySoft.CoreLibraries;
-
 #endregion
 
 namespace KGySoft.Json
@@ -149,7 +147,7 @@ namespace KGySoft.Json
         public JsonValue(double value)
         {
             Type = JsonValueType.Number;
-            this.value = value.ToRoundtripString();
+            this.value = value.ToString("R", NumberFormatInfo.InvariantInfo);
         }
 
         public JsonValue(JsonArray array)
@@ -215,18 +213,18 @@ namespace KGySoft.Json
         public static JsonValue FromLiteralUnchecked(string value) => value == null ? Null : new JsonValue(JsonValueType.UnknownLiteral, value);
 
         // numbers as strings
-        public static JsonValue FromString(double value) => new JsonValue(value.ToRoundtripString());
-        public static JsonValue FromString(decimal value) => new JsonValue(value.ToRoundtripString());
-        public static JsonValue FromString(long value) => new JsonValue(value.ToString(CultureInfo.InvariantCulture));
-        public static JsonValue FromString(ulong value) => new JsonValue(value.ToString(CultureInfo.InvariantCulture));
+        public static JsonValue FromString(double value) => new JsonValue(value.ToString("R", NumberFormatInfo.InvariantInfo));
+        public static JsonValue FromString(decimal value) => new JsonValue(value.ToString(NumberFormatInfo.InvariantInfo));
+        public static JsonValue FromString(long value) => new JsonValue(value.ToString(NumberFormatInfo.InvariantInfo));
+        public static JsonValue FromString(ulong value) => new JsonValue(value.ToString(NumberFormatInfo.InvariantInfo));
 
         // Just for completeness
         public static JsonValue FromString(string value) => new JsonValue(value);
 
         // Forced numbers, may lose precision in JS (see AsNumber vs. AsLiteral/ToString)
-        public static JsonValue FromNumber(decimal value) => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
-        public static JsonValue FromNumber(long value) => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
-        public static JsonValue FromNumber(ulong value) => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
+        public static JsonValue FromNumber(decimal value) => new JsonValue(JsonValueType.Number, value.ToString(NumberFormatInfo.InvariantInfo));
+        public static JsonValue FromNumber(long value) => new JsonValue(JsonValueType.Number, value.ToString(NumberFormatInfo.InvariantInfo));
+        public static JsonValue FromNumber(ulong value) => new JsonValue(JsonValueType.Number, value.ToString(NumberFormatInfo.InvariantInfo));
 
         // Just for completeness
         public static JsonValue FromNumber(double value) => new JsonValue(value);

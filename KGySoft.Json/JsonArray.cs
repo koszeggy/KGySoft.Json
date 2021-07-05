@@ -17,33 +17,112 @@
 #region Usings
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using KGySoft.Collections.ObjectModel;
 
 #endregion
 
 namespace KGySoft.Json
 {
-    public sealed class JsonArray : VirtualCollection<JsonValue>
+    public sealed class JsonArray : IList<JsonValue>
     {
+        #region Fields
+
+        private readonly List<JsonValue> items;
+
+        #endregion
+
+        #region Properties and Indexers
+
+        #region Public Properties
+        
+        #region Properties
+
+        public int Count => items.Count;
+
+
+        #endregion
+
+        #region Explicitly Implemented Interface Properties
+
+        bool ICollection<JsonValue>.IsReadOnly => false;
+
+        #endregion
+
+        #endregion
+
+        #region Indexers
+
+        public JsonValue this[int index]
+        {
+            get => (uint)index < Count ? items[index] : JsonValue.Undefined;
+            set
+            {
+                if ((uint)index >= Count)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                items[index] = value;
+            }
+        }
+
+        #endregion
+        
+        #endregion
+
         #region Constructors
+
+        #region Public Constructors
 
         public JsonArray()
         {
         }
 
-        public JsonArray(IList<JsonValue> items) : base(items ?? throw new ArgumentNullException(nameof(items)))
+        public JsonArray(IEnumerable<JsonValue> items) : this(new List<JsonValue>(items ?? throw new ArgumentNullException(nameof(items))))
         {
         }
+
+        #endregion
+
+        #region Internal Constructors
+
+        internal JsonArray(List<JsonValue> items) => this.items = items;
+
+        #endregion
 
         #endregion
 
         #region Methods
 
         #region Public Methods
+
+        public void Add(JsonValue item) => items.Add(item);
+
+        public void Insert(int index, JsonValue item)
+        {
+            if ((uint)index > Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            items.Insert(index, item);
+        }
+
+        public bool Contains(JsonValue item) => items.Contains(item);
+
+        public int IndexOf(JsonValue item) => items.IndexOf(item);
+
+        public bool Remove(JsonValue item) => items.Remove(item);
+
+        public void RemoveAt(int index)
+        {
+            if ((uint)index > Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            items.RemoveAt(index);
+        }
+
+        public void Clear() => items.Clear();
+
+        public void CopyTo(JsonValue[] array, int arrayIndex) => items.CopyTo(array, arrayIndex);
+
+        public IEnumerator<JsonValue> GetEnumerator() => items.GetEnumerator();
 
         public override int GetHashCode()
         {
@@ -96,9 +175,9 @@ namespace KGySoft.Json
 
         #endregion
 
-        #region Protected Methods
+        #region Explicitly Implemented Interface Methods
 
-        protected override JsonValue GetItem(int index) => (uint)index < Count ? base.GetItem(index) : JsonValue.Undefined;
+        IEnumerator IEnumerable.GetEnumerator() => items.GetEnumerator();
 
         #endregion
 

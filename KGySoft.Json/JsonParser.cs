@@ -21,8 +21,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-using KGySoft.CoreLibraries;
-
 #endregion
 
 namespace KGySoft.Json
@@ -104,7 +102,7 @@ namespace KGySoft.Json
                 }
 
                 c = (char)nextChar;
-                if (IsWhitespace(c.Value) || c.Value.In(',', '}', ']'))
+                if (IsWhitespace(c.Value) || c.Value is ',' or '}' or ']')
                     break;
 
                 if (CanBeLiteral(c.Value, ref isNumber))
@@ -287,19 +285,19 @@ namespace KGySoft.Json
             }
         }
 
-        private static bool IsWhitespace(char c) => c.In(' ', '\t', '\r', '\n');
+        private static bool IsWhitespace(char c) => c is ' ' or '\t' or '\r' or '\n';
 
         private static bool CanBeLiteral(char c, ref bool canBeNumber)
         {
             // not a precise validation but works well for valid content
-            if (canBeNumber && (c >= '0' && c <= '9' || c == '-' || c == '.' || c == 'e' || c == 'E' || c == '+'))
+            if (canBeNumber && (c is >= '0' and <= '9' or '-' or '.' or 'e' or 'E' or '+'))
                 return true;
 
             canBeNumber = false;
-            return c >= '0' && c <= '9'
-                || c >= 'a' && c <= 'z'
-                || c >= 'A' && c <= 'Z'
-                || c == '-' || c == '.' || c == '+';
+            return c is >= '0' and <= '9'
+                or >= 'a' and <= 'z'
+                or >= 'A' and <= 'Z'
+                or '-' or '.' or '+';
         }
 
         #endregion
