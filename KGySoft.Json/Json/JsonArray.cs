@@ -58,12 +58,7 @@ namespace KGySoft.Json
         public JsonValue this[int index]
         {
             get => (uint)index < Count ? items[index] : JsonValue.Undefined;
-            set
-            {
-                if ((uint)index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                items[index] = value;
-            }
+            set => items[index] = value;
         }
 
         #endregion
@@ -78,7 +73,9 @@ namespace KGySoft.Json
         {
         }
 
-        public JsonArray(IEnumerable<JsonValue> items) : this(new List<JsonValue>(items ?? throw new ArgumentNullException(nameof(items))))
+        public JsonArray(IEnumerable<JsonValue> items)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, items CAN be null but MUST NOT be
+            : this(new List<JsonValue>(items ?? Throw.ArgumentNullException<List<JsonValue>>(nameof(items))))
         {
         }
 
@@ -98,12 +95,7 @@ namespace KGySoft.Json
 
         public void Add(JsonValue item) => items.Add(item);
 
-        public void Insert(int index, JsonValue item)
-        {
-            if ((uint)index > Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-            items.Insert(index, item);
-        }
+        public void Insert(int index, JsonValue item) => items.Insert(index, item);
 
         public bool Contains(JsonValue item) => items.Contains(item);
 
@@ -111,12 +103,7 @@ namespace KGySoft.Json
 
         public bool Remove(JsonValue item) => items.Remove(item);
 
-        public void RemoveAt(int index)
-        {
-            if ((uint)index > Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-            items.RemoveAt(index);
-        }
+        public void RemoveAt(int index) => items.RemoveAt(index);
 
         public void Clear() => items.Clear();
 

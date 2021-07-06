@@ -194,9 +194,17 @@ namespace KGySoft.Json
 
         #region Public Methods
 
-        public static JsonValue Parse(TextReader reader) => JsonParser.Parse(reader ?? throw new ArgumentNullException(nameof(reader)));
-        public static JsonValue Parse(Stream stream, Encoding encoding = null) => Parse(new StreamReader(stream ?? throw new ArgumentNullException(nameof(stream)), encoding ?? Encoding.UTF8));
-        public static JsonValue Parse(string s) => Parse(new StringReader(s));
+        public static JsonValue Parse(TextReader reader)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            => JsonParser.Parse(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)));
+        
+        public static JsonValue Parse(Stream stream, Encoding? encoding = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => Parse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8));
+        
+        public static JsonValue Parse(string s)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            => Parse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))));
 
         /// <summary>
         /// Forces <paramref name="value"/> to be treated as a JSON number, even if it cannot be represented as a valid number in JavaScript.

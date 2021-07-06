@@ -16,14 +16,12 @@
 
 #region Usings
 
-
-
-#endregion
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+
+#endregion
 
 namespace KGySoft.Json
 {
@@ -31,8 +29,18 @@ namespace KGySoft.Json
     {
         #region Properties
 
+        #region Public Properties
+        
         public string Name { get; }
         public JsonValue Value { get; }
+
+        #endregion
+
+        #region Internal Properties
+
+        internal bool IsDefault => Name == default!;
+
+        #endregion
 
         #endregion
 
@@ -50,7 +58,8 @@ namespace KGySoft.Json
 
         public JsonProperty(string name, JsonValue value)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, name CAN be null but MUST NOT be
+            Name = name ?? Throw .ArgumentNullException<string>(nameof(name));
             Value = value;
         }
 
@@ -66,7 +75,7 @@ namespace KGySoft.Json
 
         public override int GetHashCode() => (Name, Value).GetHashCode();
 
-        public override string ToString() => Name == null ? base.ToString() : $"{Name}:{Value}";
+        public override string ToString() => IsDefault ? JsonValue.UndefinedLiteral : $"{Name}:{Value}";
 
         #endregion
 

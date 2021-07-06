@@ -81,18 +81,11 @@ namespace KGySoft.Json
 
         public JsonProperty this[int index]
         {
-            get
-            {
-                if ((uint)index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                return properties[index];
-            }
+            get => properties[index];
             set
             {
-                if ((uint)index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                if (value.Name == null)
-                    throw new ArgumentException($"{nameof(value.Name)} is null", nameof(value));
+                if (value.IsDefault)
+                    Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(value));
                 properties[index] = value;
 
                 Dictionary<string, int>? map = nameToIndex;
@@ -106,16 +99,16 @@ namespace KGySoft.Json
         {
             get
             {
-                if (propertyName == null)
-                    throw new ArgumentNullException(nameof(propertyName));
+                if (propertyName == null!)
+                    Throw.ArgumentNullException(nameof(propertyName));
                 return TryGetIndex(propertyName, out int index)
                     ? properties[index].Value
                     : JsonValue.Undefined;
             }
             set
             {
-                if (propertyName == null)
-                    throw new ArgumentNullException(nameof(propertyName));
+                if (propertyName == null!)
+                    Throw.ArgumentNullException(nameof(propertyName));
 
                 if (TryGetIndex(propertyName, out int index))
                 {
@@ -138,7 +131,8 @@ namespace KGySoft.Json
         public JsonObject() => properties = new List<JsonProperty>();
 
         public JsonObject(IEnumerable<JsonProperty> properties)
-            : this(new List<JsonProperty>(properties ?? throw new ArgumentNullException(nameof(properties))))
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, properties CAN be null but MUST NOT be
+            : this(new List<JsonProperty>(properties ?? Throw.ArgumentNullException<List<JsonProperty>>(nameof(properties))))
         {
             // Not initializing the dictionary here. It is initialized on demand when an element is accessed by name.
             // The public constructor always copies the elements into a new list so no consistency check is needed when using the index map.
@@ -160,8 +154,8 @@ namespace KGySoft.Json
 
         public void Add(JsonProperty item)
         {
-            if (item.Name == null)
-                throw new ArgumentException($"{nameof(item.Name)} is null", nameof(item));
+            if (item.IsDefault)
+                Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(item));
             InsertItem(Count, item);
         }
 
@@ -169,10 +163,8 @@ namespace KGySoft.Json
 
         public void Insert(int index, JsonProperty item)
         {
-            if ((uint)index > Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
-            if (item.Name == null)
-                throw new ArgumentException($"{nameof(item.Name)} is null", nameof(item));
+            if (item.IsDefault)
+                Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(item));
             InsertItem(index, item);
         }
 
@@ -182,8 +174,8 @@ namespace KGySoft.Json
 
         public bool TryGetValue(string propertyName, out JsonValue value)
         {
-            if (propertyName == null)
-                throw new ArgumentNullException(nameof(propertyName));
+            if (propertyName == null!)
+                Throw.ArgumentNullException(nameof(propertyName));
             if (TryGetIndex(propertyName, out int index))
             {
                 value = properties[index].Value;
@@ -196,16 +188,14 @@ namespace KGySoft.Json
 
         public void RemoveAt(int index)
         {
-            if ((uint)index > Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
             properties.RemoveAt(index);
             nameToIndex = null;
         }
 
         public bool Remove(string propertyName)
         {
-            if (propertyName == null)
-                throw new ArgumentNullException(nameof(propertyName));
+            if (propertyName == null!)
+                Throw.ArgumentNullException(nameof(propertyName));
 
             Dictionary<string, int>? map = nameToIndex;
             if (map != null)

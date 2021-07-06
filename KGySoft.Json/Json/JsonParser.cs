@@ -47,7 +47,7 @@ namespace KGySoft.Json
             {
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    throw new ArgumentException("Unexpected end of JSON stream.", nameof(reader));
+                    Throw.ArgumentException(Res.UnexpectedEndOfJsonStream, nameof(reader));
                 c = (char)nextChar;
             }
 
@@ -69,7 +69,7 @@ namespace KGySoft.Json
                             break;
                         bool isNumber = true;
                         if (!CanBeLiteral(c.Value, ref isNumber))
-                            throw new ArgumentException($"Unexpected character in JSON value: {c}", nameof(reader));
+                            Throw.ArgumentException(Res.UnexpectedCharInJsonValue(c.Value), nameof(reader));
 
                         string s = ParseLiteral(reader, ref c, ref isNumber);
                         return isNumber ? new JsonValue(JsonValueType.Number, s)
@@ -82,7 +82,7 @@ namespace KGySoft.Json
 
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    throw new ArgumentException("Unexpected end of JSON stream.", nameof(reader));
+                    Throw.ArgumentException(Res.UnexpectedEndOfJsonStream, nameof(reader));
                 c = (char)nextChar;
             }
         }
@@ -111,7 +111,7 @@ namespace KGySoft.Json
                     continue;
                 }
 
-                throw new ArgumentException($"Unexpected character in JSON literal: {c}", nameof(reader));
+                Throw.ArgumentException(Res.UnexpectedCharInJsonLiteral(c.Value), nameof(reader));
             }
 
             return result.ToString();
@@ -124,7 +124,7 @@ namespace KGySoft.Json
             {
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    throw new ArgumentException("Unexpected end of JSON string.", nameof(reader));
+                    Throw.ArgumentException(Res.UnexpectedEndOfJsonString, nameof(reader));
 
                 char c = (char)nextChar;
                 switch (c)
@@ -178,7 +178,7 @@ namespace KGySoft.Json
 
             int nextChar = reader.Read();
             if (nextChar == -1)
-                throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+                Throw.ArgumentException(Res.UnexpectedEndOfJsonArray, nameof(reader));
             var c = (char?)nextChar;
 
             while (true)
@@ -189,14 +189,14 @@ namespace KGySoft.Json
                         return new JsonArray(items);
                     case ',':
                         if (!commaOrEndExpected)
-                            throw new ArgumentException("Unexpected comma in JSON array", nameof(reader));
+                            Throw.ArgumentException(Res.UnexpectedCommaInJsonArray, nameof(reader));
                         commaOrEndExpected = false;
                         break;
                     default:
                         if (IsWhitespace(c.Value))
                             break;
                         if (commaOrEndExpected)
-                            throw new ArgumentException($"Comma expected but '{c}' found in JSON array", nameof(reader));
+                            Throw.ArgumentException(Res.UnexpectedCharInJsonArray(c.Value), nameof(reader));
                         items.Add(ParseValue(reader, ref c));
                         commaOrEndExpected = true;
                         if (c == null)
@@ -207,7 +207,7 @@ namespace KGySoft.Json
 
                 nextChar = reader.Read();
                 if (nextChar == -1)
-                    throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+                    Throw.ArgumentException(Res.UnexpectedEndOfJsonArray, nameof(reader));
                 c = (char)nextChar;
             }
         }
@@ -219,7 +219,7 @@ namespace KGySoft.Json
 
             int nextChar = reader.Read();
             if (nextChar == -1)
-                throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+                Throw.ArgumentException(Res.UnexpectedEndOfJsonObject, nameof(reader));
             var c = (char?)nextChar;
 
             while (true)
@@ -230,12 +230,12 @@ namespace KGySoft.Json
                         return new JsonObject(properties);
                     case ',':
                         if (!commaOrEndExpected)
-                            throw new ArgumentException("Unexpected comma in JSON property", nameof(reader));
+                            Throw.ArgumentException(Res.UnexpectedCommaInJsonObject, nameof(reader));
                         commaOrEndExpected = false;
                         break;
                     case '"':
                         if (commaOrEndExpected)
-                            throw new ArgumentException("Missing comma between properties in JSON object", nameof(reader));
+                            Throw.ArgumentException(Res.MissingCommaInJsonObject, nameof(reader));
                         properties.Add(ParseProperty(reader, ref c));
                         commaOrEndExpected = true;
                         if (c == null)
@@ -245,14 +245,13 @@ namespace KGySoft.Json
                     default:
                         if (IsWhitespace(c.Value))
                             break;
-                        if (commaOrEndExpected)
-                            throw new ArgumentException($"Comma expected but '{c}' found in JSON object", nameof(reader));
-                        throw new ArgumentException($"Double quote or object end expected but '{c}' found in JSON object", nameof(reader));
+
+                        return Throw.ArgumentException<JsonObject>(Res.UnexpectedCharInJsonObject(c.Value), nameof(reader));
                 }
 
                 nextChar = reader.Read();
                 if (nextChar == -1)
-                    throw new ArgumentException("Unexpected end of JSON array.", nameof(reader));
+                    Throw.ArgumentException(Res.UnexpectedEndOfJsonObject, nameof(reader));
                 c = (char)nextChar;
             }
         }
@@ -265,21 +264,21 @@ namespace KGySoft.Json
             {
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    throw new ArgumentException("Unexpected end of JSON object.", nameof(reader));
+                    Throw.ArgumentException(Res.UnexpectedEndOfJsonObject, nameof(reader));
 
                 c = (char)nextChar;
                 switch (c)
                 {
                     case ':':
                         if (!colonExpected)
-                            throw new ArgumentException("Unexpected colon in JSON object", nameof(reader));
+                            Throw.ArgumentException(Res.UnexpectedColonInJsonObject, nameof(reader));
                         colonExpected = false;
                         continue;
                     default:
                         if (IsWhitespace(c.Value))
                             break;
                         if (colonExpected)
-                            throw new ArgumentException($"Colon expected but '{c}' found in JSON object", nameof(reader));
+                            Throw.ArgumentException(Res.UnexpectedCharInJsonObject(c.Value), nameof(reader));
                         return new JsonProperty(name, ParseValue(reader, ref c));
                 }
             }
