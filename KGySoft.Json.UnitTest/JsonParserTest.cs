@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: JsonTest.cs
+//  File: JsonParserTest.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2021 - All Rights Reserved
 //
@@ -17,6 +17,7 @@
 #region Usings
 
 using System;
+using System.IO;
 
 using NUnit.Framework;
 
@@ -25,7 +26,7 @@ using NUnit.Framework;
 namespace KGySoft.Json.UnitTest
 {
     [TestFixture]
-    public class JsonTest
+    public class JsonParserTest
     {
         #region Methods
 
@@ -43,26 +44,10 @@ namespace KGySoft.Json.UnitTest
         [TestCase("{ \"NullProp\" : null , \"StrProp\": \"strValue\", \"ArrProp\": [ 1 , null, \"aaa\" , [ ] , { } ] , \"ObjProp\" : { \"xxx\" : null, \"yyy\" : {}, \"zzz\": \"Str\" } }")]
         public void ParseTest(string raw)
         {
-            var json = JsonValue.Parse(raw);
+            JsonValue json = JsonParser.Parse(new StringReader(raw));
             string serialized = json.ToString();
             Console.WriteLine(serialized);
             Assert.AreEqual(json, JsonValue.Parse(serialized));
-        }
-
-        [Test]
-        public void BuildTest()
-        {
-            JsonValue json = new JsonObject { { "string", "b" }, ("int", 1) };
-            Assert.AreEqual(JsonValueType.Object, json.Type);
-            Assert.AreEqual(2, json.AsObject.Count);
-
-            json.AsObject["x"] = JsonValue.Null;
-            Assert.AreEqual(3, json.AsObject.Count);
-
-            Assert.AreEqual(json["x"], json.AsObject["x"]);
-            Assert.IsTrue(json["y"].IsUndefined);
-            Assert.IsTrue(json.AsObject["y"].IsUndefined);
-            Assert.IsTrue(json[0].IsUndefined);
         }
 
         #endregion
