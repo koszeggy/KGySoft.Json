@@ -754,7 +754,6 @@ namespace KGySoft.Json
                     builder.Append(AsLiteral);
                     return;
             }
-
         }
 
         #endregion
