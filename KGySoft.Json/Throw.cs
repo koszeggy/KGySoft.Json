@@ -35,6 +35,8 @@ namespace KGySoft
         [DoesNotReturn]internal static void ArgumentException(string message, string paramName) => throw CreateArgumentException(message, paramName);
         [DoesNotReturn]internal static T ArgumentException<T>(string message, string paramName) => throw CreateArgumentException(message, paramName);
 
+        [DoesNotReturn]internal static T InvalidCastException<T>() => throw new InvalidCastException();
+
         #endregion
 
         #region Private Methods
