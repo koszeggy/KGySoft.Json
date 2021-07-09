@@ -111,6 +111,8 @@ namespace KGySoft.Json
         #region Properties and Indexers
 
         #region Properties
+        
+        #region Public Properties
 
         /// <summary>
         /// Gets the JavaScript type of this <see cref="JsonValue"/>.
@@ -132,9 +134,7 @@ namespace KGySoft.Json
         /// or <see langword="null"/>, if its <see cref="Type"/> is not <see cref="JsonValueType.Boolean"/>.
         /// To interpret other types as boolean you can use the <see cref="JsonValueExtensions.AsBoolean"/> extension method instead.
         /// </summary>
-        public bool? AsBoolean => this == True ? true
-            : this == False ? false
-            : default(bool?);
+        public bool? AsBoolean => Type == JsonValueType.Boolean ? TrueLiteral.Equals(value) : default(bool?);
 
         /// <summary>
         /// Gets the <see cref="string">string</see> value of this <see cref="JsonValue"/> instance if it has <see cref="JsonValueType.String"/>&#160;<see cref="Type"/>;
@@ -164,12 +164,13 @@ namespace KGySoft.Json
         /// <para>When getting this property the stored underlying string is converted to a <see cref="double">double</see>
         /// so it has the same behavior as a JavaScript <see cref="JsonValueType.Number"/>.</para>
         /// <para>If this <see cref="JsonValue"/> was created from a C# <see cref="long">long</see> or <see cref="decimal">decimal</see> value (see
-        /// the <see cref="O:KGySoft.Json.JsonValue.CreateNumber">CreateNumber</see> overloads), then this property may return a different value due to loss of precision.
+        /// the <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">ToJson</see> overloads), then this property may return a different value due to loss of precision.
         /// This is how JavaScript also behaves. To get the value as .NET numeric types use the extension methods in the <see cref="JsonValueExtensions"/> class.</para>
         /// <para>To retrieve the stored actual raw value without any conversion you can use the <see cref="AsLiteral"/> property.</para>
-        /// <para>This property may return <see langword="null"/> if this instance was created by the <see cref="CreateNumberUnchecked">CreateNumberUnchecked</see> method and contains an invalid number</para>
+        /// <para>This property may return <see langword="null"/> if this instance was created by the <see cref="CreateNumberUnchecked">CreateNumberUnchecked</see>
+        /// method and contains an invalid number.</para>
         /// <para>This property can also return <see langword="null"/> when a <c>NaN</c> or <c>Infinity</c>/<c>-Infinity</c> was parsed, which are not valid in JSON.
-        /// But even such values can be retrieved by the <see cref="JsonValueExtensions.AsDouble">AsDouble</see> extension method.</para>
+        /// But even such values can be retrieved as a <see cref="double">double</see> by the <see cref="JsonValueExtensions.AsDouble">AsDouble</see> extension method.</para>
         /// </remarks>
         public double? AsNumber => Type == JsonValueType.Number && Double.TryParse((string)value!, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out double result)
             ? result
@@ -203,6 +204,17 @@ namespace KGySoft.Json
         /// <para>To set/add/remove object properties in a <see cref="JsonValue"/> instance you need to use this property or the explicit cast to <see cref="JsonObject"/>.</para>
         /// </remarks>
         public JsonObject? AsObject => value as JsonObject;
+
+        #endregion
+
+        #region Internal Properties
+
+        /// <summary>
+        /// Similar to <see cref="AsLiteral"/> but returns <see langword="null"/> for <see cref="Undefined"/>.
+        /// </summary>
+        internal string? AsStringInternal => value as string;
+
+        #endregion
 
         #endregion
 
@@ -412,59 +424,59 @@ namespace KGySoft.Json
             => value == null ? Null : value.Value;
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="bool">bool</see>.
-        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Boolean"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
+        /// Performs an explicit conversion from <see cref="JsonValue"/> to nullable <see cref="bool">bool</see>.
+        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Null"/> or <see cref="JsonValueType.Boolean"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="bool">bool</see>.</param>
         /// <returns>
         /// A <see cref="bool">bool</see> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent a boolean value.</exception>
-        public static explicit operator bool(JsonValue value) => value.AsBoolean ?? Throw.InvalidCastException<bool>();
+        public static explicit operator bool?(JsonValue value) => value.IsNull ? null : value.AsBoolean ?? Throw.InvalidCastException<bool>();
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="string">string</see>.
-        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.String"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
+        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Null"/> or <see cref="JsonValueType.String"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="string">string</see>.</param>
         /// <returns>
         /// A <see cref="string">string</see> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent a string value.</exception>
-        public static explicit operator string(JsonValue value) => value.AsString ?? Throw.InvalidCastException<string>();
+        public static explicit operator string?(JsonValue value) => value.IsNull ? null : value.AsString ?? Throw.InvalidCastException<string>();
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="double">double</see>.
-        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Number"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
+        /// Performs an explicit conversion from <see cref="JsonValue"/> to nullable <see cref="double">double</see>.
+        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Null"/> or <see cref="JsonValueType.Number"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="double">double</see>.</param>
         /// <returns>
         /// A <see cref="double">double</see> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent a numeric value.</exception>
-        public static explicit operator double(JsonValue value) => value.AsNumber ?? Throw.InvalidCastException<double>();
+        public static explicit operator double?(JsonValue value) => value.IsNull ? null : value.AsNumber ?? Throw.InvalidCastException<double>();
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="JsonArray"/>.
-        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Array"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
+        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Null"/> or <see cref="JsonValueType.Array"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="JsonArray"/>.</param>
         /// <returns>
         /// A <see cref="JsonArray"/> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent an array.</exception>
-        public static explicit operator JsonArray(JsonValue value) => value.AsArray ?? Throw.InvalidCastException<JsonArray>();
+        public static explicit operator JsonArray?(JsonValue value) => value.IsNull ? null : value.AsArray ?? Throw.InvalidCastException<JsonArray>();
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="JsonObject"/>.
-        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Object"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
+        /// The conversion succeeds if the <see cref="Type"/> property is <see cref="JsonValueType.Null"/> or <see cref="JsonValueType.Object"/>; otherwise, an <see cref="InvalidCastException"/> is thrown.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="JsonObject"/>.</param>
         /// <returns>
         /// A <see cref="JsonObject"/> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent an object.</exception>
-        public static explicit operator JsonObject(JsonValue value) => value.AsObject ?? Throw.InvalidCastException<JsonObject>();
+        public static explicit operator JsonObject?(JsonValue value) => value.IsNull ? null : value.AsObject ?? Throw.InvalidCastException<JsonObject>();
 
         #endregion
 
@@ -499,7 +511,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Initializes a new <see cref="JsonValue"/> struct that represents a number.
         /// An implicit conversion from the <see cref="double">double</see> type also exists.
-        /// For some .NET numeric types such as <see cref="long">long</see> and <see cref="decimal">decimal</see> are not recommended to be encoded as JSON number.
+        /// Some .NET numeric types such as <see cref="long">long</see> and <see cref="decimal">decimal</see> are not recommended to be encoded as JSON numbers.
         /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <param name="value">The value to initialize the <see cref="JsonValue"/> from.</param>
@@ -510,9 +522,9 @@ namespace KGySoft.Json
         /// types as JavaScript numbers because their precision might be lost silently if the JSON is processed by JavaScript.</note>
         /// <note><list type="bullet">
         /// <item>JavaScript Number type is actually a double. Other large numeric types (<see cref="long">[u]long</see>/<see cref="decimal">decimal</see>) must be encoded as string to
-        /// prevent loss of precision at a real JavaScript side (see the <see cref="O:KGySoft.Json.JsonValue.CreateString">CreateString</see> overloads).
-        /// If you are sure that you want to forcibly treat such types as numbers use the <see cref="O:KGySoft.Json.JsonValue.CreateNumber">CreateNumber</see>
-        /// overloads or the <see cref="CreateNumberUnchecked">CreateNumberUnchecked</see> method.</item>
+        /// prevent loss of precision at a real JavaScript side. If you are sure that you want to forcibly treat such types as numbers use
+        /// the <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">ToJson</see> overloads and pass <see langword="true"/> to their <c>asString</c> parameter.
+        /// You can use also the <see cref="CreateNumberUnchecked">CreateNumberUnchecked</see> method to create a JSON number directly from a string.</item>
         /// <item>This method allows <see cref="Double.NaN"/> and <see cref="Double.PositiveInfinity"/>/<see cref="Double.NegativeInfinity"/>,
         /// which are also invalid in JSON. Parsing these values works though their <see cref="Type"/> will be <see cref="JsonValueType.UnknownLiteral"/> after parsing.</item>
         /// </list></note>
