@@ -66,6 +66,7 @@ namespace KGySoft.Json.UnitTest
         {
             JsonValue json = true;
             Assert.IsTrue(json == true);
+            Assert.IsTrue(json.AsBoolean);
             Assert.AreEqual(true, (bool)json);
             Assert.AreEqual(JsonValue.True, json);
             Assert.AreEqual(JsonValueType.Boolean, json.Type);
@@ -74,6 +75,7 @@ namespace KGySoft.Json.UnitTest
 
             json = false;
             Assert.IsTrue(json == false);
+            Assert.IsFalse(json.AsBoolean);
             Assert.AreEqual(false, (bool)json);
             Assert.AreEqual(JsonValue.False, json);
             Assert.AreEqual(JsonValueType.Boolean, json.Type);

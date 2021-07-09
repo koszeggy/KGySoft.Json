@@ -43,6 +43,7 @@ namespace KGySoft.Json
     ///   - ToString preserves any precision but that may be lost at JS side
     ///   - ToString supports NaN/infinity even though they are not supported in JSON
     ///   - AsNumber is compatible with JavaScript, use AsLiteral or extensions
+    ///   - Long, implicit cast with warning, use ToJson instead
     /// - Objects
     ///   - indexer access, tolerates nonexistent values
     ///   - To set cast to JsonObject or use AsObject (needed because JsonValue is a struct)
@@ -129,6 +130,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the <see cref="bool">bool</see> value of this <see cref="JsonValue"/> instance if it has <see cref="JsonValueType.Boolean"/>&#160;<see cref="Type"/>;
         /// or <see langword="null"/>, if its <see cref="Type"/> is not <see cref="JsonValueType.Boolean"/>.
+        /// To interpret other types as boolean you can use the <see cref="JsonValueExtensions.AsBoolean"/> extension method instead.
         /// </summary>
         public bool? AsBoolean => this == True ? true
             : this == False ? false
@@ -260,13 +262,22 @@ namespace KGySoft.Json
         public static implicit operator JsonValue(bool value) => new JsonValue(value);
 
         /// <summary>
+        /// Performs an implicit conversion from nullable <see cref="bool">bool</see> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
+        /// <returns>
+        /// A <see cref="JsonValue"/> instance that represents the original value.
+        /// </returns>
+        public static implicit operator JsonValue(bool? value) => value == null ? Null : value.Value;
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="string">string</see> to <see cref="JsonValue"/>.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
         /// <returns>
         /// A <see cref="JsonValue"/> instance that represents the original value.
         /// </returns>
-        public static implicit operator JsonValue(string value) => new JsonValue(value);
+        public static implicit operator JsonValue(string? value) => new JsonValue(value);
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="double">double</see> to <see cref="JsonValue"/>.
@@ -276,6 +287,15 @@ namespace KGySoft.Json
         /// A <see cref="JsonValue"/> instance that represents the original value.
         /// </returns>
         public static implicit operator JsonValue(double value) => new JsonValue(value);
+
+        /// <summary>
+        /// Performs an implicit conversion from nullable <see cref="double">double</see> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
+        /// <returns>
+        /// A <see cref="JsonValue"/> instance that represents the original value.
+        /// </returns>
+        public static implicit operator JsonValue(double? value) => value == null ? Null : value.Value;
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="JsonArray"/> to <see cref="JsonValue"/>.
@@ -307,6 +327,17 @@ namespace KGySoft.Json
             => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
 
         /// <summary>
+        /// Performs an implicit conversion from nullable <see cref="int">int</see> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
+        /// <returns>
+        /// A <see cref="JsonValue"/> instance that represents the original value.
+        /// </returns>
+        public static implicit operator JsonValue(int? value)
+            // just for performance, the double conversion covers this functionality
+            => value == null ? Null : value.Value;
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="uint">uint</see> to <see cref="JsonValue"/>.
         /// </summary>
         /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
@@ -319,6 +350,18 @@ namespace KGySoft.Json
             => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
 
         /// <summary>
+        /// Performs an implicit conversion from nullable <see cref="uint">uint</see> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
+        /// <returns>
+        /// A <see cref="JsonValue"/> instance that represents the original value.
+        /// </returns>
+        [CLSCompliant(false)]
+        public static implicit operator JsonValue(uint? value)
+            // just for performance, the double conversion covers this functionality
+            => value == null ? Null : value.Value;
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="long">long</see> to <see cref="JsonValue"/>.
         /// This operator exists only to produce a warning because otherwise the implicit conversion from double would also match <see cref="long"/> values.
         /// </summary>
@@ -326,9 +369,21 @@ namespace KGySoft.Json
         /// <returns>
         /// A <see cref="JsonValue"/> instance that represents the original value.
         /// </returns>
-        [Obsolete("Warning: Using Int64 as a JSON Number may cause loss of precision. It is recommended to use CreateString(Int64) instead. Use CreateNumber(Int64) to express your intention and to avoid this warning.")]
+        [Obsolete("Warning: Using Int64 as a JSON Number may cause loss of precision. It is recommended to use the ToJson extension method instead. You can pass false to the asString parameter to express your intention and to avoid this warning.")]
         public static implicit operator JsonValue(long value)
             => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
+
+        /// <summary>
+        /// Performs an implicit conversion from nullable <see cref="long">long</see> to <see cref="JsonValue"/>.
+        /// This operator exists only to produce a warning because otherwise the implicit conversion from double would also match <see cref="long"/> values.
+        /// </summary>
+        /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
+        /// <returns>
+        /// A <see cref="JsonValue"/> instance that represents the original value.
+        /// </returns>
+        [Obsolete("Warning: Using Int64 as a JSON Number may cause loss of precision. It is recommended to use the ToJson extension method instead. You can pass false to the asString parameter to express your intention and to avoid this warning.")]
+        public static implicit operator JsonValue(long? value)
+            => value == null ? Null : value.Value;
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="ulong">ulong</see> to <see cref="JsonValue"/>.
@@ -339,9 +394,22 @@ namespace KGySoft.Json
         /// A <see cref="JsonValue"/> instance that represents the original value.
         /// </returns>
         [CLSCompliant(false)]
-        [Obsolete("Warning: Using UInt64 as a JSON Number may cause loss of precision. It is recommended to use CreateString(UInt64) instead. Use CreateNumber(UInt64) to express your intention and to avoid this warning.")]
+        [Obsolete("Warning: Using UInt64 as a JSON Number may cause loss of precision. It is recommended to use the ToJson extension method instead. You can pass false to the asString parameter to express your intention and to avoid this warning.")]
         public static implicit operator JsonValue(ulong value)
             => new JsonValue(JsonValueType.Number, value.ToString(CultureInfo.InvariantCulture));
+
+        /// <summary>
+        /// Performs an implicit conversion from nullable <see cref="ulong">ulong</see> to <see cref="JsonValue"/>.
+        /// This operator exists only to produce a warning because otherwise the implicit conversion from double would also match <see cref="ulong"/> values.
+        /// </summary>
+        /// <param name="value">The value to be converted to a <see cref="JsonValue"/>.</param>
+        /// <returns>
+        /// A <see cref="JsonValue"/> instance that represents the original value.
+        /// </returns>
+        [CLSCompliant(false)]
+        [Obsolete("Warning: Using UInt64 as a JSON Number may cause loss of precision. It is recommended to use the ToJson extension method instead. You can pass false to the asString parameter to express your intention and to avoid this warning.")]
+        public static implicit operator JsonValue(ulong? value)
+            => value == null ? Null : value.Value;
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="bool">bool</see>.
