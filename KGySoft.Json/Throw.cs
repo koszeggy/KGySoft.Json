@@ -37,6 +37,8 @@ namespace KGySoft
 
         [DoesNotReturn]internal static T InvalidCastException<T>() => throw new InvalidCastException();
 
+        [DoesNotReturn]internal static void ArgumentOutOfRangeException(string paramName) => throw new ArgumentOutOfRangeException(paramName);
+
         #endregion
 
         #region Private Methods

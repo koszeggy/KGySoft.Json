@@ -16,6 +16,8 @@
 
 #region Usings
 
+using System;
+
 using NUnit.Framework;
 
 #endregion
@@ -347,6 +349,34 @@ namespace KGySoft.Json.UnitTest
             // null as string
             Assert.AreEqual(allowNullIfStringIsExpected, json["Null"].TryGetString(out value, JsonValueType.String, allowNullIfStringIsExpected));
             Assert.IsNull(value);
+        }
+
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.PascalCase, "\"DarkBlue\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.CamelCase, "\"darkBlue\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.LowerCase, "\"darkblue\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.LowerCaseWithUnderscores, "\"dark_blue\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.LowerCaseWithHyphens, "\"dark-blue\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCase, "\"DARKBLUE\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCaseWithUnderscores, "\"DARK_BLUE\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCaseWithHyphens, "\"DARK-BLUE\"")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.Number, "1")]
+        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.NumberAsString, "\"1\"")]
+        public void FormatEnumTest(ConsoleColor value, JsonEnumFormat format, string expectedResult)
+        {
+            JsonValue json = value.ToJson(format);
+            Assert.AreEqual(expectedResult, json.ToString());
+            Assert.IsTrue(json.TryGetEnum(true, out ConsoleColor result));
+            Assert.AreEqual(value, result);
+        }
+
+        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.PascalCase, ',', "\"Alt,Control\"")]
+        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.LowerCase, '|', "\"alt|control\"")]
+        public void FormatFlagsEnumTest(ConsoleModifiers value, JsonEnumFormat format, char separator, string expectedResult)
+        {
+            JsonValue json = value.ToJson(format, separator.ToString());
+            Assert.AreEqual(expectedResult, json.ToString());
+            Assert.IsTrue(json.TryGetEnum(true, out ConsoleModifiers result, separator));
+            Assert.AreEqual(value, result);
         }
 
         #endregion

@@ -17,8 +17,10 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 
 #endregion
 
@@ -48,8 +50,7 @@ namespace KGySoft.Json
         /// <returns>A <see cref="bool"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
         public static bool? AsBoolean(this in JsonValue json, JsonValueType expectedType = default)
         {
-            string? s;
-            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsStringInternal) == null)
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.AsStringInternal is not string s)
                 return null;
 
             return s switch
@@ -972,15 +973,14 @@ namespace KGySoft.Json
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         public static bool TryGetString(this in JsonValue json, [MaybeNullWhen(false)]out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
         {
-            string? s;
-            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsStringInternal) == null)
+            if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
             {
-                value = default;
-                return expectedType == JsonValueType.String && json.IsNull && allowNullIfStringIsExpected;
+                value = json.IsNull ? null : s;
+                return true;
             }
 
-            value = json.IsNull ? null : s;
-            return true;
+            value = default;
+            return expectedType == JsonValueType.String && json.IsNull && allowNullIfStringIsExpected;
         }
 
         /// <summary>
@@ -1020,53 +1020,209 @@ namespace KGySoft.Json
 
         #endregion
 
-        public static TEnum? AsEnum<TEnum>(this in JsonValue json, JsonValueType expectedType = default)
-            where TEnum : struct, Enum
-        {
-            string s;
-            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
-                return null;
+        #region Enum
 
-            return json.IsNull ? null : Enum.TryParse(s, out TEnum result) ? result : null;
-        }
-
-        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreCase, JsonValueType expectedType = default)
-            where TEnum : struct, Enum
-        {
-            string s;
-            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || (s = json.AsLiteral) == null)
-                return null;
-
-            return json.IsNull ? null : Enum.TryParse(s, ignoreCase, out TEnum result) ? result : null;
-        }
-
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <typeparamref name="TEnum"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, the default value of <typeparamref name="TEnum"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         public static bool TryGetEnum<TEnum>(this in JsonValue json, out TEnum value, JsonValueType expectedType = default)
             where TEnum : struct, Enum
         {
-            string s;
-            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.IsNull || (s = json.AsLiteral) == null)
-            {
-                value = default;
-                return false;
-            }
+            if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
+                return Enum.TryParse(s, out value);
 
-            return Enum.TryParse(s, out value);
+            value = default;
+            return false;
         }
 
-        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreCase, out TEnum value, JsonValueType expectedType = default)
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as <typeparamref name="TEnum"/> if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
+        /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, the default value of <typeparamref name="TEnum"/>. This parameter is passed uninitialized.</param>
+        /// <param name="flagsSeparator">Specifies the separator character if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <c>,</c>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreFormat, out TEnum value, char flagsSeparator = ',', JsonValueType expectedType = default)
             where TEnum : struct, Enum
         {
-            string s;
-            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.IsNull || (s = json.AsLiteral) == null)
+            if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
             {
-                value = default;
-                return false;
+                if (ignoreFormat && s.IndexOfAny(new[] { '_', '-' }) >= 0)
+                {
+                    s = s.Replace("_", String.Empty);
+                    s = s.Replace("-", String.Empty);
+                }
+
+                if (flagsSeparator != ',')
+                    s = s.Replace(flagsSeparator, ',');
+                return Enum.TryParse(s, ignoreFormat, out value);
             }
 
-            return Enum.TryParse(s, ignoreCase, out value);
+            value = default;
+            return false;
         }
 
-        // TODO: for all other .NET types
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as <typeparamref name="TEnum"/> if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
+        /// otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static TEnum? AsEnum<TEnum>(this in JsonValue json, JsonValueType expectedType = default) where TEnum : struct, Enum
+            => json.TryGetEnum(out TEnum result, expectedType) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as <typeparamref name="TEnum"/> if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
+        /// otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
+        /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
+        /// <param name="flagsSeparator">Specifies the separator character if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <c>,</c>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreFormat, char flagsSeparator = ',', JsonValueType expectedType = default) where TEnum : struct, Enum
+            => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as <typeparamref name="TEnum"/> if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
+        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, TEnum defaultValue = default, JsonValueType expectedType = default) where TEnum : struct, Enum
+            => json.TryGetEnum(out TEnum result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as <typeparamref name="TEnum"/> if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
+        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
+        /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <param name="flagsSeparator">Specifies the separator character if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <c>,</c>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, TEnum defaultValue = default, char flagsSeparator = ',', JsonValueType expectedType = default) where TEnum : struct, Enum
+            => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the enum in the JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonEnumFormat.PascalCase"/>.</param>
+        /// <param name="flagsSeparator">Specifies the separator if <paramref name="value"/> consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <c>", "</c>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        public static JsonValue ToJson<TEnum>(this TEnum value, JsonEnumFormat format = JsonEnumFormat.PascalCase, string flagsSeparator = ", ")
+            where TEnum : struct, Enum
+        {
+            #region Local Methods
+
+            static string AdjustString(string value, bool upperCase, char separator)
+            {
+                List<char> chars = value.ToList();
+
+                chars[0] = upperCase ? Char.ToUpperInvariant(chars[0]) : Char.ToLowerInvariant(chars[0]);
+                for (int i = chars.Count - 1; i > 0; i--)
+                {
+                    // Assuming that the original value was in PascalCase so inserting separators before upper case letters
+                    if (Char.IsLower(chars[i]))
+                    {
+                        if (upperCase)
+                            chars[i] = Char.ToUpperInvariant(chars[i]);
+                        continue;
+                    }
+
+                    if (!upperCase)
+                        chars[i] = Char.ToLowerInvariant(chars[i]);
+                    chars.Insert(i, separator);
+                }
+
+                return new String(chars.ToArray());
+            }
+
+            #endregion
+
+            string enumValue;
+            switch (format)
+            {
+                case JsonEnumFormat.PascalCase:
+                    enumValue = value.ToString();
+                    if (Char.IsLower(enumValue[0]))
+                        enumValue = Char.ToUpperInvariant(enumValue[0]) + enumValue.Substring(1);
+                    break;
+                case JsonEnumFormat.CamelCase:
+                    enumValue = value.ToString();
+                    if (Char.IsUpper(enumValue[0]))
+                        enumValue = Char.ToLowerInvariant(enumValue[0]) + enumValue.Substring(1);
+                    break;
+                case JsonEnumFormat.LowerCase:
+                    enumValue = value.ToString().ToLowerInvariant();
+                    break;
+                case JsonEnumFormat.UpperCase:
+                    enumValue = value.ToString().ToUpperInvariant();
+                    break;
+                case JsonEnumFormat.LowerCaseWithUnderscores:
+                    enumValue = AdjustString(value.ToString(), false, '_');
+                    break;
+                case JsonEnumFormat.UpperCaseWithUnderscores:
+                    enumValue = AdjustString(value.ToString(), true, '_');
+                    break;
+                case JsonEnumFormat.LowerCaseWithHyphens:
+                    enumValue = AdjustString(value.ToString(), false, '-');
+                    break;
+                case JsonEnumFormat.UpperCaseWithHyphens:
+                    enumValue = AdjustString(value.ToString(), true, '-');
+                    break;
+                case JsonEnumFormat.Number:
+                case JsonEnumFormat.NumberAsString:
+                    return new JsonValue(format == JsonEnumFormat.Number ? JsonValueType.Number : JsonValueType.String, value.ToString("D"));
+                default:
+                    Throw.ArgumentOutOfRangeException(nameof(format));
+                    return default;
+            }
+
+            if (flagsSeparator != ", ")
+                enumValue = enumValue.Replace(", ", flagsSeparator);
+            return enumValue;
+        }
+
+        #endregion
 
         #endregion
     }
