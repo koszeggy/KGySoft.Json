@@ -95,10 +95,6 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual("1.23", json.ToString());
             Assert.AreEqual(1.23, (double)json);
 
-            // from CreateNumber
-            json = JsonValue.CreateNumber(1.23);
-            Assert.AreEqual(1.23, (double)json);
-
             // from int (JavaScript Number is double but int fits into it)
             json = 1;
             Assert.AreEqual(JsonValueType.Number, json.Type);
@@ -114,8 +110,11 @@ namespace KGySoft.Json.UnitTest
         {
             long value = (1L << 53) + 1;
 
-            // CreateNumber preserves precision
-            JsonValue json = JsonValue.CreateNumber(value);
+            // The operator preserves precision at .NET side but it gives a warning
+#pragma warning disable CS0618 // Type or member is obsolete - we purposely use the long operator here
+            JsonValue json = value;
+#pragma warning restore CS0618
+
             Assert.AreEqual($"{value}", json.AsLiteral);
             Assert.AreEqual($"{value}", json.ToString());
 
@@ -135,9 +134,9 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual("\"value\"", json.ToString());
             Assert.AreEqual("value", (string)json);
 
-            // Large long from CreateString
+            // Large long as string (ToJson creates a string for long values by default)
             long value = (1L << 53) + 1;
-            json = JsonValue.CreateString(value);
+            json = value.ToJson();
             Assert.AreEqual($"{value}", json.AsString);
             Assert.AreEqual($"{value}", json.AsLiteral);
             Assert.IsNull(json.AsNumber);
