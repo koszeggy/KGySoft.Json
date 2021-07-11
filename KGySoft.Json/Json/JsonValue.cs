@@ -596,7 +596,7 @@ namespace KGySoft.Json
         /// <returns>A <see cref="JsonValue"/> that contains the JSON data that was read from the specified <see cref="TextReader"/>.</returns>
         public static JsonValue Parse(TextReader reader)
             // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
-            => JsonParser.Parse(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)));
+            => JsonParser.ParseValue(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)));
 
         /// <summary>
         /// Reads a <see cref="JsonValue"/> from a <see cref="Stream"/> that contains JSON data.
@@ -618,6 +618,43 @@ namespace KGySoft.Json
         public static JsonValue Parse(string s)
             // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
             => Parse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))));
+
+        /// <summary>
+        /// Tries to read a <see cref="JsonValue"/> from a <see cref="TextReader"/> that contains JSON data.
+        /// </summary>
+        /// <param name="reader">A <see cref="TextReader"/> that will be read for the <see cref="JsonValue"/> content.</param>
+        /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
+        /// otherwise, <see cref="Undefined"/>. This parameter is passed uninitialized.</param>
+        /// <returns>A <see cref="JsonValue"/> that contains the JSON data that was read from the specified <see cref="TextReader"/>.</returns>
+        public static bool TryParse(TextReader reader, out JsonValue value)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            => JsonParser.TryParseValue(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)), out value);
+
+        /// <summary>
+        /// Reads a <see cref="JsonValue"/> from a <see cref="Stream"/> that contains JSON data.
+        /// </summary>
+        /// <param name="stream">A <see cref="Stream"/> that will be read for the <see cref="JsonValue"/> content.</param>
+        /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
+        /// otherwise, <see cref="Undefined"/>. This parameter is passed uninitialized.</param>
+        /// <param name="encoding">An <see cref="Encoding"/> that specifies the encoding of the JSON data in the <paramref name="stream"/>.
+        /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> that contains the JSON data that was read from the specified <paramref name="stream"/>.</returns>
+        public static bool TryParse(Stream stream, out JsonValue value, Encoding? encoding = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => TryParse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), out value);
+
+        /// <summary>
+        /// Reads a <see cref="JsonValue"/> from a <see cref="string">string</see> that contains JSON data.
+        /// </summary>
+        /// <param name="s">A string that will be read for the <see cref="JsonValue"/> content.</param>
+        /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
+        /// otherwise, <see cref="Undefined"/>. This parameter is passed uninitialized.</param>
+        /// <returns>A <see cref="JsonValue"/> that contains the JSON data that was read from the specified string.</returns>
+        public static bool TryParse(string s, out JsonValue value)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            => TryParse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))), out value);
+
 
         /// <summary>
         /// Creates a <see cref="JsonValue"/> that forcibly treats <paramref name="value"/> as a JSON number,

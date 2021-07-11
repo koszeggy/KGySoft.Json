@@ -17,6 +17,7 @@
 #region Usings
 
 using System;
+using System.IO;
 
 using NUnit.Framework;
 
@@ -174,7 +175,7 @@ namespace KGySoft.Json.UnitTest
             JsonValue json = new JsonObject
             {
                 { "undefined", default },
-                { "null", (string)null },
+                { "null", (string)null! },
                 { "bool", true },
                 { "number", 1.23 },
                 { "string", "value" },
@@ -227,6 +228,28 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(JsonValueType.UnknownLiteral, num.Type);
             Assert.AreEqual("ping", num.AsLiteral);
             Assert.AreEqual("ping", num.ToString());
+        }
+
+        [TestCase("undefined")]
+        [TestCase("null")]
+        [TestCase("true")]
+        [TestCase("false")]
+        [TestCase("unknown")]
+        [TestCase("\"string\"")]
+        [TestCase("2435.2354")]
+        [TestCase("-1.25e-10")]
+        [TestCase("[]")]
+        [TestCase("[ 1 ,\"aaa\" ]")]
+        [TestCase("{}")]
+        [TestCase("{ \"NullProp\" : null , \"StrProp\": \"strValue\", \"ArrProp\": [ 1 , null, \"aaa\" , [ ] , { } ] , \"ObjProp\" : { \"xxx\" : null, \"yyy\" : {}, \"zzz\": \"Str\" } }")]
+        public void ParseTest(string raw)
+        {
+            JsonValue json = JsonValue.Parse(raw);
+            string serialized = json.ToString();
+            Console.WriteLine(serialized);
+            Assert.AreEqual(json, JsonValue.Parse(serialized));
+            Assert.IsTrue(JsonValue.TryParse(raw, out json));
+            Assert.AreEqual(serialized, json.ToString());
         }
 
         #endregion

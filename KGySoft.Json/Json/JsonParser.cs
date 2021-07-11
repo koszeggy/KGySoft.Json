@@ -16,7 +16,6 @@
 
 #region Usings
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -31,47 +30,67 @@ namespace KGySoft.Json
 
         #region Internal Methods
 
-        internal static JsonValue Parse(TextReader reader)
+        internal static JsonValue ParseValue(TextReader reader)
         {
             char? _ = default;
-            return ParseValue(reader, ref _);
+            JsonValue result = DoParseValue(reader, ref _, out string? error);
+            if (error != null)
+                Throw.ArgumentException(error, nameof(reader));
+            return result;
+        }
+
+        internal static bool TryParseValue(TextReader reader, out JsonValue result)
+        {
+            char? _ = default;
+            result = DoParseValue(reader, ref _, out string? error);
+            return error == null;
         }
 
         #endregion
 
         #region Private Methods
 
-        private static JsonValue ParseValue(TextReader reader, ref char? c)
+        private static JsonValue DoParseValue(TextReader reader, ref char? c, out string? error)
         {
             if (c == null)
             {
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    Throw.ArgumentException(Res.UnexpectedEndOfJsonStream, nameof(reader));
+                {
+                    error = Res.UnexpectedEndOfJsonStream;
+                    return default;
+                }
+
                 c = (char)nextChar;
             }
 
+            error = null;
             while (true)
             {
                 switch (c)
                 {
                     case '{':
                         c = null;
-                        return new JsonValue(ParseObject(reader));
+                        return DoParseObject(reader, out error) is JsonObject obj ? obj : default(JsonValue);
                     case '[':
                         c = null;
-                        return new JsonValue(ParseArray(reader));
+                        return DoParseArray(reader, out error) is JsonArray arr ? arr : default(JsonValue);
                     case '"':
                         c = null;
-                        return new JsonValue(JsonValueType.String, ParseString(reader));
+                        return ParseString(reader, out error) is string str ? str : default(JsonValue);
                     default:
                         if (IsWhitespace(c.Value))
                             break;
                         bool isNumber = true;
                         if (!CanBeLiteral(c.Value, ref isNumber))
-                            Throw.ArgumentException(Res.UnexpectedCharInJsonValue(c.Value), nameof(reader));
+                        {
+                            error = Res.UnexpectedCharInJsonValue(c.Value);
+                            return default;
+                        }
 
-                        string s = ParseLiteral(reader, ref c, ref isNumber);
+                        string? s = ParseLiteral(reader, ref c, ref isNumber, out error);
+                        if (s == null)
+                            return default;
                         return isNumber ? new JsonValue(JsonValueType.Number, s)
                             : s == JsonValue.NullLiteral ? JsonValue.Null
                             : s == JsonValue.TrueLiteral ? JsonValue.True
@@ -82,12 +101,16 @@ namespace KGySoft.Json
 
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    Throw.ArgumentException(Res.UnexpectedEndOfJsonStream, nameof(reader));
+                {
+                    error = Res.UnexpectedEndOfJsonStream;
+                    return default;
+                }
+
                 c = (char)nextChar;
             }
         }
 
-        private static string ParseLiteral(TextReader reader, ref char? c, ref bool isNumber)
+        private static string? ParseLiteral(TextReader reader, ref char? c, ref bool isNumber, out string? error)
         {
             var result = new StringBuilder();
             result.Append(c);
@@ -111,25 +134,31 @@ namespace KGySoft.Json
                     continue;
                 }
 
-                Throw.ArgumentException(Res.UnexpectedCharInJsonLiteral(c.Value), nameof(reader));
+                error = Res.UnexpectedCharInJsonLiteral(c.Value);
+                return null;
             }
 
+            error = null;
             return result.ToString();
         }
 
-        private static string ParseString(TextReader reader)
+        private static string? ParseString(TextReader reader, out string? error)
         {
             var result = new StringBuilder();
             while (true)
             {
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    Throw.ArgumentException(Res.UnexpectedEndOfJsonString, nameof(reader));
+                {
+                    error = Res.UnexpectedEndOfJsonString;
+                    return null;
+                }
 
                 char c = (char)nextChar;
                 switch (c)
                 {
                     case '"':
+                        error = null;
                         return result.ToString();
                     case '\\':
                         nextChar = reader.Read();
@@ -171,16 +200,20 @@ namespace KGySoft.Json
             }
         }
 
-        private static JsonArray ParseArray(TextReader reader)
+        private static JsonArray? DoParseArray(TextReader reader, out string? error)
         {
             var items = new List<JsonValue>();
             bool commaOrEndExpected = false;
 
             int nextChar = reader.Read();
             if (nextChar == -1)
-                Throw.ArgumentException(Res.UnexpectedEndOfJsonArray, nameof(reader));
-            var c = (char?)nextChar;
+            {
+                error = Res.UnexpectedEndOfJsonArray;
+                return null;
+            }
 
+            var c = (char?)nextChar;
+            error = null;
             while (true)
             {
                 switch (c)
@@ -189,15 +222,26 @@ namespace KGySoft.Json
                         return new JsonArray(items);
                     case ',':
                         if (!commaOrEndExpected)
-                            Throw.ArgumentException(Res.UnexpectedCommaInJsonArray, nameof(reader));
+                        {
+                            error = Res.UnexpectedCommaInJsonArray;
+                            return null;
+                        }
+
                         commaOrEndExpected = false;
                         break;
                     default:
                         if (IsWhitespace(c.Value))
                             break;
                         if (commaOrEndExpected)
-                            Throw.ArgumentException(Res.UnexpectedCharInJsonArray(c.Value), nameof(reader));
-                        items.Add(ParseValue(reader, ref c));
+                        {
+                            error = Res.UnexpectedCharInJsonArray(c.Value);
+                            return null;
+                        }
+
+                        JsonValue item = DoParseValue(reader, ref c, out error);
+                        if (error != null)
+                            return null;
+                        items.Add(item);
                         commaOrEndExpected = true;
                         if (c == null)
                             break;
@@ -207,21 +251,29 @@ namespace KGySoft.Json
 
                 nextChar = reader.Read();
                 if (nextChar == -1)
-                    Throw.ArgumentException(Res.UnexpectedEndOfJsonArray, nameof(reader));
+                {
+                    error = Res.UnexpectedEndOfJsonArray;
+                    return null;
+                }
+
                 c = (char)nextChar;
             }
         }
 
-        private static JsonObject ParseObject(TextReader reader)
+        private static JsonObject? DoParseObject(TextReader reader, out string? error)
         {
             var properties = new List<JsonProperty>();
             bool commaOrEndExpected = false;
 
             int nextChar = reader.Read();
             if (nextChar == -1)
-                Throw.ArgumentException(Res.UnexpectedEndOfJsonObject, nameof(reader));
+            {
+                error = Res.UnexpectedEndOfJsonObject;
+                return null;
+            }
+            
             var c = (char?)nextChar;
-
+            error = null;
             while (true)
             {
                 switch (c)
@@ -230,13 +282,24 @@ namespace KGySoft.Json
                         return new JsonObject(properties);
                     case ',':
                         if (!commaOrEndExpected)
-                            Throw.ArgumentException(Res.UnexpectedCommaInJsonObject, nameof(reader));
+                        {
+                            error = Res.UnexpectedCommaInJsonObject;
+                            return null;
+                        }
+
                         commaOrEndExpected = false;
                         break;
                     case '"':
                         if (commaOrEndExpected)
-                            Throw.ArgumentException(Res.MissingCommaInJsonObject, nameof(reader));
-                        properties.Add(ParseProperty(reader, ref c));
+                        {
+                            error = Res.MissingCommaInJsonObject;
+                            return null;
+                        }
+
+                        JsonProperty item = ParseProperty(reader, ref c, out error);
+                        if (error != null)
+                            return null;
+                        properties.Add(item);
                         commaOrEndExpected = true;
                         if (c == null)
                             break;
@@ -246,40 +309,59 @@ namespace KGySoft.Json
                         if (IsWhitespace(c.Value))
                             break;
 
-                        return Throw.ArgumentException<JsonObject>(Res.UnexpectedCharInJsonObject(c.Value), nameof(reader));
+                        error = Res.UnexpectedCharInJsonObject(c.Value);
+                        return null;
                 }
 
                 nextChar = reader.Read();
                 if (nextChar == -1)
-                    Throw.ArgumentException(Res.UnexpectedEndOfJsonObject, nameof(reader));
+                {
+                    error = Res.UnexpectedEndOfJsonObject;
+                    return null;
+                }
+
                 c = (char)nextChar;
             }
         }
 
-        private static JsonProperty ParseProperty(TextReader reader, ref char? c)
+        private static JsonProperty ParseProperty(TextReader reader, ref char? c, out string? error)
         {
-            string name = ParseString(reader);
+            string? name = ParseString(reader, out error);
+            if (name == null)
+                return default;
+
             bool colonExpected = true;
             while (true)
             {
                 int nextChar = reader.Read();
                 if (nextChar == -1)
-                    Throw.ArgumentException(Res.UnexpectedEndOfJsonObject, nameof(reader));
+                {
+                    error = Res.UnexpectedEndOfJsonObject;
+                    return default;
+                }
 
                 c = (char)nextChar;
                 switch (c)
                 {
                     case ':':
                         if (!colonExpected)
-                            Throw.ArgumentException(Res.UnexpectedColonInJsonObject, nameof(reader));
+                        {
+                            error = Res.UnexpectedColonInJsonObject;
+                            return default;
+                        }
+
                         colonExpected = false;
                         continue;
                     default:
                         if (IsWhitespace(c.Value))
                             break;
                         if (colonExpected)
-                            Throw.ArgumentException(Res.UnexpectedCharInJsonObject(c.Value), nameof(reader));
-                        return new JsonProperty(name, ParseValue(reader, ref c));
+                        {
+                            error = Res.UnexpectedCharInJsonObject(c.Value);
+                            return default;
+                        }
+
+                        return new JsonProperty(name, DoParseValue(reader, ref c, out error));
                 }
             }
         }
