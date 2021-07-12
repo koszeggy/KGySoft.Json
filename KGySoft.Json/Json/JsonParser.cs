@@ -16,7 +16,9 @@
 
 #region Usings
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -46,9 +48,61 @@ namespace KGySoft.Json
             return error == null;
         }
 
+        internal static JsonArray ParseArray(TextReader reader)
+        {
+            ReadToStart(reader, true, out string? error);
+            if (error == null)
+            {
+                JsonArray? result = DoParseArray(reader, out error);
+                if (error == null)
+                    return result!;
+            }
+
+            return Throw.ArgumentException<JsonArray>(error, nameof(reader));
+        }
+
+        internal static bool TryParseArray(TextReader reader, [MaybeNullWhen(false)]out JsonArray result)
+        {
+            ReadToStart(reader, true, out string? error);
+            if (error != null)
+            {
+                result = null;
+                return false;
+            }
+
+            result = DoParseArray(reader, out error);
+            return error == null;
+        }
+
         #endregion
 
         #region Private Methods
+
+        private static void ReadToStart(TextReader reader, bool isArray, out string? error)
+        {
+            while (true)
+            {
+                int nextChar = reader.Read();
+                if (nextChar == -1)
+                {
+                    error = Res.UnexpectedEndOfJsonStream;
+                    return;
+                }
+
+                char c = (char)nextChar;
+                if (Char.IsWhiteSpace(c))
+                    continue;
+
+                if (isArray && c == '[' || !isArray && c == '{')
+                {
+                    error = null;
+                    return;
+                }
+
+                error = isArray ? Res.UnexpectedCharInJsonArray(c) : Res.UnexpectedCharInJsonObject(c);
+                return;
+            }
+        }
 
         private static JsonValue DoParseValue(TextReader reader, ref char? c, out string? error)
         {

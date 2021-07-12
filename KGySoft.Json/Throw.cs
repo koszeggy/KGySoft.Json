@@ -31,6 +31,7 @@ namespace KGySoft
         [DoesNotReturn]internal static T ArgumentNullException<T>(string paramName) => throw new ArgumentNullException(paramName);
 
         [DoesNotReturn]internal static void ArgumentException(string message, string paramName) => throw new ArgumentException(message, paramName);
+        [DoesNotReturn]internal static T ArgumentException<T>(string message, string paramName) => throw new ArgumentException(message, paramName);
 
         [DoesNotReturn]internal static T InvalidCastException<T>() => throw new InvalidCastException();
 
