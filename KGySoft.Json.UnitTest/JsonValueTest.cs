@@ -17,7 +17,6 @@
 #region Usings
 
 using System;
-using System.IO;
 
 using NUnit.Framework;
 
@@ -52,13 +51,13 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(JsonValue.NullLiteral, json.AsLiteral);
 
             // Also from implicit conversions, even though JsonValue is a struct
-            json = (string)null;
+            json = (string?)null;
             Assert.IsTrue(json.IsNull);
 
-            json = (JsonArray)null;
+            json = (JsonArray?)null;
             Assert.IsTrue(json.IsNull);
 
-            json = (JsonObject)null;
+            json = (JsonObject?)null;
             Assert.IsTrue(json.IsNull);
         }
 
@@ -68,7 +67,7 @@ namespace KGySoft.Json.UnitTest
             JsonValue json = true;
             Assert.IsTrue(json == true);
             Assert.IsTrue(json.AsBoolean);
-            Assert.AreEqual(true, (bool)json);
+            Assert.AreEqual(true, (bool)json!);
             Assert.AreEqual(JsonValue.True, json);
             Assert.AreEqual(JsonValueType.Boolean, json.Type);
             Assert.AreEqual(JsonValue.TrueLiteral, json.ToString());
@@ -77,7 +76,7 @@ namespace KGySoft.Json.UnitTest
             json = false;
             Assert.IsTrue(json == false);
             Assert.IsFalse(json.AsBoolean);
-            Assert.AreEqual(false, (bool)json);
+            Assert.AreEqual(false, (bool)json!);
             Assert.AreEqual(JsonValue.False, json);
             Assert.AreEqual(JsonValueType.Boolean, json.Type);
             Assert.AreEqual(JsonValue.FalseLiteral, json.ToString());
@@ -94,7 +93,7 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual("1.23", json.AsLiteral);
             Assert.IsNull(json.AsString);
             Assert.AreEqual("1.23", json.ToString());
-            Assert.AreEqual(1.23, (double)json);
+            Assert.AreEqual(1.23, (double)json!);
 
             // from int (JavaScript Number is double but int fits into it)
             json = 1;
@@ -103,7 +102,7 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual("1", json.AsLiteral);
             Assert.IsNull(json.AsString);
             Assert.AreEqual("1", json.ToString());
-            Assert.AreEqual(1, (int)json); // actually via the double conversion
+            Assert.AreEqual(1, (int)json!); // actually via the double conversion
         }
 
         [Test]
@@ -133,7 +132,7 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual("value", json.AsLiteral);
             Assert.IsNull(json.AsNumber);
             Assert.AreEqual("\"value\"", json.ToString());
-            Assert.AreEqual("value", (string)json);
+            Assert.AreEqual("value", (string)json!);
 
             // Large long as string (ToJson creates a string for long values by default)
             long value = (1L << 53) + 1;
@@ -147,7 +146,7 @@ namespace KGySoft.Json.UnitTest
         [Test]
         public void ArrayValueTest()
         {
-            JsonValue json = new JsonArray { default, true, 1, 1.23, "value", (string)null };
+            JsonValue json = new JsonArray { default, true, 1, 1.23, "value", (string?)null };
             Assert.AreEqual(JsonValueType.Array, json.Type);
             Assert.IsNotNull(json.AsArray);
             Assert.IsTrue(json[0].IsUndefined);
@@ -163,7 +162,7 @@ namespace KGySoft.Json.UnitTest
             // just like in JavaScript, serialized JSON string leaves out undefined values
             string serialized = json.ToString();
             Console.WriteLine(serialized);
-            Assert.AreEqual(6, json.AsArray.Count);
+            Assert.AreEqual(6, json.AsArray!.Count);
             json.AsArray.RemoveAt(0);
             Assert.AreEqual(5, json.AsArray.Count);
             Assert.AreEqual(serialized, json.ToString());
@@ -175,7 +174,7 @@ namespace KGySoft.Json.UnitTest
             JsonValue json = new JsonObject
             {
                 { "undefined", default },
-                { "null", (string)null! },
+                { "null", (string?)null },
                 { "bool", true },
                 { "number", 1.23 },
                 { "string", "value" },
@@ -200,7 +199,7 @@ namespace KGySoft.Json.UnitTest
             // just like in JavaScript, serialized JSON string leaves out undefined properties
             string serialized = json.ToString();
             Console.WriteLine(serialized);
-            Assert.AreEqual(7, json.AsObject.Count);
+            Assert.AreEqual(7, json.AsObject!.Count);
             json.AsObject.Remove("undefined");
             Assert.AreEqual(6, json.AsObject.Count);
             Assert.AreEqual(serialized, json.ToString());
