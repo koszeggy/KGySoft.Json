@@ -92,7 +92,7 @@ namespace KGySoft.Json
         public JsonArray() => items = new List<JsonValue>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonArray"/> class from a collection of <see cref="JsonValue"/> elements.
+        /// Initializes a new instance of the <see cref="JsonArray"/> class from a collection of <see cref="JsonValue"/> items.
         /// </summary>
         /// <param name="items">The items to be added to this <see cref="JsonArray"/>.</param>
         public JsonArray(IEnumerable<JsonValue> items)
@@ -198,7 +198,7 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
         /// <param name="item">The <see cref="JsonValue"/> to insert into the <see cref="JsonArray"/>.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the array.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than zero or greater than <see cref="Count"/>.</exception>
         public void Insert(int index, JsonValue item) => items.Insert(index, item);
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace KGySoft.Json
         /// Determines the index of a specific value in the <see cref="JsonArray"/>.
         /// </summary>
         /// <param name="item">The <see cref="JsonValue"/> to locate in the <see cref="JsonArray"/>.</param>
-        /// <returns> The index of <paramref name="item"/> if found in the array; otherwise, -1. </returns>
+        /// <returns>The index of <paramref name="item"/> if found in the array; otherwise, -1. </returns>
         public int IndexOf(JsonValue item) => items.IndexOf(item);
 
         /// <summary>

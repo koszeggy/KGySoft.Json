@@ -756,14 +756,14 @@ namespace KGySoft.Json
         /// Indicates whether the current <see cref="JsonValue"/> instance is equal to another one specified in the <paramref name="other"/> parameter.
         /// </summary>
         /// <param name="other">A <see cref="JsonValue"/> instance to compare with this instance.</param>
-        /// <returns><see langword="true"/>&#160;if the current object is equal to the <paramref name="other"/> parameter; otherwise, <see langword="false"/>.</returns>
+        /// <returns><see langword="true"/> if the current object is equal to the <paramref name="other"/> parameter; otherwise, <see langword="false"/>.</returns>
         public bool Equals(JsonValue other) => Type == other.Type && Equals(value, other.value);
 
         /// <summary>
         /// Determines whether the specified <see cref="object">object</see> is equal to this instance.
         /// </summary>
-        /// <param name="obj">A <see cref="JsonValue"/> instance to compare with this instance.</param>
-        /// <returns><see langword="true"/>&#160;if the specified object is equal to this instance; otherwise, <see langword="false"/>.</returns>
+        /// <param name="obj">An <see cref="object"/> to compare with this instance.</param>
+        /// <returns><see langword="true"/> if the specified object is equal to this instance; otherwise, <see langword="false"/>.</returns>
         public override bool Equals(object? obj) => obj is JsonValue other && Equals(other);
 
         /// <summary>
