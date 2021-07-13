@@ -20,6 +20,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -236,6 +238,79 @@ namespace KGySoft.Json
 
         #region Methods
 
+        #region Static Methods
+
+        /// <summary>
+        /// Reads a <see cref="JsonObject"/> from a <see cref="TextReader"/> that contains a JSON object.
+        /// </summary>
+        /// <param name="reader">A <see cref="TextReader"/> that will be read for the <see cref="JsonObject"/> content.</param>
+        /// <returns>A <see cref="JsonObject"/> that contains the JSON object data that was read from the specified <see cref="TextReader"/>.</returns>
+        public static JsonObject Parse(TextReader reader)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            => JsonParser.ParseObject(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)));
+
+        /// <summary>
+        /// Reads a <see cref="JsonObject"/> from a <see cref="Stream"/> that contains JSON object.
+        /// </summary>
+        /// <param name="stream">A <see cref="Stream"/> that will be read for the <see cref="JsonObject"/> content.</param>
+        /// <param name="encoding">An <see cref="Encoding"/> that specifies the encoding of the JSON object data in the <paramref name="stream"/>.
+        /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <returns>A <see cref="JsonObject"/> that contains the JSON object data that was read from the specified <paramref name="stream"/>.</returns>
+        public static JsonObject Parse(Stream stream, Encoding? encoding = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => Parse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8));
+
+        /// <summary>
+        /// Reads a <see cref="JsonObject"/> from a <see cref="string">string</see> that contains JSON object.
+        /// </summary>
+        /// <param name="s">A string that will be read for the <see cref="JsonObject"/> content.</param>
+        /// <returns>A <see cref="JsonObject"/> that contains the JSON object data that was read from the specified string.</returns>
+        public static JsonObject Parse(string s)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            => Parse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))));
+
+        /// <summary>
+        /// Tries to read a <see cref="JsonObject"/> from a <see cref="TextReader"/> that contains JSON object.
+        /// </summary>
+        /// <param name="reader">A <see cref="TextReader"/> that will be read for the <see cref="JsonObject"/> content.</param>
+        /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
+        /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
+        /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
+        public static bool TryParse(TextReader reader, [MaybeNullWhen(false)] out JsonObject value)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            => JsonParser.TryParseObject(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)), out value);
+
+        /// <summary>
+        /// Tries to read a <see cref="JsonObject"/> from a <see cref="Stream"/> that contains JSON object.
+        /// </summary>
+        /// <param name="stream">A <see cref="Stream"/> that will be read for the <see cref="JsonObject"/> content.</param>
+        /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
+        /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
+        /// <param name="encoding">An <see cref="Encoding"/> that specifies the encoding of the JSON object data in the <paramref name="stream"/>.
+        /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
+        public static bool TryParse(Stream stream, [MaybeNullWhen(false)] out JsonObject value, Encoding? encoding = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => TryParse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), out value);
+
+        /// <summary>
+        /// Tries to read a <see cref="JsonObject"/> from a <see cref="string">string</see> that contains JSON object.
+        /// </summary>
+        /// <param name="s">A string that will be read for the <see cref="JsonObject"/> content.</param>
+        /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
+        /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
+        /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
+        public static bool TryParse(string s, [MaybeNullWhen(false)] out JsonObject value)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            => TryParse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))), out value);
+
+
+        #endregion
+
+        #region Instance Methods
+
         #region Public Methods
 
         /// <summary>
@@ -425,7 +500,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Returns an enumerator that iterates through the <see cref="JsonObject"/>.
         /// </summary>
-        /// <returns>An <see cref="IEnumerator{T}"/> instance that can be used to iterate though the elements of the <see cref="JsonArray"/>.</returns>
+        /// <returns>An <see cref="IEnumerator{T}"/> instance that can be used to iterate though the elements of the <see cref="JsonObject"/>.</returns>
         public IEnumerator<JsonProperty> GetEnumerator() => properties.GetEnumerator();
 
         /// <summary>
@@ -584,6 +659,8 @@ namespace KGySoft.Json
             => properties.Select(property => new KeyValuePair<string, JsonValue>(property.Name!, property.Value)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => properties.GetEnumerator();
+
+        #endregion
 
         #endregion
 

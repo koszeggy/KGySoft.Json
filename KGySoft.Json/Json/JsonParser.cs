@@ -74,6 +74,32 @@ namespace KGySoft.Json
             return error == null;
         }
 
+        internal static JsonObject ParseObject(TextReader reader)
+        {
+            ReadToStart(reader, false, out string? error);
+            if (error == null)
+            {
+                JsonObject? result = DoParseObject(reader, out error);
+                if (error == null)
+                    return result!;
+            }
+
+            return Throw.ArgumentException<JsonObject>(error, nameof(reader));
+        }
+
+        internal static bool TryParseObject(TextReader reader, [MaybeNullWhen(false)]out JsonObject result)
+        {
+            ReadToStart(reader, false, out string? error);
+            if (error != null)
+            {
+                result = null;
+                return false;
+            }
+
+            result = DoParseObject(reader, out error);
+            return error == null;
+        }
+
         #endregion
 
         #region Private Methods
