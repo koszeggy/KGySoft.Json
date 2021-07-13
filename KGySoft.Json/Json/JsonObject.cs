@@ -19,18 +19,46 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 #endregion
 
 namespace KGySoft.Json
 {
+    /// <summary>
+    /// Represents a JSON object, interpreted as a <see cref="string">string</see>-<see cref="JsonValue"/> dictionary
+    /// and also as a list of <see cref="JsonProperty"/> elements.
+    /// Use the <see cref="ToString">ToString</see> method to convert it to a JSON string.
+    /// <br/>See the <strong>Remarks</strong> section for details.
+    /// </summary>
+    /// <remarks>
+    /// <para>Just like in JavaScript, the <see cref="ToString">ToString</see> method filters out properties with <see cref="JsonValue.Undefined"/> values,
+    /// and trying to obtain a nonexistent property <see cref="this[string]">by name</see> also returns <see cref="JsonValue.Undefined"/>.</para>
+    /// <para>Due to performance reasons <see cref="JsonObject"/> allows adding duplicate keys; however, getting the properties <see cref="this[string]">by name</see> retrieves
+    /// always the lastly set value, just like in JavaScript.
+    /// <note type="tip">Populating the <see cref="JsonObject"/> only by the <see cref="JsonObject(IDictionary{string, JsonValue})">dictionary constructor</see>
+    /// or the <see cref="this[string]">string indexer</see> ensures that no duplicate property names are added/</note></para>
+    /// <para>If the <see cref="JsonObject"/> contains duplicate property names, then the <see cref="ToString">ToString</see> method dumps all of them by default.
+    /// It's not an issue for JavaScript, which allows parsing such a JSON string where the duplicate keys will have the lastly defined value.
+    /// But you can explicitly call the <see cref="EnsureUniqueKeys">EnsureUniqueKeys</see> method to remove the duplicate keys (keeping the lastly defined values)
+    /// before calling the <see cref="ToString">ToString</see> method.</para>
+    /// </remarks>
+    /// <seealso cref="JsonValue"/>
+    /// <seealso cref="JsonObject"/>
     public sealed class JsonObject : IList<JsonProperty>, IDictionary<string, JsonValue>
     {
+        #region Constants
+
+        private const int buildIndexMapThreshold = 5;
+
+        #endregion
+
         #region Fields
 
-        private readonly List<JsonProperty> properties;
+        private List<JsonProperty> properties;
 
         private Dictionary<string, int>? nameToIndex;
 
@@ -42,25 +70,32 @@ namespace KGySoft.Json
 
         #region Public Properties
 
+        /// <summary>
+        /// Gets the number of properties contained in the <see cref="JsonObject"/>,
+        /// including possible duplicates and properties with <see cref="JsonValue.Undefined"/> value.
+        /// </summary>
         public int Count => properties.Count;
 
-        #endregion
-
-        #region Explicitly Implemented Interface Properties
-
-        bool ICollection<JsonProperty>.IsReadOnly => false;
-        bool ICollection<KeyValuePair<string, JsonValue>>.IsReadOnly => false;
-
-        ICollection<string> IDictionary<string, JsonValue>.Keys
+        /// <summary>
+        /// Gets a collection of the property names in this <see cref="JsonObject"/>.
+        /// This property returns distinct property names even if there are duplicated keys.
+        /// </summary>
+        public ICollection<string> Keys
         {
             get
             {
+                // ensuring that duplicated keys are returned only once.
                 EnsureMap();
                 return nameToIndex!.Keys;
             }
         }
 
-        ICollection<JsonValue> IDictionary<string, JsonValue>.Values
+        /// <summary>
+        /// Gets a collection of the property values in this <see cref="JsonObject"/>.
+        /// If there are duplicated property names, then this property may return more elements than the <see cref="Keys"/> property.
+        /// To avoid that call the <see cref="EnsureUniqueKeys">EnsureUniqueKeys</see> method before getting this property.
+        /// </summary>
+        public ICollection<JsonValue> Values
         {
             get
             {
@@ -75,10 +110,24 @@ namespace KGySoft.Json
 
         #endregion
 
+        #region Explicitly Implemented Interface Properties
+
+        bool ICollection<JsonProperty>.IsReadOnly => false;
+        bool ICollection<KeyValuePair<string, JsonValue>>.IsReadOnly => false;
+
+        #endregion
+
         #endregion
 
         #region Indexers
 
+        /// <summary>
+        /// Gets or sets the property at the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The zero-based index of the property to get or set.</param>
+        /// <returns>The element at the specified index.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than zero or greater or equal to <see cref="Count"/>.</exception>
+        /// <exception cref="ArgumentException">The value is set and the <see cref="JsonProperty.Name"/> of the <paramref name="value"/> is <see langword="null"/>.</exception>
         public JsonProperty this[int index]
         {
             get => properties[index];
@@ -91,33 +140,30 @@ namespace KGySoft.Json
                 Dictionary<string, int>? map = nameToIndex;
                 if (map == null)
                     return;
-                map[value.Name] = index;
+
+                // if name is replaced we invalidate the map
+                if (map.TryGetValue(value.Name!, out int origIndex) && origIndex != index)
+                    nameToIndex = null;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the value of a property by name. When the indexer is read, using a nonexistent <paramref name="propertyName"/>
+        /// returns <see cref="JsonValue.Undefined"/>, just like in JavaScript.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to get or set.</param>
+        /// <returns>The value of the property with the specified <paramref name="propertyName"/>, or <see cref="JsonValue.Undefined"/> if no such property is found.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyName"/> is <see langword="null"/>.</exception>
         public JsonValue this[string propertyName]
         {
             get
             {
                 if (propertyName == null!)
                     Throw.ArgumentNullException(nameof(propertyName));
-                return TryGetIndex(propertyName, out int index)
-                    ? properties[index].Value
-                    : JsonValue.Undefined;
+                int index = TryGetIndex(propertyName);
+                return index >= 0 ? properties[index].Value : JsonValue.Undefined;
             }
-            set
-            {
-                if (propertyName == null!)
-                    Throw.ArgumentNullException(nameof(propertyName));
-
-                if (TryGetIndex(propertyName, out int index))
-                {
-                    properties[index] = (propertyName, value);
-                    return;
-                }
-
-                InsertItem(Count, (propertyName, value));
-            }
+            set => SetItem(new JsonProperty(propertyName, value));
         }
 
         #endregion
@@ -128,14 +174,54 @@ namespace KGySoft.Json
 
         #region Public Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonObject"/> class.
+        /// </summary>
         public JsonObject() => properties = new List<JsonProperty>();
 
-        public JsonObject(IEnumerable<JsonProperty> properties)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, properties CAN be null but MUST NOT be
-            : this(new List<JsonProperty>(properties ?? Throw.ArgumentNullException<List<JsonProperty>>(nameof(properties))))
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonObject"/> class from a collection of <see cref="JsonProperty"/> items.
+        /// </summary>
+        /// <param name="properties">The properties to be added to this <see cref="JsonObject"/>.</param>
+        /// <param name="allowDuplicates"><see langword="true"/> to allow duplicate multiple elements with the same <see cref="JsonProperty.Name"/>;
+        /// <see langword="false"/> to overwrite recurring names with the latest value. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <exception cref="ArgumentNullException">The <paramref name="properties"/> parameter is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException">The <paramref name="properties"/> contains a <see cref="JsonProperty"/> with <see langword="null"/>&#160;<see cref="JsonProperty.Name"/>.</exception>
+        public JsonObject(IEnumerable<JsonProperty> properties, bool allowDuplicates = true) : this()
         {
-            // Not initializing the dictionary here. It is initialized on demand when an element is accessed by name.
-            // The public constructor always copies the elements into a new list so no consistency check is needed when using the index map.
+            if (properties == null!)
+                Throw.ArgumentNullException(nameof(properties));
+
+            // Initializing the dictionary only if duplicates are disabled and it is known that enough properties will be added
+            if (!allowDuplicates && properties is ICollection<JsonProperty> { Count: >= buildIndexMapThreshold } collection)
+                nameToIndex = new Dictionary<string, int>(collection.Count);
+                
+            foreach (JsonProperty property in properties)
+            {
+                if (property.Name == null)
+                    Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(properties));
+
+                if (allowDuplicates)
+                    AddItem(property);
+                else
+                    SetItem(property);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonObject"/> class from a dictionary.
+        /// </summary>
+        /// <param name="properties">The properties to be added to this <see cref="JsonObject"/>.</param>
+        /// <exception cref="ArgumentNullException">The <paramref name="properties"/> parameter is <see langword="null"/>.</exception>
+        public JsonObject(IDictionary<string, JsonValue> properties) : this()
+        {
+            if (properties == null!)
+                Throw.ArgumentNullException(nameof(properties));
+            if (properties.Count >= buildIndexMapThreshold)
+                nameToIndex = new Dictionary<string, int>(properties.Count);
+            foreach (KeyValuePair<string, JsonValue> property in properties)
+                this[property.Key] = property.Value;
         }
 
         #endregion
@@ -152,31 +238,91 @@ namespace KGySoft.Json
 
         #region Public Methods
 
+        /// <summary>
+        /// Adds an <paramref name="item"/> to this <see cref="JsonObject"/>.
+        /// </summary>
+        /// <param name="item">The item to add to the <see cref="JsonObject"/>.</param>
+        /// <exception cref="ArgumentException">The <see cref="JsonProperty.Name"/> of the <paramref name="item"/> is <see langword="null"/>.</exception>
         public void Add(JsonProperty item)
         {
             if (item.IsDefault)
                 Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(item));
-            InsertItem(Count, item);
+            AddItem(item);
         }
 
-        public void Add(string name, JsonValue value) => Add(new JsonProperty(name, value));
+        /// <summary>
+        /// Adds a pair of <paramref name="name"/> and <paramref name="value"/> to this <see cref="JsonObject"/>.
+        /// </summary>
+        /// <param name="name">The name of the property to add to the <see cref="JsonObject"/>.</param>
+        /// <param name="value">The value of the property to add to the <see cref="JsonObject"/>.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
+        public void Add(string name, JsonValue value) => AddItem(new JsonProperty(name, value));
 
+        /// <summary>
+        /// Inserts an <paramref name="item"/> to the <see cref="JsonObject"/> at the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
+        /// <param name="item">The <see cref="JsonProperty"/> to insert into the <see cref="JsonObject"/>.</param>
+        /// <exception cref="ArgumentException">The <see cref="JsonProperty.Name"/> of the <paramref name="item"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than zero or greater than <see cref="Count"/>.</exception>
         public void Insert(int index, JsonProperty item)
         {
             if (item.IsDefault)
                 Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(item));
-            InsertItem(index, item);
+
+            properties.Insert(index, item);
+            if (nameToIndex == null)
+                return;
+
+            // Maintaining index map dictionary only if inserting at the last position
+            if (index == Count - 1)
+                nameToIndex[item.Name!] = index;
+            else
+                nameToIndex = null;
         }
 
-        public bool Contains(string propertyName) => TryGetIndex(propertyName, out int index) && index >= 0;
+        /// <summary>
+        /// Determines whether the <see cref="JsonObject"/> contains a property with the specified <paramref name="propertyName"/>.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if <paramref name="propertyName"/> is found in the <see cref="JsonObject"/>; otherwise, <see langword="false"/>.
+        /// </returns>
+        /// <param name="propertyName">The name of the property to locate in the <see cref="JsonObject"/>.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyName"/> is <see langword="null"/>.</exception>
+        public bool Contains(string propertyName)
+        {
+            if (propertyName == null!)
+                Throw.ArgumentNullException(nameof(propertyName));
+            return TryGetIndex(propertyName) >= 0;
+        }
 
-        public int IndexOf(string propertyName) => TryGetIndex(propertyName, out int index) ? index : -1;
+        /// <summary>
+        /// Determines the index of a specific property in the <see cref="JsonObject"/>.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to locate in the <see cref="JsonObject"/>.</param>
+        /// <returns> The index of the property if found in the <see cref="JsonObject"/>; otherwise, -1.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyName"/> is <see langword="null"/>.</exception>
+        public int IndexOf(string propertyName)
+        {
+            if (propertyName == null!)
+                Throw.ArgumentNullException(nameof(propertyName));
+            return TryGetIndex(propertyName);
+        }
 
+        /// <summary>
+        /// Tries to get the value associated with the specified <paramref name="propertyName"/> from the <see cref="JsonObject"/>.
+        /// </summary>
+        /// <returns><see langword="true"/> if the key was found in the <see cref="JsonObject"/>; otherwise, <see langword="false"/>.</returns>
+        /// <param name="propertyName">The name of the property to get.</param>
+        /// <param name="value">When this method returns, the value associated with the specified name, if the <paramref name="propertyName"/> is found;
+        /// otherwise, <see cref="JsonValue.Undefined"/>. This parameter is passed uninitialized.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyName"/> is <see langword="null"/>.</exception>
         public bool TryGetValue(string propertyName, out JsonValue value)
         {
             if (propertyName == null!)
                 Throw.ArgumentNullException(nameof(propertyName));
-            if (TryGetIndex(propertyName, out int index))
+            int index = TryGetIndex(propertyName);
+            if (index >= 0)
             {
                 value = properties[index].Value;
                 return true;
@@ -186,12 +332,22 @@ namespace KGySoft.Json
             return false;
         }
 
+        /// <summary>
+        /// Removes the property from the <see cref="JsonObject"/> at the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The zero-based index of the property to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than zero or greater or equal to <see cref="Count"/>.</exception>
         public void RemoveAt(int index)
         {
             properties.RemoveAt(index);
             nameToIndex = null;
         }
 
+        /// <summary>
+        /// Removes one occurrence of the properties with the specific <paramref name="propertyName"/> from the <see cref="JsonObject"/>.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to remove from the <see cref="JsonObject"/>.</param>
+        /// <returns><see langword="true"/> if a property with <paramref name="propertyName"/> was successfully removed from the <see cref="JsonObject"/>; otherwise, <see langword="false"/>.</returns>
         public bool Remove(string propertyName)
         {
             if (propertyName == null!)
@@ -210,7 +366,7 @@ namespace KGySoft.Json
             }
 
             int count = Count;
-            IList<JsonProperty> items = properties;
+            List<JsonProperty> items = properties;
             for (int i = 0; i < count; i++)
             {
                 if (items[i].Name == propertyName)
@@ -223,16 +379,59 @@ namespace KGySoft.Json
             return false;
         }
 
+        /// <summary>
+        /// Removes all properties from the <see cref="JsonObject"/>.
+        /// </summary>
         public void Clear()
         {
-            properties.Clear();
+            if (Count == 0)
+                return;
+            properties = new List<JsonProperty>();
             nameToIndex = null;
         }
 
+        /// <summary>
+        /// Removes possible duplicate keys from the <see cref="JsonObject"/> so <see cref="ToString">ToString</see> and <see cref="GetEnumerator">GetEnumerator</see>
+        /// methods will return only the last occurrence the properties before calling this method. It does not affect the behavior of the <see cref="this[string]">string indexer</see>.
+        /// </summary>
+        public void EnsureUniqueKeys()
+        {
+            List<JsonProperty> oldItems = properties;
+            if (oldItems.Count == 0)
+                return;
+
+            EnsureMap();
+            if (nameToIndex!.Count == oldItems.Count)
+                return;
+
+            var newItems = new List<JsonProperty>(nameToIndex.Count);
+            foreach (KeyValuePair<string, int> map in nameToIndex)
+            {
+                Debug.Assert(map.Key == oldItems[map.Value].Name);
+                newItems.Add(oldItems[map.Value]);
+            }
+
+            properties = newItems;
+            nameToIndex = null;
+        }
+
+        /// <summary>
+        /// Copies the properties of the <see cref="JsonObject" /> to an <see cref="Array"/> of <see cref="JsonProperty"/> elements, starting at the specified <paramref name="arrayIndex"/>.
+        /// </summary>
+        /// <param name="array">The one-dimensional <see cref="Array"/> that is the destination of the elements copied from <see cref="JsonObject"/>.</param>
+        /// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
         public void CopyTo(JsonProperty[] array, int arrayIndex) => properties.CopyTo(array, arrayIndex);
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the <see cref="JsonObject"/>.
+        /// </summary>
+        /// <returns>An <see cref="IEnumerator{T}"/> instance that can be used to iterate though the elements of the <see cref="JsonArray"/>.</returns>
         public IEnumerator<JsonProperty> GetEnumerator() => properties.GetEnumerator();
 
+        /// <summary>
+        /// Returns a hash code for this <see cref="JsonObject"/> instance.
+        /// </summary>
+        /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode()
         {
             int result = Count;
@@ -240,6 +439,7 @@ namespace KGySoft.Json
                 return result;
 
             // ReSharper disable once LoopCanBeConvertedToQuery - performance and readability
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
             foreach (JsonProperty property in properties)
             {
                 // to avoid recursion including the hashes of the primitive values only (Equals does it, though)
@@ -251,8 +451,17 @@ namespace KGySoft.Json
             return result;
         }
 
-        public override bool Equals(object obj) => obj is JsonObject other && Count == other.Count && properties.SequenceEqual(other.properties);
+        /// <summary>
+        /// Determines whether the specified <see cref="object"/> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The object to compare with this instance.</param>
+        /// <returns><see langword="true"/> if the specified object is equal to this instance; otherwise, <see langword="false"/>.</returns>
+        public override bool Equals(object? obj) => obj is JsonObject other && Count == other.Count && properties.SequenceEqual(other.properties);
 
+        /// <summary>
+        /// Returns a minimized JSON string for this <see cref="JsonObject"/>.
+        /// </summary>
+        /// <returns>A minimized JSON string for this <see cref="JsonObject"/>.</returns>
         public override string ToString()
         {
             var result = new StringBuilder();
@@ -286,37 +495,61 @@ namespace KGySoft.Json
 
         #region Private Methods
 
-        private void InsertItem(int index, JsonProperty item)
+        private void AddItem(in JsonProperty item)
         {
-            properties.Insert(index, item);
-            if (nameToIndex == null)
+            properties.Add(item);
+            if (nameToIndex != null)
+                nameToIndex[item.Name!] = Count - 1;
+        }
+
+        private void SetItem(in JsonProperty property)
+        {
+            int index = TryGetIndex(property.Name!);
+            if (index >= 0)
+            {
+                properties[index] = property;
                 return;
+            }
 
-            // Maintaining index map dictionary only if inserting at the last position
-            // (by an offset field inserting at the first position could be maintained, too, but we don't want a field only for this)
-            if (index == Count - 1)
-                nameToIndex[item.Name] = index;
-            else
-                nameToIndex = null;
+            AddItem(property);
         }
 
-        private bool TryGetIndex(string name, out int index)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int TryGetIndex(string name)
         {
-            EnsureMap();
-            return nameToIndex!.TryGetValue(name, out index);
+            int count = Count;
+            if (count >= buildIndexMapThreshold)
+            {
+                EnsureMap();
+                return nameToIndex!.TryGetValue(name, out int index) ? index : -1;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                if (properties[i].Name == name)
+                    return i;
+            }
+
+            return -1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureMap()
         {
-            if (nameToIndex != null)
-                return;
+            if (nameToIndex == null)
+                BuildMap();
+        }
+
+        private void BuildMap()
+        {
+            Debug.Assert(nameToIndex == null);
 
             // Initializing index map. Duplicate names will map to the last occurrence.
-            IList<JsonProperty> items = properties;
+            List<JsonProperty> items = properties;
             int count = items.Count;
             var map = new Dictionary<string, int>(count);
             for (int i = 0; i < count; i++)
-                map[items[i].Name] = i;
+                map[items[i].Name!] = i;
             nameToIndex = map;
         }
 
@@ -344,11 +577,11 @@ namespace KGySoft.Json
         void ICollection<KeyValuePair<string, JsonValue>>.CopyTo(KeyValuePair<string, JsonValue>[] array, int arrayIndex)
         {
             // This means double copying but we can delegate error checking to List. Just use the public CopyTo whenever possible
-            properties.Select(p => new KeyValuePair<string, JsonValue>()).ToList().CopyTo(array, arrayIndex);
+            properties.Select(p => new KeyValuePair<string, JsonValue>(p.Name!, p.Value)).ToList().CopyTo(array, arrayIndex);
         }
 
         IEnumerator<KeyValuePair<string, JsonValue>> IEnumerable<KeyValuePair<string, JsonValue>>.GetEnumerator()
-            => properties.Select(property => new KeyValuePair<string, JsonValue>(property.Name, property.Value)).GetEnumerator();
+            => properties.Select(property => new KeyValuePair<string, JsonValue>(property.Name!, property.Value)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => properties.GetEnumerator();
 
