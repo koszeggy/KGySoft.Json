@@ -144,7 +144,6 @@ namespace KGySoft.Json
                 c = (char)nextChar;
             }
 
-            error = null;
             while (true)
             {
                 switch (c)

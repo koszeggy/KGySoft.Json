@@ -40,7 +40,7 @@ namespace KGySoft.Json.UnitTest
             JsonValue value = json;
             Assert.AreEqual(JsonValueType.Object, value.Type);
             Assert.AreEqual(json["x"], value["x"]);
-            Assert.AreEqual(json["x"], value.AsObject["x"]);
+            Assert.AreEqual(json["x"], value.AsObject!["x"]);
             Assert.IsTrue(value["y"].IsUndefined);
             Assert.IsTrue(value[0].IsUndefined);
         }
