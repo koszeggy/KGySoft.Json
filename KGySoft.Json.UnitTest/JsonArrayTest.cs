@@ -62,7 +62,7 @@ namespace KGySoft.Json.UnitTest
         [Test]
         public void IndexerReadOutOfBoundsTest()
         {
-            // just like in JavaScript, out-of-bounds index return undefined
+            // just like in JavaScript, out-of-bounds index returns undefined
             Assert.IsTrue(new JsonArray()[42].IsUndefined);
         }
 
