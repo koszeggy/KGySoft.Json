@@ -39,6 +39,8 @@ namespace KGySoft.Json
     /// <remarks>
     /// <para>Just like in JavaScript, the <see cref="ToString">ToString</see> method filters out properties with <see cref="JsonValue.Undefined"/> values,
     /// and trying to obtain a nonexistent property <see cref="this[string]">by name</see> also returns <see cref="JsonValue.Undefined"/>.</para>
+    /// <note>Using LINQ extension methods on a <see cref="JsonObject"/> may cause ambiguity due to its list/dictionary duality.
+    /// It is recommended to perform the LINQ operations on the <see cref="Entries"/> property so you it is not needed to specify the type arguments of the LINQ extension methods.</note>
     /// <para>Due to performance reasons <see cref="JsonObject"/> allows adding duplicate keys; however, getting the properties <see cref="this[string]">by name</see> retrieves
     /// always the lastly set value, just like in JavaScript.
     /// <note type="tip">Populating the <see cref="JsonObject"/> only by the <see cref="JsonObject(IDictionary{string, JsonValue})">dictionary constructor</see>
@@ -109,6 +111,13 @@ namespace KGySoft.Json
                 return result;
             }
         }
+
+        /// <summary>
+        /// Gets the property entries of this <see cref="JsonObject"/>, including possible duplicates.
+        /// This property simply returns the self reference. It can be useful to be able to use LINQ extension methods
+        /// on a <see cref="JsonObject"/> without ambiguity.
+        /// </summary>
+        public IList<JsonProperty> Entries => this;
 
         #endregion
 
@@ -592,14 +601,14 @@ namespace KGySoft.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int TryGetIndex(string name)
         {
-            int count = Count;
-            if (count >= buildIndexMapThreshold)
+            if (Count >= buildIndexMapThreshold)
             {
                 EnsureMap();
                 return nameToIndex!.TryGetValue(name, out int index) ? index : -1;
             }
 
-            for (int i = 0; i < count; i++)
+            // reverse traversal so finding the last occurrence of possible duplicates
+            for (int i = Count - 1; i >= 0; i--)
             {
                 if (properties[i].Name == name)
                     return i;
