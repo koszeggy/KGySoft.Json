@@ -34,7 +34,7 @@ namespace KGySoft.Json
     /// </summary>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
-    public sealed class JsonArray : IList<JsonValue>
+    public sealed class JsonArray : IList<JsonValue>, IReadOnlyList<JsonValue>
     {
         #region Fields
 

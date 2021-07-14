@@ -52,7 +52,7 @@ namespace KGySoft.Json
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
-    public sealed class JsonObject : IList<JsonProperty>, IDictionary<string, JsonValue>
+    public sealed class JsonObject : IList<JsonProperty>, IDictionary<string, JsonValue>, IReadOnlyList<JsonProperty>, IReadOnlyDictionary<string, JsonValue>
     {
         #region Constants
 
@@ -125,6 +125,8 @@ namespace KGySoft.Json
 
         bool ICollection<JsonProperty>.IsReadOnly => false;
         bool ICollection<KeyValuePair<string, JsonValue>>.IsReadOnly => false;
+        IEnumerable<string> IReadOnlyDictionary<string, JsonValue>.Keys => Keys;
+        IEnumerable<JsonValue> IReadOnlyDictionary<string, JsonValue>.Values => Values;
 
         #endregion
 
@@ -647,6 +649,7 @@ namespace KGySoft.Json
         bool ICollection<JsonProperty>.Contains(JsonProperty item) => properties.Contains(item);
         bool ICollection<KeyValuePair<string, JsonValue>>.Contains(KeyValuePair<string, JsonValue> item) => properties.Contains(item);
         bool IDictionary<string, JsonValue>.ContainsKey(string key) => Contains(key);
+        bool IReadOnlyDictionary<string, JsonValue>.ContainsKey(string key) => Contains(key);
 
         bool ICollection<JsonProperty>.Remove(JsonProperty item)
         {
