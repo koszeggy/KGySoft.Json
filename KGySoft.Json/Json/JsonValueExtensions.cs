@@ -971,7 +971,7 @@ namespace KGySoft.Json
         /// but the actual <see cref="JsonValue.Type"/> is <see cref="JsonValueType.Null"/>; otherwise, <see langword="false"/>. This parameter is optional.
         /// <br/>Default value: <see langword="false"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetString(this in JsonValue json, [MaybeNullWhen(false)]out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
+        public static bool TryGetString(this in JsonValue json, [MaybeNullWhen(false)] out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
             {
@@ -1037,7 +1037,23 @@ namespace KGySoft.Json
             where TEnum : struct, Enum
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
+            {
+#if NET40_OR_GREATER || NETSTANDARD
                 return Enum.TryParse(s, out value);
+#else
+                // NOTE: using KGySoft.CoreLibraries.Enum<TEnum>.TryParse would be much-much efficient but this library has no dependencies
+                try
+                {
+                    value = (TEnum)Enum.Parse(typeof(TEnum), s);
+                    return true;
+                }
+                catch (Exception e) when (e is ArgumentException or OverflowException)
+                {
+                    value = default;
+                    return false;
+                }
+#endif
+            }
 
             value = default;
             return false;
@@ -1070,7 +1086,21 @@ namespace KGySoft.Json
 
                 if (flagsSeparator != ',')
                     s = s.Replace(flagsSeparator, ',');
+#if NET40_OR_GREATER || NETSTANDARD
                 return Enum.TryParse(s, ignoreFormat, out value);
+#else
+                // NOTE: using KGySoft.CoreLibraries.Enum<TEnum>.TryParse would be much-much efficient but this library has no dependencies
+                try
+                {
+                    value = (TEnum)Enum.Parse(typeof(TEnum), s, ignoreFormat);
+                    return true;
+                }
+                catch (Exception e) when (e is ArgumentException or OverflowException)
+                {
+                    value = default;
+                    return false;
+                }
+#endif
             }
 
             value = default;

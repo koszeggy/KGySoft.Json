@@ -38,7 +38,11 @@ namespace KGySoft.Json.UnitTest
             {
                 new JsonProperty("name", "value"), // regular
                 { "string", "string value" }, // from name and value
+#if NET70_OR_GREATER || NET
                 ("int", 1), // from tuple
+#else
+                new("int", 1),
+#endif
                 new KeyValuePair<string, JsonValue>("bool", true) // from key-value pair
             };
 
@@ -64,15 +68,15 @@ namespace KGySoft.Json.UnitTest
 
             JsonObject obj = new()
             {
-                ("undefined", default),
-                ("null", JsonValue.Null),
-                ("bool", true),
-                ("number", 1.23),
-                ("string", "value"),
-                ("array", new JsonArray { true, 1, "value" }),
-                ("nestedObject", new JsonObject
+                new("undefined", default),
+                new("null", JsonValue.Null),
+                new("bool", true),
+                new("number", 1.23),
+                new("string", "value"),
+                new("array", new JsonArray { true, 1, "value" }),
+                new("nestedObject", new JsonObject
                 {
-                    ("propName", "propValue")
+                    new ("propName", "propValue")
                 })
             };
 
@@ -98,9 +102,9 @@ namespace KGySoft.Json.UnitTest
         {
             var list = new List<JsonProperty>
             {
-                ("bool", true),
-                ("int", 1),
-                ("int", 2),
+                new ("bool", true),
+                new ("int", 1),
+                new ("int", 2),
             };
 
             var obj = new JsonObject(list, allowDuplicates);
@@ -129,12 +133,12 @@ namespace KGySoft.Json.UnitTest
         [Test]
         public void CollectionOperationsTest()
         {
-            JsonObject obj = new() { ("bool", true) };
+            JsonObject obj = new() { { "bool", true } };
             Assert.AreEqual(1, obj.Count);
 
             // Adding some more elements, including a duplicate
-            obj.Insert(0, ("int", 1));
-            obj.Add(("string", "orig value")); // as list (item is a JsonProperty)
+            obj.Insert(0, new("int", 1));
+            obj.Add(new("string", "orig value")); // as list (item is a JsonProperty)
             obj.Add("string", "new value"); // as dictionary (item is a key-value pair)
             Assert.AreEqual(4, obj.Count);
 
@@ -168,13 +172,13 @@ namespace KGySoft.Json.UnitTest
 
             // Contains
             Assert.IsTrue(obj.Contains("int"));
-            Assert.IsTrue(asList.Contains(("int", 1)));
-            Assert.IsTrue(asDict.Contains(new ("int", 1)));
+            Assert.IsTrue(asList.Contains(new("int", 1)));
+            Assert.IsTrue(asDict.Contains(new("int", 1)));
             Assert.IsTrue(asDict.ContainsKey("int"));
 
             // IndexOf
             Assert.AreEqual(0, obj.IndexOf("int"));
-            Assert.AreEqual(0, asList.IndexOf(("int", 1)));
+            Assert.AreEqual(0, asList.IndexOf(new("int", 1)));
 
             // CopyTo
             var properties = new JsonProperty[obj.Count];
@@ -182,7 +186,7 @@ namespace KGySoft.Json.UnitTest
             Assert.IsTrue(obj.SequenceEqual(properties));
 
             // set by index
-            obj[0] = ("replaced", "replaced value");
+            obj[0] = new("replaced", "replaced value");
             Assert.AreEqual(3, obj.Count);
             Assert.AreEqual(new JsonProperty("replaced", "replaced value"), obj[0]);
             Assert.AreEqual(-1, obj.IndexOf("int"));

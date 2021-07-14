@@ -52,7 +52,10 @@ namespace KGySoft.Json
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
-    public sealed class JsonObject : IList<JsonProperty>, IDictionary<string, JsonValue>, IReadOnlyList<JsonProperty>, IReadOnlyDictionary<string, JsonValue>
+    public sealed class JsonObject : IList<JsonProperty>, IDictionary<string, JsonValue>
+#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER
+        , IReadOnlyList<JsonProperty>, IReadOnlyDictionary<string, JsonValue> 
+#endif
     {
         #region Constants
 
@@ -125,8 +128,11 @@ namespace KGySoft.Json
 
         bool ICollection<JsonProperty>.IsReadOnly => false;
         bool ICollection<KeyValuePair<string, JsonValue>>.IsReadOnly => false;
+
+#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER
         IEnumerable<string> IReadOnlyDictionary<string, JsonValue>.Keys => Keys;
         IEnumerable<JsonValue> IReadOnlyDictionary<string, JsonValue>.Values => Values;
+#endif
 
         #endregion
 
@@ -600,7 +606,7 @@ namespace KGySoft.Json
             AddItem(property);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImpl.AggressiveInlining)]
         private int TryGetIndex(string name)
         {
             if (Count >= buildIndexMapThreshold)
@@ -619,7 +625,7 @@ namespace KGySoft.Json
             return -1;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImpl.AggressiveInlining)]
         private void EnsureMap()
         {
             if (nameToIndex == null)
@@ -649,7 +655,10 @@ namespace KGySoft.Json
         bool ICollection<JsonProperty>.Contains(JsonProperty item) => properties.Contains(item);
         bool ICollection<KeyValuePair<string, JsonValue>>.Contains(KeyValuePair<string, JsonValue> item) => properties.Contains(item);
         bool IDictionary<string, JsonValue>.ContainsKey(string key) => Contains(key);
+
+#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER
         bool IReadOnlyDictionary<string, JsonValue>.ContainsKey(string key) => Contains(key);
+#endif
 
         bool ICollection<JsonProperty>.Remove(JsonProperty item)
         {

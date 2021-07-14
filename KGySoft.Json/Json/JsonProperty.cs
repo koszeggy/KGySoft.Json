@@ -74,6 +74,7 @@ namespace KGySoft.Json
         /// <returns>The result of the inequality check.</returns>
         public static bool operator !=(JsonProperty left, JsonProperty right) => !left.Equals(right);
 
+#if NETSTANDARD2_0_OR_GREATER || NET47_OR_GREATER
         /// <summary>
         /// Performs an implicit conversion from <see cref="ValueTuple{T1, T2}"/> to <see cref="JsonProperty"/>.
         /// </summary>
@@ -82,6 +83,7 @@ namespace KGySoft.Json
         /// A <see cref="JsonProperty"/> instance that represents the original value.
         /// </returns>
         public static implicit operator JsonProperty((string Name, JsonValue Value) property) => new JsonProperty(property.Name, property.Value);
+#endif
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="KeyValuePair{TKey,TValue}"/> to <see cref="JsonProperty"/>.
@@ -150,7 +152,7 @@ namespace KGySoft.Json
         internal void Dump(StringBuilder builder)
         {
             Debug.Assert(Name != null && !Value.IsUndefined);
-            JsonValue.WriteJsonString(builder, Name);
+            JsonValue.WriteJsonString(builder, Name!);
             builder.Append(':');
             Value.Dump(builder);
         }

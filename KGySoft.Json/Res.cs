@@ -93,9 +93,9 @@ namespace KGySoft
 
         #region Private Methods
 
-        private static string Get([NotNull] string id) => resourceManager.GetString(id, Thread.CurrentThread.CurrentUICulture) ?? String.Format(CultureInfo.InvariantCulture, unavailableResource, id);
+        private static string Get(string id) => resourceManager.GetString(id, Thread.CurrentThread.CurrentUICulture) ?? String.Format(CultureInfo.InvariantCulture, unavailableResource, id);
 
-        private static string Get([NotNull] string id, params object?[]? args)
+        private static string Get(string id, params object?[]? args)
         {
             string format = Get(id);
             return args == null ? format : SafeFormat(format, args);

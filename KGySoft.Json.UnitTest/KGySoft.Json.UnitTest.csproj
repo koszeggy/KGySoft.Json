@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net35;net40;net45;net47;net5.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\KGySoft.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

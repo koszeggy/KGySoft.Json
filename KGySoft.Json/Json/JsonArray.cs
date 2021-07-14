@@ -34,7 +34,10 @@ namespace KGySoft.Json
     /// </summary>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
-    public sealed class JsonArray : IList<JsonValue>, IReadOnlyList<JsonValue>
+    public sealed class JsonArray : IList<JsonValue>
+#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER
+        , IReadOnlyList<JsonValue> 
+#endif
     {
         #region Fields
 
