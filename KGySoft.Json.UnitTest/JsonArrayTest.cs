@@ -127,6 +127,10 @@ namespace KGySoft.Json.UnitTest
             JsonArray deserialized = JsonArray.Parse(serialized);
             Assert.AreEqual(array, deserialized);
             Assert.AreEqual(serialized, deserialized.ToString());
+
+            string formatted = array.ToString("\t");
+            Console.WriteLine(formatted);
+            Assert.AreEqual(deserialized, JsonArray.Parse(formatted));
         }
 
         #endregion

@@ -246,6 +246,10 @@ namespace KGySoft.Json.UnitTest
             JsonObject deserialized = JsonObject.Parse(serialized);
             Assert.AreEqual(obj, deserialized);
             Assert.AreEqual(serialized, deserialized.ToString());
+
+            string formatted = obj.ToString("\t");
+            Console.WriteLine(formatted);
+            Assert.AreEqual(deserialized, JsonObject.Parse(formatted));
         }
 
         #endregion

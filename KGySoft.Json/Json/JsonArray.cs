@@ -30,12 +30,12 @@ namespace KGySoft.Json
 {
     /// <summary>
     /// Represents a JSON array, interpreted as a list of <see cref="JsonValue"/> elements.
-    /// Use the <see cref="ToString">ToString</see> method to convert it to a JSON string.
+    /// Use the <see cref="O:KGySoft.Json.JsonArray.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonArray.WriteTo">WriteTo</see> methods to convert it to JSON.
     /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
     /// <remarks>
-    /// <para>Just like in JavaScript, the <see cref="ToString">ToString</see> method replaces <see cref="JsonValue.Undefined"/>
-    /// values with <see cref="JsonValue.Null"/>.</para>
+    /// <para>Just like in JavaScript, the <see cref="O:KGySoft.Json.JsonArray.ToString">ToString</see> (and <see cref="O:KGySoft.Json.JsonArray.WriteTo">WriteTo</see>)
+    /// methods replace <see cref="JsonValue.Undefined"/> values with <see cref="JsonValue.Null"/>.</para>
     /// <para>Obtaining an element by the <see cref="this[int]">indexer</see> using an invalid index also returns <see cref="JsonValue.Undefined"/>,
     /// which is also a JavaScript-compatible behavior.</para>
     /// </remarks>
@@ -289,15 +289,76 @@ namespace KGySoft.Json
         public override bool Equals(object? obj) => obj is JsonArray other && Count == other.Count && this.SequenceEqual(other);
 
         /// <summary>
-        /// Returns a minimized JSON string for this <see cref="JsonArray"/>.
+        /// Returns a minimized JSON string that represents this <see cref="JsonArray"/>.
         /// </summary>
-        /// <returns>A minimized JSON string for this <see cref="JsonArray"/>.</returns>
+        /// <returns>A minimized JSON string that represents this <see cref="JsonArray"/>.</returns>
         public override string ToString()
         {
             var result = new StringBuilder();
             Dump(result);
             return result.ToString();
         }
+
+        /// <summary>
+        /// Returns a JSON string that represents this <see cref="JsonArray"/>.
+        /// </summary>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON.</param>
+        /// <returns>A JSON string that represents this <see cref="JsonArray"/>.</returns>
+        public string ToString(string? indent)
+        {
+            var result = new StringBuilder(64);
+            WriteTo(result, indent);
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Writes this <see cref="JsonArray"/> instance into a <see cref="TextReader"/>.
+        /// </summary>
+        /// <param name="writer">A <see cref="TextWriter"/> to write the <see cref="JsonArray"/> into.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(TextWriter writer, string? indent = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, writer CAN be null but MUST NOT be
+            => new JsonWriter(writer ?? Throw.ArgumentNullException<TextWriter>(nameof(writer)), indent).Write(this);
+
+        /// <summary>
+        /// Writes this <see cref="JsonArray"/> instance into a <see cref="JsonArray"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="StringBuilder"/> to write the <see cref="JsonValue"/> into.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(StringBuilder builder, string? indent = null)
+        {
+            if (builder == null!)
+                Throw.ArgumentNullException(nameof(builder));
+
+            // shortcut: we don't need to use a writer
+            if (String.IsNullOrEmpty(indent))
+            {
+                Dump(builder);
+                return;
+            }
+
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
+            new JsonWriter(new StringWriter(builder ?? Throw.ArgumentNullException<StringBuilder>(nameof(builder))), indent).Write(this);
+        }
+
+        /// <summary>
+        /// Writes this <see cref="JsonArray"/> instance into a <see cref="Stream"/> using the specified <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="stream">The <see cref="Stream"/> to write the <see cref="JsonArray"/> into.</param>
+        /// <param name="encoding">An <see cref="Encoding"/> that specifies the encoding of the JSON data in the <paramref name="stream"/>.
+        /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(Stream stream, Encoding? encoding = null, string? indent = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => new JsonWriter(new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), indent).Write(this);
 
         #endregion
 

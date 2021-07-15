@@ -17,7 +17,6 @@
 #region Usings
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -32,12 +31,12 @@ namespace KGySoft.Json
     /// such as <see cref="JsonValueType.Null"/>, <see cref="JsonValueType.Boolean"/>, <see cref="JsonValueType.Number"/> and <see cref="JsonValueType.String"/>,
     /// and it is also assignable from <see cref="JsonArray"/> and <see cref="JsonObject"/> types.
     /// Its default value represents the JavaScript <see cref="JsonValueType.Undefined"/> value.
-    /// Use the <see cref="ToString">ToString</see> method to convert it to a JSON string.
+    /// Use the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see> methods to convert it to JSON.
     /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
     /// <remarks>
     /// TODO
-    /// - JSON: ToString
+    /// - JSON: ToString/WriteTo
     /// - Implicit conversions
     /// - numbers
     ///   - ToString preserves any precision but that may be lost at JS side
@@ -51,6 +50,14 @@ namespace KGySoft.Json
     /// - Arrays
     ///   - Just like in JS, nonexistent index is tolerated
     ///   - To set cast to JsonArray or use AsArray (needed because JsonValue is a struct)
+    /// - Undefined:
+    ///   - Unlike in JS, a standalone undefined is serialized as `undefined` by ToString
+    ///   - But WriteTo writes nothing so Parse will say unexpected end
+    ///   - It is replaced by null in arrays and skipped in objects
+    /// - ToString vs WriteTo
+    ///   - ToString always minimizes
+    ///   - ToString writes undefined as a root
+    ///   - WriteTo can indent and supports different encodings (eg. direct UTF8)
     /// </remarks>
     /// <seealso cref="JsonArray"/>
     /// <seealso cref="JsonObject"/>
@@ -144,7 +151,7 @@ namespace KGySoft.Json
         /// <remarks>
         /// <para>This property returns <see langword="null"/> if this <see cref="JsonValue"/> represents a non-string primitive JavaScript literal.
         /// For non-string primitive types you can use the <see cref="AsLiteral"/> property to get their literal value.</para>
-        /// <para>This property gets the string value without quotes and escapes. To return it as a parseable JSON string, use the <see cref="ToString">ToString</see> method instead.</para>
+        /// <para>This property gets the string value without quotes and escapes. To return it as a parseable JSON string, use the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> method overloads instead.</para>
         /// </remarks>
         public string? AsString => Type == JsonValueType.String ? (string)value! : null;
 
@@ -670,7 +677,8 @@ namespace KGySoft.Json
         /// <para>The <see cref="Type"/> property of the result will return <see cref="JsonValueType.Number"/> even if <paramref name="value"/> is not a valid number.</para>
         /// <para>The <see cref="AsLiteral"/> property will return the specified <paramref name="value"/>.</para>
         /// <para>The <see cref="AsNumber"/> property of the result may return a less precise value, or even <see langword="null"/>,
-        /// though serializing to JSON by the <see cref="ToString">ToString</see> method preserves the specified <paramref name="value"/>.</para>
+        /// though serializing to JSON by the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> and <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see>
+        /// methods preserves the specified <paramref name="value"/>.</para>
         /// </remarks>
         public static JsonValue CreateNumberUnchecked(string? value) => value == null ? Null : new JsonValue(JsonValueType.Number, value);
 
@@ -685,7 +693,8 @@ namespace KGySoft.Json
         /// <note type="warning">This method makes possible to create invalid JSON.</note>
         /// <para>The <see cref="Type"/> property of the result will return <see cref="JsonValueType.UnknownLiteral"/> even if <paramref name="value"/> is actually a valid JSON literal.</para>
         /// <para>The <see cref="AsLiteral"/> property will return the specified <paramref name="value"/>.</para>
-        /// <para>Serializing to JSON by the <see cref="ToString">ToString</see> method preserves the specified <paramref name="value"/>.</para>
+        /// <para>Serializing to JSON by the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> and <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see>
+        /// methods preserves the specified <paramref name="value"/>.</para>
         /// </remarks>
         public static JsonValue CreateLiteralUnchecked(string? value) => value == null ? Null : new JsonValue(JsonValueType.UnknownLiteral, value);
 
@@ -739,9 +748,9 @@ namespace KGySoft.Json
         #region Public Methods
 
         /// <summary>
-        /// Returns a minimized JSON string for this <see cref="JsonValue"/>.
+        /// Returns a minimized JSON string that represents this <see cref="JsonValue"/>.
         /// </summary>
-        /// <returns>A minimized JSON string for this <see cref="JsonValue"/>.</returns>
+        /// <returns>A minimized JSON string that represents this <see cref="JsonValue"/>.</returns>
         public override string ToString()
         {
             if (Type <= JsonValueType.Number)
@@ -749,6 +758,22 @@ namespace KGySoft.Json
 
             var result = new StringBuilder(value is string s ? s.Length + 2 : 64);
             Dump(result);
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Returns a JSON string that represents this <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON.</param>
+        /// <returns>A JSON string that represents this <see cref="JsonValue"/>.</returns>
+        public string ToString(string? indent)
+        {
+            if (Type <= JsonValueType.Number || String.IsNullOrEmpty(indent))
+                return ToString();
+
+            var result = new StringBuilder(value is string s ? s.Length + 2 : 64);
+            WriteTo(result, indent);
             return result.ToString();
         }
 
@@ -772,6 +797,54 @@ namespace KGySoft.Json
         /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode() => (Type, value).GetHashCode();
 
+        /// <summary>
+        /// Writes this <see cref="JsonValue"/> instance into a <see cref="TextReader"/>.
+        /// </summary>
+        /// <param name="writer">A <see cref="TextWriter"/> to write the <see cref="JsonValue"/> into.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(TextWriter writer, string? indent = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, writer CAN be null but MUST NOT be
+            => new JsonWriter(writer ?? Throw.ArgumentNullException<TextWriter>(nameof(writer)), indent).Write(this);
+
+        /// <summary>
+        /// Writes this <see cref="JsonValue"/> instance into a <see cref="StringBuilder"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="StringBuilder"/> to write the <see cref="JsonValue"/> into.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(StringBuilder builder, string? indent = null)
+        {
+            if (builder == null!)
+                Throw.ArgumentNullException(nameof(builder));
+
+            // shortcut: we don't need to use a writer
+            if (String.IsNullOrEmpty(indent))
+            {
+                Dump(builder);
+                return;
+            }
+
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
+            new JsonWriter(new StringWriter(builder ?? Throw.ArgumentNullException<StringBuilder>(nameof(builder))), indent).Write(this);
+        }
+
+        /// <summary>
+        /// Writes this <see cref="JsonValue"/> instance into a <see cref="Stream"/> using the specified <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="stream">The <see cref="Stream"/> to write the <see cref="JsonValue"/> into.</param>
+        /// <param name="encoding">An <see cref="Encoding"/> that specifies the encoding of the JSON data in the <paramref name="stream"/>.
+        /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(Stream stream, Encoding? encoding = null, string? indent = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => new JsonWriter(new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), indent).Write(this);
+
         #endregion
 
         #region Internal Methods
@@ -793,8 +866,9 @@ namespace KGySoft.Json
                     return;
 
                 default:
-                    Debug.Assert(!IsUndefined, "Undefined value is not expected in Dump");
-                    builder.Append(AsLiteral);
+                    // In Dump undefined may occur only as a root from WriteTo(StringBuilder,null), in which case it is skipped
+                    if (!IsUndefined)
+                        builder.Append(AsLiteral);
                     return;
             }
         }

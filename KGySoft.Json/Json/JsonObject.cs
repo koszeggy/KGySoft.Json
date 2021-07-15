@@ -33,22 +33,25 @@ namespace KGySoft.Json
     /// <summary>
     /// Represents a JSON object, interpreted as a <see cref="string">string</see>-<see cref="JsonValue"/> dictionary
     /// and also as a list of <see cref="JsonProperty"/> elements.
-    /// Use the <see cref="ToString">ToString</see> method to convert it to a JSON string.
+    /// Use the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see> methods to convert it to JSON.
     /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
     /// <remarks>
-    /// <para>Just like in JavaScript, the <see cref="ToString">ToString</see> method filters out properties with <see cref="JsonValue.Undefined"/> values,
-    /// and trying to obtain a nonexistent property <see cref="this[string]">by name</see> also returns <see cref="JsonValue.Undefined"/>.</para>
+    /// <para>Just like in JavaScript, the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see> (and <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see>)
+    /// methods filter out properties with <see cref="JsonValue.Undefined"/> values.</para>
+    /// <para>Obtaining a nonexistent property by the <see cref="this[string]">string indexer</see> also returns <see cref="JsonValue.Undefined"/>,
+    /// which is also a JavaScript-compatible behavior.</para>
     /// <note>Using LINQ extension methods on a <see cref="JsonObject"/> may cause ambiguity due to its list/dictionary duality.
-    /// It is recommended to perform the LINQ operations on the <see cref="Entries"/> property so you it is not needed to specify the type arguments of the LINQ extension methods.</note>
-    /// <para>Due to performance reasons <see cref="JsonObject"/> allows adding duplicate keys; however, getting the properties <see cref="this[string]">by name</see> retrieves
-    /// always the lastly set value, just like in JavaScript.
+    /// It is recommended to perform the LINQ operations on the <see cref="Entries"/> property so it is not needed to specify the type arguments of the LINQ extension methods.</note>
+    /// <para>Due to performance reasons <see cref="JsonObject"/> allows adding duplicate keys; however, getting the properties by
+    /// the <see cref="this[string]">string indexer</see> retrieves always the lastly set value, just like in JavaScript.
     /// <note type="tip">Populating the <see cref="JsonObject"/> only by the <see cref="JsonObject(IDictionary{string, JsonValue})">dictionary constructor</see>
     /// or the <see cref="this[string]">string indexer</see> ensures that no duplicate property names are added/</note></para>
-    /// <para>If the <see cref="JsonObject"/> contains duplicate property names, then the <see cref="ToString">ToString</see> method dumps all of them by default.
+    /// <para>If the <see cref="JsonObject"/> contains duplicate property names, then the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see>
+    /// and <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see> methods dump all of them by default.
     /// It's not an issue for JavaScript, which allows parsing such a JSON string where the duplicate keys will have the lastly defined value.
     /// But you can explicitly call the <see cref="EnsureUniqueKeys">EnsureUniqueKeys</see> method to remove the duplicate keys (keeping the lastly defined values)
-    /// before calling the <see cref="ToString">ToString</see> method.</para>
+    /// before producing the JSON string.</para>
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
@@ -483,8 +486,10 @@ namespace KGySoft.Json
         }
 
         /// <summary>
-        /// Removes possible duplicate keys from the <see cref="JsonObject"/> so <see cref="ToString">ToString</see> and <see cref="GetEnumerator">GetEnumerator</see>
-        /// methods will return only the last occurrence the properties before calling this method. It does not affect the behavior of the <see cref="this[string]">string indexer</see>.
+        /// Removes possible duplicate keys from the <see cref="JsonObject"/> so <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see>,
+        /// <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see> and <see cref="GetEnumerator">GetEnumerator</see> methods will return
+        /// only the last occurrence the properties before calling this method.
+        /// It does not affect the behavior of the <see cref="this[string]">string indexer</see>.
         /// </summary>
         public void EnsureUniqueKeys()
         {
@@ -551,15 +556,76 @@ namespace KGySoft.Json
         public override bool Equals(object? obj) => obj is JsonObject other && Count == other.Count && properties.SequenceEqual(other.properties);
 
         /// <summary>
-        /// Returns a minimized JSON string for this <see cref="JsonObject"/>.
+        /// Returns a minimized JSON string that represents this <see cref="JsonObject"/>.
         /// </summary>
-        /// <returns>A minimized JSON string for this <see cref="JsonObject"/>.</returns>
+        /// <returns>A minimized JSON string that represents this <see cref="JsonObject"/>.</returns>
         public override string ToString()
         {
             var result = new StringBuilder();
             Dump(result);
             return result.ToString();
         }
+
+        /// <summary>
+        /// Returns a JSON string that represents this <see cref="JsonObject"/>.
+        /// </summary>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON.</param>
+        /// <returns>A JSON string that represents this <see cref="JsonObject"/>.</returns>
+        public string ToString(string? indent)
+        {
+            var result = new StringBuilder(64);
+            WriteTo(result, indent);
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Writes this <see cref="JsonObject"/> instance into a <see cref="TextReader"/>.
+        /// </summary>
+        /// <param name="writer">A <see cref="TextWriter"/> to write the <see cref="JsonObject"/> into.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(TextWriter writer, string? indent = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, writer CAN be null but MUST NOT be
+            => new JsonWriter(writer ?? Throw.ArgumentNullException<TextWriter>(nameof(writer)), indent).Write(this);
+
+        /// <summary>
+        /// Writes this <see cref="JsonObject"/> instance into a <see cref="JsonObject"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="StringBuilder"/> to write the <see cref="JsonValue"/> into.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(StringBuilder builder, string? indent = null)
+        {
+            if (builder == null!)
+                Throw.ArgumentNullException(nameof(builder));
+
+            // shortcut: we don't need to use a writer
+            if (String.IsNullOrEmpty(indent))
+            {
+                Dump(builder);
+                return;
+            }
+
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
+            new JsonWriter(new StringWriter(builder ?? Throw.ArgumentNullException<StringBuilder>(nameof(builder))), indent).Write(this);
+        }
+
+        /// <summary>
+        /// Writes this <see cref="JsonObject"/> instance into a <see cref="Stream"/> using the specified <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="stream">The <see cref="Stream"/> to write the <see cref="JsonObject"/> into.</param>
+        /// <param name="encoding">An <see cref="Encoding"/> that specifies the encoding of the JSON data in the <paramref name="stream"/>.
+        /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        /// <param name="indent">Specifies the indentation string to produce a formatted JSON.
+        /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public void WriteTo(Stream stream, Encoding? encoding = null, string? indent = null)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            => new JsonWriter(new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), indent).Write(this);
 
         #endregion
 
