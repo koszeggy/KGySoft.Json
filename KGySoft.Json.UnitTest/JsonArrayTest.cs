@@ -50,13 +50,13 @@ namespace KGySoft.Json.UnitTest
 
             JsonArray array = new() { default, true, 1, 1.23, "value", (string?)null };
 
-            // just like in JavaScript, serialized JSON string leaves out undefined values
+            // just like in JavaScript, serialized JSON string replaces undefined values with null
             string serialized = array.ToString();
             Console.WriteLine(serialized);
-            Assert.AreEqual(6, array.Count);
-            array.RemoveAt(0);
-            Assert.AreEqual(5, array.Count);
-            Assert.AreEqual(serialized, array.ToString());
+            JsonArray deserialized = JsonArray.Parse(serialized);
+            Assert.AreEqual(array.Count, deserialized.Count);
+            Assert.IsTrue(deserialized[0].IsNull);
+            CollectionAssert.AreEqual(array.Skip(1), deserialized.Skip(1));
         }
 
         [Test]

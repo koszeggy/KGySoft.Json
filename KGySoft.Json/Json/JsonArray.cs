@@ -31,7 +31,14 @@ namespace KGySoft.Json
     /// <summary>
     /// Represents a JSON array, interpreted as a list of <see cref="JsonValue"/> elements.
     /// Use the <see cref="ToString">ToString</see> method to convert it to a JSON string.
+    /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
+    /// <remarks>
+    /// <para>Just like in JavaScript, the <see cref="ToString">ToString</see> method replaces <see cref="JsonValue.Undefined"/>
+    /// values with <see cref="JsonValue.Null"/>.</para>
+    /// <para>Obtaining an element by the <see cref="this[int]">indexer</see> using an invalid index also returns <see cref="JsonValue.Undefined"/>,
+    /// which is also a JavaScript-compatible behavior.</para>
+    /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
     public sealed class JsonArray : IList<JsonValue>
@@ -302,13 +309,11 @@ namespace KGySoft.Json
             bool first = true;
             foreach (JsonValue value in items)
             {
-                if (value.IsUndefined)
-                    continue;
                 if (first)
                     first = false;
                 else
                     builder.Append(',');
-                value.Dump(builder);
+                (value.IsUndefined ? JsonValue.Null : value).Dump(builder);
             }
 
             builder.Append(']');

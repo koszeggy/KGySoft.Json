@@ -17,6 +17,7 @@
 #region Usings
 
 using System;
+using System.Linq;
 
 using NUnit.Framework;
 
@@ -159,13 +160,14 @@ namespace KGySoft.Json.UnitTest
             // just like in JavaScript, out-of-bounds index return undefined
             Assert.IsTrue(json[6].IsUndefined);
 
-            // just like in JavaScript, serialized JSON string leaves out undefined values
+            // just like in JavaScript, serialized JSON string replaces undefined values with null
             string serialized = json.ToString();
             Console.WriteLine(serialized);
-            Assert.AreEqual(6, json.AsArray!.Count);
-            json.AsArray.RemoveAt(0);
-            Assert.AreEqual(5, json.AsArray.Count);
-            Assert.AreEqual(serialized, json.ToString());
+            JsonValue deserialized = JsonValue.Parse(serialized);
+            Assert.AreEqual(JsonValueType.Array, deserialized.Type);
+            Assert.AreEqual(json.AsArray!.Count, deserialized.AsArray!.Count);
+            Assert.IsTrue(deserialized[0].IsNull);
+            CollectionAssert.AreEqual(json.AsArray.Skip(1), deserialized.AsArray.Skip(1));
         }
 
         [Test]
