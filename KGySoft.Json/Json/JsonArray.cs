@@ -257,7 +257,7 @@ namespace KGySoft.Json
         /// Returns an enumerator that iterates through the <see cref="JsonArray"/>.
         /// </summary>
         /// <returns>An <see cref="IEnumerator{T}"/> instance that can be used to iterate though the elements of the <see cref="JsonArray"/>.</returns>
-        public IEnumerator<JsonValue> GetEnumerator() => items.GetEnumerator();
+        public List<JsonValue>.Enumerator GetEnumerator() => items.GetEnumerator();
 
         /// <summary>
         /// Returns a hash code for this <see cref="JsonArray"/> instance.
@@ -323,6 +323,7 @@ namespace KGySoft.Json
 
         #region Explicitly Implemented Interface Methods
 
+        IEnumerator<JsonValue> IEnumerable<JsonValue>.GetEnumerator() => items.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => items.GetEnumerator();
 
         #endregion

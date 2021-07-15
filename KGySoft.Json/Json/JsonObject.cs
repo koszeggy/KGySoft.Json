@@ -518,7 +518,7 @@ namespace KGySoft.Json
         /// Returns an enumerator that iterates through the <see cref="JsonObject"/>.
         /// </summary>
         /// <returns>An <see cref="IEnumerator{T}"/> instance that can be used to iterate though the elements of the <see cref="JsonObject"/>.</returns>
-        public IEnumerator<JsonProperty> GetEnumerator() => properties.GetEnumerator();
+        public List<JsonProperty>.Enumerator GetEnumerator() => properties.GetEnumerator();
 
         /// <summary>
         /// Returns a hash code for this <see cref="JsonObject"/> instance.
@@ -676,10 +676,15 @@ namespace KGySoft.Json
             properties.Select(p => new KeyValuePair<string, JsonValue>(p.Name!, p.Value)).ToList().CopyTo(array, arrayIndex);
         }
 
-        IEnumerator<KeyValuePair<string, JsonValue>> IEnumerable<KeyValuePair<string, JsonValue>>.GetEnumerator()
-            => properties.Select(property => new KeyValuePair<string, JsonValue>(property.Name!, property.Value)).GetEnumerator();
-
+        IEnumerator<JsonProperty> IEnumerable<JsonProperty>.GetEnumerator() => properties.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => properties.GetEnumerator();
+
+        IEnumerator<KeyValuePair<string, JsonValue>> IEnumerable<KeyValuePair<string, JsonValue>>.GetEnumerator()
+        {
+            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator - not using Select to prevent boxing the List.Enumerator
+            foreach (JsonProperty property in properties)
+                yield return new KeyValuePair<string, JsonValue>(property.Name!, property.Value);
+        }
 
         #endregion
 
