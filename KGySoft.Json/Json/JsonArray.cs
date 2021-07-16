@@ -65,6 +65,12 @@ namespace KGySoft.Json
 
         #endregion
 
+        #region Internal Properties
+
+        internal List<JsonValue> ItemsInternal => items;
+
+        #endregion
+
         #region Explicitly Implemented Interface Properties
 
         bool ICollection<JsonValue>.IsReadOnly => false;
@@ -366,10 +372,18 @@ namespace KGySoft.Json
 
         internal void Dump(StringBuilder builder)
         {
+            int len = items.Count;
+            if (len == 0)
+            {
+                builder.Append("[]");
+                return;
+            }
+
             builder.Append('[');
             bool first = true;
-            foreach (JsonValue value in items)
+            for (var i = 0; i < len; i++)
             {
+                JsonValue value = items[i];
                 if (first)
                     first = false;
                 else

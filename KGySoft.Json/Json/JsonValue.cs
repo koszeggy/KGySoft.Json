@@ -705,30 +705,38 @@ namespace KGySoft.Json
         internal static void WriteJsonString(StringBuilder builder, string value)
         {
             builder.Append('"');
-            foreach (char c in value)
+            int len = value.Length;
+            for (var i = 0; i < len; i++)
             {
+                char c = value[i];
                 switch (c)
                 {
-                    case '\b':
-                        builder.Append(@"\b");
+                    case > '\\': // 92
+                        goto default;
+                    case '\\':
+                        builder.Append(@"\\");
                         break;
-                    case '\f':
-                        builder.Append(@"\f");
+                    case > '"': // 34
+                        goto default;
+                    case '"':
+                        builder.Append(@"\""");
+                        break;
+                    case > '\r': // 13
+                        goto default;
+                    case '\r':
+                        builder.Append(@"\r");
                         break;
                     case '\n':
                         builder.Append(@"\n");
                         break;
-                    case '\r':
-                        builder.Append(@"\r");
-                        break;
                     case '\t':
                         builder.Append(@"\t");
                         break;
-                    case '"':
-                        builder.Append(@"\""");
+                    case '\f':
+                        builder.Append(@"\f");
                         break;
-                    case '\\':
-                        builder.Append(@"\\");
+                    case '\b':
+                        builder.Append(@"\b");
                         break;
                     default:
                         builder.Append(c);

@@ -237,6 +237,7 @@ namespace KGySoft.Json.UnitTest
         [TestCase("false")]
         [TestCase("unknown")]
         [TestCase("\"string\"")]
+        [TestCase("\"escapes:\\r\\n\\\"value\\\"\"")]
         [TestCase("2435.2354")]
         [TestCase("-1.25e-10")]
         [TestCase("[]")]

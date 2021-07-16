@@ -127,6 +127,12 @@ namespace KGySoft.Json
 
         #endregion
 
+        #region Internal Properties
+
+        internal List<JsonProperty> PropertiesInternal => properties;
+
+        #endregion
+
         #region Explicitly Implemented Interface Properties
 
         bool ICollection<JsonProperty>.IsReadOnly => false;
@@ -633,10 +639,19 @@ namespace KGySoft.Json
 
         internal void Dump(StringBuilder builder)
         {
+            int len = properties.Count;
+            if (len == 0)
+            {
+                builder.Append("{}");
+                return;
+            }
+
             builder.Append('{');
             bool first = true;
-            foreach (JsonProperty property in properties)
+
+            for (var i = 0; i < len; i++)
             {
+                JsonProperty property = properties[i];
                 if (property.Value.IsUndefined)
                     continue;
                 if (first)

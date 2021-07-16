@@ -17,7 +17,9 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 #endregion
 
@@ -29,6 +31,7 @@ namespace KGySoft.Json
 
         private readonly TextWriter writer;
         private readonly string indent;
+        private readonly char[]? indent10;
 
         private int depth;
 
@@ -36,11 +39,16 @@ namespace KGySoft.Json
 
         #region Constructors
 
-        internal JsonWriter(TextWriter writer, string? indent)
+        internal JsonWriter(TextWriter writer, string? indent) : this()
         {
             this.writer = writer;
-            this.indent = indent ?? String.Empty;
-            depth = 0;
+            this.indent = indent ??= String.Empty;
+            int length = indent.Length;
+            if (length == 0)
+                return;
+            indent10 = new char[length * 10];
+            for (int i = 0; i < 10; i++)
+                indent.CopyTo(0, indent10, i * length, length);
         }
 
         #endregion
@@ -74,11 +82,20 @@ namespace KGySoft.Json
 
         internal void Write(JsonObject obj)
         {
+            int len = obj.Count;
+            if (len == 0)
+            {
+                writer.Write("{}");
+                return;
+            }
+
             writer.Write('{');
             bool hasIndent = indent.Length > 0;
             bool empty = true;
-            foreach (JsonProperty property in obj)
+            List<JsonProperty> properties = obj.PropertiesInternal;
+            for (var i = 0; i < len; i++)
             {
+                JsonProperty property = properties[i];
                 if (property.Value.IsUndefined)
                     continue;
                 if (empty)
@@ -96,9 +113,10 @@ namespace KGySoft.Json
                 }
 
                 WriteJsonString(property.Name!);
-                writer.Write(':');
                 if (hasIndent)
-                    writer.Write(' ');
+                    writer.Write(": ");
+                else
+                    writer.Write(':');
                 Write(property.Value);
             }
 
@@ -114,16 +132,23 @@ namespace KGySoft.Json
 
         internal void Write(JsonArray array)
         {
-            writer.Write('[');
-            bool empty = true;
-            bool hasIndent = indent.Length > 0;
-            foreach (JsonValue value in array)
+            int len = array.Count;
+            if (len == 0)
             {
-                if (empty)
-                {
-                    empty = false;
-                    depth += 1;
-                }
+                writer.Write("[]");
+                return;
+            }
+
+            writer.Write('[');
+            bool first = true;
+            bool hasIndent = indent.Length > 0;
+            depth += 1;
+            List<JsonValue> items = array.ItemsInternal;
+            for (var i = 0; i < len; i++)
+            {
+                JsonValue value = items[i];
+                if (first)
+                    first = false;
                 else
                     writer.Write(',');
 
@@ -136,9 +161,9 @@ namespace KGySoft.Json
                 Write(value.IsUndefined ? JsonValue.Null : value);
             }
 
-            if (!empty && hasIndent)
+            depth -= 1;
+            if (hasIndent)
             {
-                depth -= 1;
                 writer.WriteLine();
                 WriteIndent();
             }
@@ -150,39 +175,54 @@ namespace KGySoft.Json
 
         #region Private Methods
 
+        [MethodImpl(MethodImpl.AggressiveInlining)]
         private void WriteIndent()
         {
-            for (int i = 0; i < depth; i++)
+            if (depth == 1)
+            {
                 writer.Write(indent);
+                return;
+            }
+
+            for (int d = depth; d > 0; d -= 10)
+                writer.Write(indent10!, 0, indent.Length * Math.Min(10, d));
         }
 
         private void WriteJsonString(string value)
         {
             writer.Write('"');
-            foreach (char c in value)
+            int len = value.Length;
+            for (var i = 0; i < len; i++)
             {
+                char c = value[i];
                 switch (c)
                 {
-                    case '\b':
-                        writer.Write(@"\b");
+                    case > '\\': // 92
+                        goto default;
+                    case '\\':
+                        writer.Write(@"\\");
                         break;
-                    case '\f':
-                        writer.Write(@"\f");
+                    case > '"': // 34
+                        goto default;
+                    case '"':
+                        writer.Write(@"\""");
+                        break;
+                    case > '\r': // 13
+                        goto default;
+                    case '\r':
+                        writer.Write(@"\r");
                         break;
                     case '\n':
                         writer.Write(@"\n");
                         break;
-                    case '\r':
-                        writer.Write(@"\r");
-                        break;
                     case '\t':
                         writer.Write(@"\t");
                         break;
-                    case '"':
-                        writer.Write(@"\""");
+                    case '\f':
+                        writer.Write(@"\f");
                         break;
-                    case '\\':
-                        writer.Write(@"\\");
+                    case '\b':
+                        writer.Write(@"\b");
                         break;
                     default:
                         writer.Write(c);
