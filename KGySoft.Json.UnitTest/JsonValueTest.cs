@@ -237,7 +237,6 @@ namespace KGySoft.Json.UnitTest
         [TestCase("false")]
         [TestCase("unknown")]
         [TestCase("\"string\"")]
-        [TestCase("\"escapes:\\r\\n\\\"value\\\"\"")]
         [TestCase("2435.2354")]
         [TestCase("-1.25e-10")]
         [TestCase("[]")]
@@ -256,6 +255,23 @@ namespace KGySoft.Json.UnitTest
             string formatted = json.ToString("\t");
             Console.WriteLine(formatted);
             Assert.AreEqual(json, JsonValue.Parse(formatted));
+        }
+
+        [Test]
+        public void StringEscapesTest()
+        {
+            string json = @"""escapes:\r\n\""value\""  \/\/ \uD834\uDD1e\u0000""";
+            Console.WriteLine($"Orig JSON: {json}");
+            JsonValue value = JsonValue.Parse(json);
+            Assert.AreEqual("escapes:\r\n\"value\"  // 𝄞\0", value.AsString);
+
+            string serialized = value.ToString();
+            Console.WriteLine($"New JSON: {serialized}");
+            JsonValue deserialized = JsonValue.Parse(serialized);
+            Assert.AreEqual(value, deserialized);
+
+            Console.WriteLine($"Value: {value.AsString}");
+            Assert.AreEqual(value.AsString, deserialized.AsString);
         }
 
         #endregion

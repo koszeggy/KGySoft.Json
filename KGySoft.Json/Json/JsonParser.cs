@@ -224,6 +224,7 @@ namespace KGySoft.Json
         private static string? ParseString(TextReader reader, out string? error)
         {
             var result = new StringBuilder();
+            char[]? buf = null;
             while (true)
             {
                 int nextChar = reader.Read();
@@ -246,35 +247,63 @@ namespace KGySoft.Json
                         c = (char)nextChar;
                         switch (c)
                         {
-                            case 'b':
-                                result.Append('\b');
-                                break;
-                            case 'f':
-                                result.Append('\f');
-                                break;
-                            case 'n':
-                                result.Append('\n');
-                                break;
-                            case 'r':
-                                result.Append('\r');
-                                break;
-                            case 't':
-                                result.Append('\t');
-                                break;
                             case '"':
                                 result.Append('"');
-                                break;
+                                continue;
+                            case 'n':
+                                result.Append('\n');
+                                continue;
+                            case 'r':
+                                result.Append('\r');
+                                continue;
+                            case 't':
+                                result.Append('\t');
+                                continue;
                             case '\\':
                                 result.Append(@"\\");
-                                break;
+                                continue;
+                            case '/':
+                                result.Append('/');
+                                continue;
+                            case 'u':
+                                buf ??= new char[4];
+                                if (reader.ReadBlock(buf, 0, 4) < 4)
+                                    continue;
+                                c = '\0';
+                                foreach (char digit in buf)
+                                {
+                                    c <<= 4;
+                                    if (digit is >= '0' and <= '9')
+                                        c |= (char)(digit - '0');
+                                    else if (digit is >= 'A' and <= 'F')
+                                        c |= (char)(digit - 'A' + 10);
+                                    else if (digit is >= 'a' and <= 'f')
+                                        c |= (char)(digit - 'a' + 10);
+                                    else
+                                    {
+                                        error = Res.UnexpectedEscapeCharInJsonString(digit);
+                                        return null;
+                                    }
+                                }
+
+                                result.Append(c);
+                                continue;
+
+                            case 'b':
+                                result.Append('\b');
+                                continue;
+                            case 'f':
+                                result.Append('\f');
+                                continue;
+
                             default:
-                                result.Append($"\\{c}");
-                                break;
+                                error = Res.UnexpectedEscapeCharInJsonString(c);
+                                return null;
                         }
-                        break;
+
                     default:
                         result.Append(c);
-                        break;
+                        continue;
                 }
             }
         }

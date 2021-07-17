@@ -22,6 +22,8 @@ using System.Globalization;
 using System.Resources;
 using System.Threading;
 
+using KGySoft.Json;
+
 #endregion
 
 namespace KGySoft
@@ -88,6 +90,12 @@ namespace KGySoft
 
         /// <summary>Unexpected character in JSON object: '{0}'</summary>
         internal static string UnexpectedCharInJsonObject(char c) => Get("UnexpectedCharInJsonObject_Format", c);
+
+        /// <summary>Unexpected escape character in JSON string: '{0}'</summary>
+        internal static string UnexpectedEscapeCharInJsonString(char c) => Get("UnexpectedEscapeCharInJsonString_Format", c);
+
+        /// <summary>Date-time format '{0}' cannot be encoded as a JSON number.</summary>
+        internal static string DateTimeFormatIsStringOnly(JsonDateTimeFormat format) => Get("DateTimeFormatIsStringOnly_Format", format);
 
         #endregion
 

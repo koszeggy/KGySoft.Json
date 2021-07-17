@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -198,17 +199,23 @@ namespace KGySoft.Json
                 switch (c)
                 {
                     case > '\\': // 92
-                        goto default;
-                    case '\\':
-                        writer.Write(@"\\");
+                        writer.Write(c);
                         break;
+
                     case > '"': // 34
-                        goto default;
-                    case '"':
-                        writer.Write(@"\""");
+                        if (c == '\\')
+                            writer.Write(@"\\");
+                        else
+                            writer.Write(c);
                         break;
-                    case > '\r': // 13
-                        goto default;
+
+                    case >= ' ': // 32
+                        if (c == '"')
+                            writer.Write(@"\""");
+                        else
+                            writer.Write(c);
+                        break;
+
                     case '\r':
                         writer.Write(@"\r");
                         break;
@@ -225,7 +232,8 @@ namespace KGySoft.Json
                         writer.Write(@"\b");
                         break;
                     default:
-                        writer.Write(c);
+                        writer.Write("\\u");
+                        writer.Write(((int)c).ToString("X4", NumberFormatInfo.InvariantInfo));
                         break;
                 }
             }

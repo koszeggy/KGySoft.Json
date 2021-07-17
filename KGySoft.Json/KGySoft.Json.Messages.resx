@@ -156,4 +156,10 @@
   <data name="UnexpectedCharInJsonObject_Format" xml:space="preserve">
     <value>Unexpected character in JSON object: '{0}'</value>
   </data>
+  <data name="UnexpectedEscapeCharInJsonString_Format" xml:space="preserve">
+    <value>Unexpected escape character in JSON string: '{0}'</value>
+  </data>
+  <data name="DateTimeFormatIsStringOnly_Format" xml:space="preserve">
+    <value>Date-time format '{0}' cannot be encoded as a JSON number.</value>
+  </data>
 </root>

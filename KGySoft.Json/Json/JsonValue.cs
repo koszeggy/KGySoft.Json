@@ -712,17 +712,23 @@ namespace KGySoft.Json
                 switch (c)
                 {
                     case > '\\': // 92
-                        goto default;
-                    case '\\':
-                        builder.Append(@"\\");
+                        builder.Append(c);
                         break;
+
                     case > '"': // 34
-                        goto default;
-                    case '"':
-                        builder.Append(@"\""");
+                        if (c == '\\')
+                            builder.Append(@"\\");
+                        else
+                            builder.Append(c);
                         break;
-                    case > '\r': // 13
-                        goto default;
+
+                    case >= ' ': // 32
+                        if (c == '"')
+                            builder.Append(@"\""");
+                        else
+                            builder.Append(c);
+                        break;
+
                     case '\r':
                         builder.Append(@"\r");
                         break;
@@ -739,7 +745,8 @@ namespace KGySoft.Json
                         builder.Append(@"\b");
                         break;
                     default:
-                        builder.Append(c);
+                        builder.Append("\\u");
+                        builder.Append(((int)c).ToString("X4", NumberFormatInfo.InvariantInfo));
                         break;
                 }
             }
