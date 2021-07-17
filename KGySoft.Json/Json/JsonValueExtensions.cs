@@ -1252,6 +1252,18 @@ namespace KGySoft.Json
             return enumValue;
         }
 
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the enum in the JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonEnumFormat.PascalCase"/>.</param>
+        /// <param name="flagsSeparator">Specifies the separator if <paramref name="value"/> consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <c>", "</c>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        public static JsonValue ToJson<TEnum>(this TEnum? value, JsonEnumFormat format = JsonEnumFormat.PascalCase, string flagsSeparator = ", ") where TEnum : struct, Enum
+            => value?.ToJson(format, flagsSeparator) ?? JsonValue.Null;
+
         #endregion
 
         #endregion

@@ -361,12 +361,13 @@ namespace KGySoft.Json.UnitTest
         [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCaseWithHyphens, "\"DARK-BLUE\"")]
         [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.Number, "1")]
         [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.NumberAsString, "\"1\"")]
-        public void FormatEnumTest(ConsoleColor value, JsonEnumFormat format, string expectedResult)
+        [TestCase(null, JsonEnumFormat.PascalCase, "null")]
+        public void FormatEnumTest(ConsoleColor? value, JsonEnumFormat format, string expectedResult)
         {
             JsonValue json = value.ToJson(format);
             Assert.AreEqual(expectedResult, json.ToString());
-            Assert.IsTrue(json.TryGetEnum(true, out ConsoleColor result));
-            Assert.AreEqual(value, result);
+            Assert.AreEqual(value.HasValue, json.TryGetEnum(true, out ConsoleColor result));
+            Assert.AreEqual(value ?? default, result);
         }
 
         [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.PascalCase, ',', "\"Alt,Control\"")]
