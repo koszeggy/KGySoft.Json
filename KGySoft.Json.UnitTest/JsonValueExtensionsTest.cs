@@ -380,6 +380,60 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(value, result);
         }
 
+        [TestCase("1578870000000", JsonDateTimeFormat.UnixMilliseconds, DateTimeKind.Utc)]
+        [TestCase("\"1578870000000\"", JsonDateTimeFormat.UnixMilliseconds, DateTimeKind.Utc)]
+        [TestCase("1578870000", JsonDateTimeFormat.UnixSeconds, DateTimeKind.Utc)]
+        [TestCase("\"1578870000\"", JsonDateTimeFormat.UnixSeconds, DateTimeKind.Utc)]
+        [TestCase("1578870000.000", JsonDateTimeFormat.UnixSecondsFloat, DateTimeKind.Utc)]
+        [TestCase("\"1578870000.000\"", JsonDateTimeFormat.UnixSecondsFloat, DateTimeKind.Utc)]
+        [TestCase("637144668000000000", JsonDateTimeFormat.Ticks, DateTimeKind.Utc)]
+        [TestCase("\"637144668000000000\"", JsonDateTimeFormat.Ticks, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03.456Z\"", JsonDateTimeFormat.Iso8601JavaScript, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601Utc, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601Local, DateTimeKind.Local)]
+        [TestCase("\"2020-01-13T01:02:03.1234567\"", JsonDateTimeFormat.Iso8601, DateTimeKind.Unspecified)]
+        [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601, DateTimeKind.Local)]
+        [TestCase("\"2020-01-13\"", JsonDateTimeFormat.Iso8601Date, DateTimeKind.Unspecified)]
+        [TestCase("\"2020-01-13T01:02\"", JsonDateTimeFormat.Iso8601Minutes, DateTimeKind.Unspecified)]
+        [TestCase("\"2020-01-13T01:02Z\"", JsonDateTimeFormat.Iso8601Minutes, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02+01:00\"", JsonDateTimeFormat.Iso8601Minutes, DateTimeKind.Local)]
+        [TestCase("\"2020-01-13T01:02:03\"", JsonDateTimeFormat.Iso8601Seconds, DateTimeKind.Unspecified)]
+        [TestCase("\"2020-01-13T01:02:03Z\"", JsonDateTimeFormat.Iso8601Seconds, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03+01:00\"", JsonDateTimeFormat.Iso8601Seconds, DateTimeKind.Local)]
+        [TestCase("\"2020-01-13T01:02:03.123\"", JsonDateTimeFormat.Iso8601Milliseconds, DateTimeKind.Unspecified)]
+        [TestCase("\"2020-01-13T01:02:03.123Z\"", JsonDateTimeFormat.Iso8601Milliseconds, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03.123+01:00\"", JsonDateTimeFormat.Iso8601Milliseconds, DateTimeKind.Local)]
+        [TestCase("\"/Date(1578870000000)/\"", JsonDateTimeFormat.MicrosoftLegacy, DateTimeKind.Utc)]
+        [TestCase("\"/Date(1578870000000+0100)/\"", JsonDateTimeFormat.MicrosoftLegacy, DateTimeKind.Local)]
+        public void DateTimePredefinedFormatsTest(string json, JsonDateTimeFormat format, DateTimeKind expectedKind)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetDateTime(format, out DateTime dateTime));
+            if (expectedKind != DateTimeKind.Local || TimeZoneInfo.Local.GetUtcOffset(dateTime) == TimeSpan.FromHours(1))
+                Assert.AreEqual(value, dateTime.ToJson(format, value.Type == JsonValueType.String));
+            Assert.AreEqual(expectedKind, dateTime.Kind);
+            Assert.AreEqual(dateTime, value.AsDateTime(format));
+            Assert.AreEqual(dateTime, value.AsDateTime());
+            Assert.AreEqual(dateTime, value.GetDateTimeOrDefault(format));
+            Assert.AreEqual(dateTime, value.GetDateTimeOrDefault());
+        }
+
+        [TestCase("\"20200101\"", "yyyyMMdd", DateTimeKind.Unspecified)]
+        [TestCase("\"20200101|010203|Z\"", "yyyyMMdd'|'HHmmss'|'K", DateTimeKind.Utc)]
+        [TestCase("\"20200101|010203|+01:00\"", "yyyyMMdd'|'HHmmss'|'zzz", DateTimeKind.Local)]
+        public void DateTimeExactFormatTest(string json, string format, DateTimeKind expectedKind)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetDateTime(format, out DateTime dateTime));
+            if (expectedKind != DateTimeKind.Local || TimeZoneInfo.Local.GetUtcOffset(dateTime) == TimeSpan.FromHours(1))
+                Assert.AreEqual(value, dateTime.ToJson(format));
+            Assert.AreEqual(expectedKind, dateTime.Kind);
+            Assert.AreEqual(dateTime, value.AsDateTime(format));
+            Assert.AreEqual(dateTime, value.GetDateTimeOrDefault(format));
+        }
+
+
         #endregion
     }
 }
