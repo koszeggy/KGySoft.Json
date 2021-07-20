@@ -433,6 +433,45 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(dateTime, value.GetDateTimeOrDefault(format));
         }
 
+        [TestCase("1578870000000", JsonDateTimeFormat.UnixMilliseconds)]
+        [TestCase("\"1578870000000\"", JsonDateTimeFormat.UnixMilliseconds)]
+        [TestCase("1578870000", JsonDateTimeFormat.UnixSeconds)]
+        [TestCase("\"1578870000\"", JsonDateTimeFormat.UnixSeconds)]
+        [TestCase("1578870000.000", JsonDateTimeFormat.UnixSecondsFloat)]
+        [TestCase("\"1578870000.000\"", JsonDateTimeFormat.UnixSecondsFloat)]
+        [TestCase("637144668000000000", JsonDateTimeFormat.Ticks)]
+        [TestCase("\"637144668000000000\"", JsonDateTimeFormat.Ticks)]
+        [TestCase("\"2020-01-13T01:02:03.456Z\"", JsonDateTimeFormat.Iso8601JavaScript)]
+        [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601Utc)]
+        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601Local)]
+        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601)]
+        [TestCase("\"2020-01-13\"", JsonDateTimeFormat.Iso8601Date)]
+        [TestCase("\"2020-01-13T01:02+01:00\"", JsonDateTimeFormat.Iso8601Minutes)]
+        [TestCase("\"2020-01-13T01:02:03+01:00\"", JsonDateTimeFormat.Iso8601Seconds)]
+        [TestCase("\"2020-01-13T01:02:03.123+01:00\"", JsonDateTimeFormat.Iso8601Milliseconds)]
+        [TestCase("\"/Date(1578870000000)/\"", JsonDateTimeFormat.MicrosoftLegacy)]
+        [TestCase("\"/Date(1578870000000+0100)/\"", JsonDateTimeFormat.MicrosoftLegacy)]
+        public void DateTimeOffsetPredefinedFormatsTest(string json, JsonDateTimeFormat format)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetDateTimeOffset(format, out DateTimeOffset dateTimeOffset));
+            Assert.AreEqual(value, dateTimeOffset.ToJson(format, value.Type == JsonValueType.String));
+            Assert.AreEqual(dateTimeOffset, value.AsDateTimeOffset(format));
+            Assert.AreEqual(dateTimeOffset, value.AsDateTimeOffset());
+            Assert.AreEqual(dateTimeOffset, value.GetDateTimeOffsetOrDefault(format));
+            Assert.AreEqual(dateTimeOffset, value.GetDateTimeOffsetOrDefault());
+        }
+
+        [TestCase("\"20200101\"", "yyyyMMdd")]
+        [TestCase("\"20200101|010203|+01:00\"", "yyyyMMdd'|'HHmmss'|'zzz")]
+        public void DateTimeOffsetExactFormatTest(string json, string format)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetDateTimeOffset(format, out DateTimeOffset dateTimeOffset));
+            Assert.AreEqual(value, dateTimeOffset.ToJson(format));
+            Assert.AreEqual(dateTimeOffset, value.AsDateTimeOffset(format));
+            Assert.AreEqual(dateTimeOffset, value.GetDateTimeOffsetOrDefault(format));
+        }
 
         #endregion
     }

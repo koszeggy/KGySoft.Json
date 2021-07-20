@@ -96,6 +96,15 @@ namespace KGySoft.Json
             return $"{msPrefix}{ms}{(offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}{Math.Abs(offset.Minutes):00}{msPostfix}";
         }
 
+        internal static string ToMicrosoftJsonDate(this DateTimeOffset value)
+        {
+            long ms = value.UtcDateTime.ToUnixMilliseconds();
+            TimeSpan offset = value.Offset;
+            if (offset == TimeSpan.Zero)
+                return $"{msPrefix}{ms}{msPostfix}";
+            return $"{msPrefix}{ms}{(value.Offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}{Math.Abs(offset.Minutes):00}{msPostfix}";
+        }
+
         internal static DateTime AsUtc(this DateTime dateTime) => dateTime.Kind switch
         {
             DateTimeKind.Utc => dateTime,
@@ -121,8 +130,7 @@ namespace KGySoft.Json
                         return TryParseDateTimeDetectFormat(s, isNumber, out value);
 
                     case JsonDateTimeFormat.UnixMilliseconds:
-                        if (Int64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out longValue)
-                            && longValue is >= minUnixMilliseconds and <= maxUnixMilliseconds)
+                        if (TryParseInt64(s, minUnixMilliseconds, maxUnixMilliseconds, out longValue))
                         {
                             value = new DateTime(UnixMillisecondsToTicks(longValue), DateTimeKind.Utc);
                             return true;
@@ -131,8 +139,7 @@ namespace KGySoft.Json
                         break;
 
                     case JsonDateTimeFormat.UnixSeconds:
-                        if (Int64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out longValue)
-                            && longValue is >= minUnixSeconds and <= maxUnixSeconds)
+                        if (TryParseInt64(s, minUnixSeconds, maxUnixSeconds, out longValue))
                         {
                             value = new DateTime(UnixSecondsToTicks(longValue), DateTimeKind.Utc);
                             return true;
@@ -140,19 +147,8 @@ namespace KGySoft.Json
 
                         break;
 
-                    case JsonDateTimeFormat.UnixSecondsFloat:
-                        if (Double.TryParse(s, NumberStyles.Integer | NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out double doubleValue)
-                            && doubleValue is >= minUnixSeconds and <= maxUnixSeconds)
-                        {
-                            value = new DateTime(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), DateTimeKind.Utc);
-                            return true;
-                        }
-
-                        break;
-
                     case JsonDateTimeFormat.Ticks:
-                        if (Int64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out longValue)
-                            && longValue is >= 0L and <= maxTicks)
+                        if (TryParseInt64(s, 0L, maxTicks, out longValue))
                         {
                             value = new DateTime(longValue, DateTimeKind.Utc);
                             return true;
@@ -160,6 +156,17 @@ namespace KGySoft.Json
 
                         break;
 
+                    case JsonDateTimeFormat.UnixSecondsFloat:
+                        if (TryParseFloatUnixSeconds(s, out double doubleValue))
+                        {
+                            value = new DateTime(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), DateTimeKind.Utc);
+                            return true;
+                        }
+
+                        break;
+
+                    // For DateTime using RoundtripKind everywhere to prevent converting everything to local time.
+                    // Not using AssumeUniversal even for UTC only formats (Iso8601JavaScript, Iso8601Utc) because the Z in the format would turn the Kind Local.
                     case JsonDateTimeFormat.Iso8601JavaScript:
                         if (!DateTime.TryParseExact(s, Iso8601JavaScriptFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.RoundtripKind, out value))
                             return false;
@@ -191,7 +198,94 @@ namespace KGySoft.Json
                         return DateTime.TryParseExact(s, Iso8601MillisecondsFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.RoundtripKind, out value);
 
                     case JsonDateTimeFormat.MicrosoftLegacy:
-                        return TryParseMSDateTime(s, out value);
+                        if (TryParseMSDateTime(s, out DateTimeOffset timestamp, out bool hasTimeZone))
+                        {
+                            value = hasTimeZone ? timestamp.LocalDateTime : timestamp.UtcDateTime;
+                            return true;
+                        }
+
+                        break;
+                }
+            }
+
+            value = default;
+            return false;
+        }
+
+        internal static bool TryParseDateTimeOffset(this string s, JsonDateTimeFormat format, bool isNumber, out DateTimeOffset value)
+        {
+            if (!isNumber || format <= JsonDateTimeFormat.Ticks)
+            {
+                long longValue;
+                switch (format)
+                {
+                    case JsonDateTimeFormat.Auto:
+                        return TryParseDateTimeOffsetDetectFormat(s, isNumber, out value);
+
+                    case JsonDateTimeFormat.UnixMilliseconds:
+                        if (TryParseInt64(s, minUnixMilliseconds, maxUnixMilliseconds, out longValue))
+                        {
+                            value = new DateTimeOffset(UnixMillisecondsToTicks(longValue), TimeSpan.Zero);
+                            return true;
+                        }
+
+                        break;
+
+                    case JsonDateTimeFormat.UnixSeconds:
+                        if (TryParseInt64(s, minUnixSeconds, maxUnixSeconds, out longValue))
+                        {
+                            value = new DateTimeOffset(UnixSecondsToTicks(longValue), TimeSpan.Zero);
+                            return true;
+                        }
+
+                        break;
+
+                    case JsonDateTimeFormat.Ticks:
+                        if (TryParseInt64(s, 0L, maxTicks, out longValue))
+                        {
+                            value = new DateTimeOffset(longValue, TimeSpan.Zero);
+                            return true;
+                        }
+
+                        break;
+
+                    case JsonDateTimeFormat.UnixSecondsFloat:
+                        if (TryParseFloatUnixSeconds(s, out double doubleValue))
+                        {
+                            value = new DateTimeOffset(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), TimeSpan.Zero);
+                            return true;
+                        }
+
+                        break;
+
+                    // For DateTimeOffset using AssumeUniversal to prevent treating unspecified times as local ones (including UTC times with Z postfix if format contains Z as literal).
+                    // AssumeUniversal will not cause conflict if the time contains a time zone, it be simply ignored in such cases.
+                    case JsonDateTimeFormat.Iso8601JavaScript:
+                        return DateTimeOffset.TryParseExact(s, Iso8601JavaScriptFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.Iso8601:
+                        return DateTimeOffset.TryParseExact(s, iso8601RoundtripFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.Iso8601Utc:
+                        return DateTimeOffset.TryParseExact(s, iso8601RoundtripUtcFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.Iso8601Local:
+                        return DateTimeOffset.TryParseExact(s, iso8601RoundtripLocalFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None, out value);
+
+                    case JsonDateTimeFormat.Iso8601Date:
+                        return DateTimeOffset.TryParseExact(s, Iso8601DateFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.Iso8601Minutes:
+                        return DateTimeOffset.TryParseExact(s, Iso8601MinutesFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.Iso8601Seconds:
+                        return DateTimeOffset.TryParseExact(s, Iso8601SecondsFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.Iso8601Milliseconds:
+                        return DateTimeOffset.TryParseExact(s, Iso8601MillisecondsFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                    case JsonDateTimeFormat.MicrosoftLegacy:
+                        return TryParseMSDateTime(s, out value, out _);
                 }
             }
 
@@ -203,6 +297,13 @@ namespace KGySoft.Json
 
         #region Private Methods
 
+        private static bool TryParseInt64(string s, long min, long max, out long value)
+            => Int64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value) && value >= min && value <= max;
+
+        private static bool TryParseFloatUnixSeconds(string s, out double value)
+            => Double.TryParse(s, NumberStyles.Integer | NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out value) && value is >= minUnixSeconds and <= maxUnixSeconds;
+
+        // we could use DateTimeOffset.FromUnixTimeMilliseconds but it is not available on every targeted platform
         private static long UnixMillisecondsToTicks(long milliseconds) => milliseconds * TimeSpan.TicksPerMillisecond + unixEpochTicks;
         private static long UnixSecondsToTicks(long seconds) => seconds * TimeSpan.TicksPerSecond + unixEpochTicks;
 
@@ -215,13 +316,15 @@ namespace KGySoft.Json
                     return DateTime.TryParseExact(s, iso8601Formats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.RoundtripKind, out value);
 
                 // Legacy Microsoft formats
-                if (TryParseMSDateTime(s, out value))
+                if (TryParseMSDateTime(s, out DateTimeOffset timestamp, out bool hasTimeZone))
+                {
+                    value = hasTimeZone ? timestamp.LocalDateTime : timestamp.UtcDateTime;
                     return true;
+                }
             }
 
             // integer: trying to detect a sensible range
-            if (Int64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out long longValue)
-                && longValue is <= maxTicks and >= minUnixMilliseconds)
+            if (TryParseInt64(s, minUnixMilliseconds, maxTicks, out long longValue))
             {
                 value = longValue > maxUnixMilliseconds ? new DateTime(longValue, DateTimeKind.Utc)
                     : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTime(UnixSecondsToTicks(longValue), DateTimeKind.Utc)
@@ -230,8 +333,7 @@ namespace KGySoft.Json
             }
 
             // double: allowing only Unix time seconds
-            if (Double.TryParse(s, NumberStyles.Integer | NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out double doubleValue)
-                && doubleValue is >= minUnixSeconds and <= maxUnixSeconds)
+            if (TryParseFloatUnixSeconds(s, out double doubleValue))
             {
                 value = new DateTime(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), DateTimeKind.Utc);
                 return true;
@@ -241,23 +343,59 @@ namespace KGySoft.Json
             return false;
         }
 
-        private static bool TryParseMSDateTime(string s, out DateTime value)
+        private static bool TryParseDateTimeOffsetDetectFormat(string s, bool isNumber, out DateTimeOffset value)
+        {
+            if (!isNumber)
+            {
+                // Trying ISO 8601 formats first. AssumeUniversal is for unspecified time zone information to prevent treating it as local time.
+                if (s.Length >= 7 && s[4] == '-')
+                    return DateTimeOffset.TryParseExact(s, iso8601Formats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
+
+                // Legacy Microsoft formats
+                if (TryParseMSDateTime(s, out DateTimeOffset timestamp, out bool hasTimeZone))
+                {
+                    value = hasTimeZone ? timestamp.LocalDateTime : timestamp.UtcDateTime;
+                    return true;
+                }
+            }
+
+            // integer: trying to detect a sensible range
+            if (TryParseInt64(s, minUnixMilliseconds, maxTicks, out long longValue))
+            {
+                value = longValue > maxUnixMilliseconds ? new DateTimeOffset(longValue, TimeSpan.Zero)
+                    : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTimeOffset(UnixSecondsToTicks(longValue), TimeSpan.Zero)
+                    : new DateTimeOffset(UnixMillisecondsToTicks(longValue), TimeSpan.Zero);
+                return true;
+            }
+
+            // double: allowing only Unix time seconds
+            if (TryParseFloatUnixSeconds(s, out double doubleValue))
+            {
+                value = new DateTimeOffset(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), TimeSpan.Zero);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        private static bool TryParseMSDateTime(string s, out DateTimeOffset value, out bool hasTimeZone)
         {
             if (s.StartsWith(msPrefix, StringComparison.Ordinal) && s.EndsWith(msPostfix, StringComparison.Ordinal))
             {
                 // 13: prefix + postfix + sign + 4 digits
-                bool hasOffset = s.Length > 13 && s[s.Length - 7] is '+' or '-';
+                hasTimeZone = s.Length > 13 && s[s.Length - 7] is '+' or '-';
                 if (Int64.TryParse(
 #if NETSTANDARD2_1_OR_GREATER
-                    s.AsSpan(6, s.Length - (hasOffset ? 13 : 8)),
+                    s.AsSpan(6, s.Length - (hasTimeZone ? 13 : 8)),
 #else
-                    s.Substring(6, s.Length - (hasOffset ? 13 : 8)),
+                    s.Substring(6, s.Length - (hasTimeZone ? 13 : 8)),
 #endif
 
                     NumberStyles.AllowLeadingSign, NumberFormatInfo.InvariantInfo, out long longValue))
                 {
-                    value = new DateTime(UnixMillisecondsToTicks(longValue), DateTimeKind.Utc);
-                    if (!hasOffset)
+                    value = new DateTimeOffset(UnixMillisecondsToTicks(longValue), TimeSpan.Zero);
+                    if (!hasTimeZone)
                         return true;
 
                     if (Int32.TryParse(
@@ -268,15 +406,16 @@ namespace KGySoft.Json
 #endif
                         NumberStyles.None, NumberFormatInfo.InvariantInfo, out int offsetValue))
                     {
-                        var offset = new TimeSpan(offsetValue / 100, offsetValue % 100, 0);
+                        TimeSpan offset = new TimeSpan(offsetValue / 100, offsetValue % 100, 0);
                         if (s[s.Length - 7] == '-')
                             offset = -offset;
-                        value = new DateTimeOffset(value).ToOffset(offset).LocalDateTime;
+                        value = value.ToOffset(offset);
                         return true;
                     }
                 }
             }
 
+            hasTimeZone = default;
             value = default;
             return false;
         }

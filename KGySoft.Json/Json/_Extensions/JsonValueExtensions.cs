@@ -1458,7 +1458,7 @@ namespace KGySoft.Json
         /// converted to <see cref="DateTime"/>; otherwise, returns <paramref name="defaultValue"/>.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTime"/>.</param>
-        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date-time value in the <see cref="JsonValue"/>.</param>
+        /// <param name="format">Specifies the exact format of the date-time value in the <see cref="JsonValue"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see cref="DateTime.MinValue"/>.</param>
         /// <param name="desiredKind">The desired value of the <see cref="DateTime.Kind"/> property of the returned <see cref="DateTime"/> instance,
@@ -1550,6 +1550,224 @@ namespace KGySoft.Json
         /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
         /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
         public static JsonValue ToJson(this DateTime? value, string format) => value?.ToJson(format) ?? JsonValue.Null;
+
+        #endregion
+
+        #region DateTimeOffset
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// The actual format is attempted to be auto detected. If you know exact format use the
+        /// other <see cref="O:KGySoft.Json.JsonValueExtensions.TryGetDateTimeOffset">TryGetDateTimeOffset</see> overloads.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="DateTimeOffset.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetDateTimeOffset(this in JsonValue json, out DateTimeOffset value, JsonValueType expectedType = default)
+            => json.TryGetDateTimeOffset(JsonDateTimeFormat.Auto, out value, expectedType);
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value using the specified <paramref name="format"/>
+        /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date-time offset value in the <see cref="JsonValue"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="DateTimeOffset.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetDateTimeOffset(this in JsonValue json, JsonDateTimeFormat format, out DateTimeOffset value, JsonValueType expectedType = default)
+        {
+            if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
+                Throw.ArgumentOutOfRangeException(nameof(format));
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.AsStringInternal is not string s)
+            {
+                value = default;
+                return false;
+            }
+
+            return s.TryParseDateTimeOffset(format, json.Type == JsonValueType.Number, out value);
+        }
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value using the specified <paramref name="format"/>
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="format">Specifies the exact format of the date-time offset value in the <see cref="JsonValue"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="DateTimeOffset.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetDateTimeOffset(this in JsonValue json, string format, out DateTimeOffset value)
+        {
+            if (format == null!)
+                Throw.ArgumentNullException(nameof(format));
+            if (json.AsString is not string s)
+            {
+                value = default;
+                return false;
+            }
+
+            return DateTimeOffset.TryParseExact(s, format, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.RoundtripKind, out value);
+        }
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value using the specified <paramref name="format"/>
+        /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/>
+        /// property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTimeOffset"/>; otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date-time offset value in the <see cref="JsonValue"/>. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which attempts to auto detect the format.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static DateTimeOffset? AsDateTimeOffset(this in JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, JsonValueType expectedType = default)
+            => json.TryGetDateTimeOffset(format, out DateTimeOffset result, expectedType) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value using the specified <paramref name="format"/>
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>
+        /// and it can be converted to <see cref="DateTimeOffset"/>; otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="format">Specifies the exact format of the date-time offset value in the <see cref="JsonValue"/>.</param>
+        /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static DateTimeOffset? AsDateTimeOffset(this in JsonValue json, string format)
+            => json.TryGetDateTimeOffset(format, out DateTimeOffset result) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTimeOffset"/>;
+        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="DateTimeOffset.MinValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, DateTimeOffset defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetDateTimeOffset(JsonDateTimeFormat.Auto, out DateTimeOffset result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
+        /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
+        /// converted to <see cref="DateTimeOffset"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date-time offset value in the <see cref="JsonValue"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="DateTimeOffset.MinValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateTimeOffset defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetDateTimeOffset(format, out DateTimeOffset result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value using the specified <paramref name="format"/>
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/> and it can be
+        /// converted to <see cref="DateTimeOffset"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
+        /// <param name="format">Specifies the exact format of the date-time offset value in the <see cref="JsonValue"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="DateTimeOffset.MinValue"/>.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, string format, DateTimeOffset defaultValue = default)
+            => json.TryGetDateTimeOffset(format, out DateTimeOffset result) ? result : defaultValue;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which applies <see cref="JsonDateTimeFormat.Iso8601JavaScript"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonDateTimeFormat.UnixMilliseconds"/> id <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
+        /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
+        public static JsonValue ToJson(this DateTimeOffset value, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, bool asString = true)
+        {
+            if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
+                Throw.ArgumentOutOfRangeException(nameof(format));
+            if (!asString && format > JsonDateTimeFormat.Ticks)
+                Throw.ArgumentException(Res.DateTimeFormatIsStringOnly(format), nameof(format));
+
+            if (format == JsonDateTimeFormat.Auto)
+                format = asString ? JsonDateTimeFormat.Iso8601JavaScript : JsonDateTimeFormat.UnixMilliseconds;
+
+            string formattedValue = format switch
+            {
+                JsonDateTimeFormat.Iso8601JavaScript => value.UtcDateTime.ToString(DateTimeExtensions.Iso8601JavaScriptFormat, DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.UnixMilliseconds => value.UtcDateTime.ToUnixMilliseconds().ToString(NumberFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.UnixSeconds => value.UtcDateTime.ToUnixSeconds().ToString(NumberFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.UnixSecondsFloat => value.UtcDateTime.ToUnixSecondsFloat().ToString("F3", NumberFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Ticks => value.UtcTicks.ToString(NumberFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601 => value.ToString("O", DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601Utc => value.UtcDateTime.ToString("O", DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601Local => value.ToString("O", DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601Date => value.ToString(DateTimeExtensions.Iso8601DateFormat, DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601Minutes => value.ToString(DateTimeExtensions.Iso8601MinutesFormat, DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601Seconds => value.ToString(DateTimeExtensions.Iso8601SecondsFormat, DateTimeFormatInfo.InvariantInfo),
+                JsonDateTimeFormat.Iso8601Milliseconds => value.ToString(DateTimeExtensions.Iso8601MillisecondsFormat, DateTimeFormatInfo.InvariantInfo),
+                /*JsonDateTimeFormat.MicrosoftLegacy*/_ => value.ToMicrosoftJsonDate(),
+            };
+
+            return new JsonValue(asString ? JsonValueType.String : JsonValueType.Number, formattedValue);
+        }
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which applies <see cref="JsonDateTimeFormat.Iso8601JavaScript"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonDateTimeFormat.UnixMilliseconds"/> id <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
+        /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
+        public static JsonValue ToJson(this DateTimeOffset? value, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, bool asString = true)
+            => value?.ToJson(format, asString) ?? JsonValue.Null;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the exact format of the <paramref name="value"/> as a JSON value.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
+        public static JsonValue ToJson(this DateTimeOffset value, string format)
+            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, format CAN be null but MUST NOT be
+            => value.ToString(format ?? Throw.ArgumentNullException<string>(nameof(format)), DateTimeFormatInfo.InvariantInfo);
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the exact format of the <paramref name="value"/> as a JSON value.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
+        public static JsonValue ToJson(this DateTimeOffset? value, string format) => value?.ToJson(format) ?? JsonValue.Null;
 
         #endregion
 
