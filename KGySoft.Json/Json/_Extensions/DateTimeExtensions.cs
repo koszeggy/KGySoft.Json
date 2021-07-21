@@ -23,6 +23,9 @@ using System.Globalization;
 
 namespace KGySoft.Json
 {
+    /// <summary>
+    /// Helper methods for parsing <see cref="DateTime"/>, <see cref="DateTimeOffset"/> and <see cref="TimeSpan"/> instances.
+    /// </summary>
     internal static class DateTimeExtensions
     {
         #region Constants
@@ -39,7 +42,7 @@ namespace KGySoft.Json
 
         #region Private Constants
 
-        private const long maxTicks = 3_155_378_975_999_999_999; // DateTime.MaxValue.Ticks
+        private const long maxDateTimeTicks = 3_155_378_975_999_999_999; // DateTime.MaxValue.Ticks
         private const long unixEpochTicks = 621_355_968_000_000_000; // new DateTime(1970, 1, 1).Ticks
         private const long unixEpochMilliseconds = unixEpochTicks / TimeSpan.TicksPerMillisecond;
         private const long unixEpochSeconds = unixEpochTicks / TimeSpan.TicksPerSecond;
@@ -47,6 +50,8 @@ namespace KGySoft.Json
         private const long maxUnixMilliseconds = 253_402_300_799_999; // DateTimeOffset.MaxValue.ToUnixTimeMilliseconds()
         private const long minUnixSeconds = -62_135_596_800;
         private const long maxUnixSeconds = 253_402_300_799;
+        private const long minTimeSpanMilliseconds = -922_337_203_685_477; // TimeSpan.MinValue.Ticks / TimeSpan.TicksPerMillisecond
+        private const long maxTimeSpanMilliseconds = 922_337_203_685_477; // TimeSpan.MaxValue.Ticks / TimeSpan.TicksPerMillisecond
 
         private const string iso8601FractionalSecondsFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'FFFFFFFK";
         private const string iso8601RoundtripFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK";
@@ -100,8 +105,6 @@ namespace KGySoft.Json
         {
             long ms = value.UtcDateTime.ToUnixMilliseconds();
             TimeSpan offset = value.Offset;
-            if (offset == TimeSpan.Zero)
-                return $"{msPrefix}{ms}{msPostfix}";
             return $"{msPrefix}{ms}{(value.Offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}{Math.Abs(offset.Minutes):00}{msPostfix}";
         }
 
@@ -148,7 +151,7 @@ namespace KGySoft.Json
                         break;
 
                     case JsonDateTimeFormat.Ticks:
-                        if (TryParseInt64(s, 0L, maxTicks, out longValue))
+                        if (TryParseInt64(s, 0L, maxDateTimeTicks, out longValue))
                         {
                             value = new DateTime(longValue, DateTimeKind.Utc);
                             return true;
@@ -173,7 +176,7 @@ namespace KGySoft.Json
                         value = DateTime.SpecifyKind(value, DateTimeKind.Utc);
                         return true;
 
-                    case JsonDateTimeFormat.Iso8601:
+                    case JsonDateTimeFormat.Iso8601Roundtrip:
                         return DateTime.TryParseExact(s, iso8601RoundtripFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.RoundtripKind, out value);
 
                     case JsonDateTimeFormat.Iso8601Utc:
@@ -241,7 +244,7 @@ namespace KGySoft.Json
                         break;
 
                     case JsonDateTimeFormat.Ticks:
-                        if (TryParseInt64(s, 0L, maxTicks, out longValue))
+                        if (TryParseInt64(s, 0L, maxDateTimeTicks, out longValue))
                         {
                             value = new DateTimeOffset(longValue, TimeSpan.Zero);
                             return true;
@@ -263,7 +266,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.Iso8601JavaScript:
                         return DateTimeOffset.TryParseExact(s, Iso8601JavaScriptFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
 
-                    case JsonDateTimeFormat.Iso8601:
+                    case JsonDateTimeFormat.Iso8601Roundtrip:
                         return DateTimeOffset.TryParseExact(s, iso8601RoundtripFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
 
                     case JsonDateTimeFormat.Iso8601Utc:
@@ -286,6 +289,47 @@ namespace KGySoft.Json
 
                     case JsonDateTimeFormat.MicrosoftLegacy:
                         return TryParseMSDateTime(s, out value, out _);
+                }
+            }
+
+            value = default;
+            return false;
+        }
+
+        internal static bool TryParseTimeSpan(this string s, JsonTimeSpanFormat format, bool isNumber, out TimeSpan value)
+        {
+            if (!isNumber || format <= JsonTimeSpanFormat.Ticks)
+            {
+                long longValue;
+                switch (format)
+                {
+                    case JsonTimeSpanFormat.Auto:
+                        return TryParseTimeSpanDetectFormat(s, isNumber, out value);
+
+                    case JsonTimeSpanFormat.Milliseconds:
+                        if (TryParseInt64(s, minTimeSpanMilliseconds, maxTimeSpanMilliseconds, out longValue))
+                        {
+                            value = new TimeSpan(longValue * TimeSpan.TicksPerMillisecond);
+                            return true;
+                        }
+
+                        break;
+
+                    case JsonTimeSpanFormat.Ticks:
+                        if (TryParseInt64(s, Int64.MinValue, Int64.MaxValue, out longValue))
+                        {
+                            value = new TimeSpan(longValue);
+                            return true;
+                        }
+
+                        break;
+
+                    case JsonTimeSpanFormat.Text:
+#if NET35
+                        return TimeSpan.TryParse(s, out value);
+#else
+                        return TimeSpan.TryParseExact(s, "c", DateTimeFormatInfo.InvariantInfo, out value);
+#endif
                 }
             }
 
@@ -324,7 +368,7 @@ namespace KGySoft.Json
             }
 
             // integer: trying to detect a sensible range
-            if (TryParseInt64(s, minUnixMilliseconds, maxTicks, out long longValue))
+            if (TryParseInt64(s, minUnixMilliseconds, maxDateTimeTicks, out long longValue))
             {
                 value = longValue > maxUnixMilliseconds ? new DateTime(longValue, DateTimeKind.Utc)
                     : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTime(UnixSecondsToTicks(longValue), DateTimeKind.Utc)
@@ -360,7 +404,7 @@ namespace KGySoft.Json
             }
 
             // integer: trying to detect a sensible range
-            if (TryParseInt64(s, minUnixMilliseconds, maxTicks, out long longValue))
+            if (TryParseInt64(s, minUnixMilliseconds, maxDateTimeTicks, out long longValue))
             {
                 value = longValue > maxUnixMilliseconds ? new DateTimeOffset(longValue, TimeSpan.Zero)
                     : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTimeOffset(UnixSecondsToTicks(longValue), TimeSpan.Zero)
@@ -372,6 +416,31 @@ namespace KGySoft.Json
             if (TryParseFloatUnixSeconds(s, out double doubleValue))
             {
                 value = new DateTimeOffset(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), TimeSpan.Zero);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        private static bool TryParseTimeSpanDetectFormat(string s, bool isNumber, out TimeSpan value)
+        {
+            if (!isNumber)
+            {
+#if NET35
+                if (TimeSpan.TryParse(s, out value))
+#else
+                if (TimeSpan.TryParseExact(s, "c", DateTimeFormatInfo.InvariantInfo, out value))
+#endif
+                    return true;
+            }
+
+            // integer: trying to detect a sensible range
+            if (TryParseInt64(s, Int64.MinValue, Int64.MaxValue, out long longValue))
+            {
+                value = longValue is >= minTimeSpanMilliseconds and <= maxTimeSpanMilliseconds
+                    ? new TimeSpan(longValue * TimeSpan.TicksPerMillisecond)
+                    : new TimeSpan(longValue);
                 return true;
             }
 

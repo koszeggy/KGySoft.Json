@@ -162,4 +162,7 @@
   <data name="DateTimeFormatIsStringOnly_Format" xml:space="preserve">
     <value>Date-time format '{0}' cannot be encoded as a JSON number.</value>
   </data>
+  <data name="TimeSpanFormatIsStringOnly_Format" xml:space="preserve">
+    <value>Time span format '{0}' cannot be encoded as a JSON number.</value>
+  </data>
 </root>

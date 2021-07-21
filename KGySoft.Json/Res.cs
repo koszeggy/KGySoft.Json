@@ -97,6 +97,9 @@ namespace KGySoft
         /// <summary>Date-time format '{0}' cannot be encoded as a JSON number.</summary>
         internal static string DateTimeFormatIsStringOnly(JsonDateTimeFormat format) => Get("DateTimeFormatIsStringOnly_Format", format);
 
+        /// <summary>Time span format '{0}' cannot be encoded as a JSON number.</summary>
+        internal static string TimeSpanFormatIsStringOnly(JsonTimeSpanFormat format) => Get("TimeSpanFormatIsStringOnly_Format", format);
+
         #endregion
 
         #region Private Methods

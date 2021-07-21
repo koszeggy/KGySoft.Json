@@ -391,9 +391,9 @@ namespace KGySoft.Json.UnitTest
         [TestCase("\"2020-01-13T01:02:03.456Z\"", JsonDateTimeFormat.Iso8601JavaScript, DateTimeKind.Utc)]
         [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601Utc, DateTimeKind.Utc)]
         [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601Local, DateTimeKind.Local)]
-        [TestCase("\"2020-01-13T01:02:03.1234567\"", JsonDateTimeFormat.Iso8601, DateTimeKind.Unspecified)]
-        [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601, DateTimeKind.Utc)]
-        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601, DateTimeKind.Local)]
+        [TestCase("\"2020-01-13T01:02:03.1234567\"", JsonDateTimeFormat.Iso8601Roundtrip, DateTimeKind.Unspecified)]
+        [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601Roundtrip, DateTimeKind.Utc)]
+        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601Roundtrip, DateTimeKind.Local)]
         [TestCase("\"2020-01-13\"", JsonDateTimeFormat.Iso8601Date, DateTimeKind.Unspecified)]
         [TestCase("\"2020-01-13T01:02\"", JsonDateTimeFormat.Iso8601Minutes, DateTimeKind.Unspecified)]
         [TestCase("\"2020-01-13T01:02Z\"", JsonDateTimeFormat.Iso8601Minutes, DateTimeKind.Utc)]
@@ -444,12 +444,12 @@ namespace KGySoft.Json.UnitTest
         [TestCase("\"2020-01-13T01:02:03.456Z\"", JsonDateTimeFormat.Iso8601JavaScript)]
         [TestCase("\"2020-01-13T01:02:03.1234567Z\"", JsonDateTimeFormat.Iso8601Utc)]
         [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601Local)]
-        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601)]
+        [TestCase("\"2020-01-13T01:02:03.1234567+01:00\"", JsonDateTimeFormat.Iso8601Roundtrip)]
         [TestCase("\"2020-01-13\"", JsonDateTimeFormat.Iso8601Date)]
         [TestCase("\"2020-01-13T01:02+01:00\"", JsonDateTimeFormat.Iso8601Minutes)]
         [TestCase("\"2020-01-13T01:02:03+01:00\"", JsonDateTimeFormat.Iso8601Seconds)]
         [TestCase("\"2020-01-13T01:02:03.123+01:00\"", JsonDateTimeFormat.Iso8601Milliseconds)]
-        [TestCase("\"/Date(1578870000000)/\"", JsonDateTimeFormat.MicrosoftLegacy)]
+        [TestCase("\"/Date(1578870000000+0000)/\"", JsonDateTimeFormat.MicrosoftLegacy)]
         [TestCase("\"/Date(1578870000000+0100)/\"", JsonDateTimeFormat.MicrosoftLegacy)]
         public void DateTimeOffsetPredefinedFormatsTest(string json, JsonDateTimeFormat format)
         {
@@ -471,6 +471,23 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(value, dateTimeOffset.ToJson(format));
             Assert.AreEqual(dateTimeOffset, value.AsDateTimeOffset(format));
             Assert.AreEqual(dateTimeOffset, value.GetDateTimeOffsetOrDefault(format));
+        }
+
+        [TestCase("86400000", JsonTimeSpanFormat.Milliseconds)]
+        [TestCase("\"86400000\"", JsonTimeSpanFormat.Milliseconds)]
+        [TestCase("637144668000000000", JsonTimeSpanFormat.Ticks)]
+        [TestCase("\"637144668000000000\"", JsonTimeSpanFormat.Ticks)]
+        [TestCase("\"01:02:03\"", JsonTimeSpanFormat.Text)]
+        [TestCase("\"00:00:00.1234567\"", JsonTimeSpanFormat.Text)]
+        public void TimeSpanTest(string json, JsonTimeSpanFormat format)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetTimeSpan(format, out TimeSpan timeSpan));
+            Assert.AreEqual(value, timeSpan.ToJson(format, value.Type == JsonValueType.String));
+            Assert.AreEqual(timeSpan, value.AsTimeSpan(format));
+            Assert.AreEqual(timeSpan, value.AsTimeSpan());
+            Assert.AreEqual(timeSpan, value.GetTimeSpanOrDefault(format));
+            Assert.AreEqual(timeSpan, value.GetTimeSpanOrDefault());
         }
 
         #endregion

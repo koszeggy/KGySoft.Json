@@ -23,24 +23,24 @@ using System;
 namespace KGySoft.Json
 {
     /// <summary>
-    /// Specifies how <see cref="DateTime"/> and <see cref="DateTimeOffset"/> instances are formatted when converted to JSON by the
-    /// <see cref="JsonValueExtensions.ToJson(DateTime,JsonDateTimeFormat,bool)"/> and <see cref="JsonValueExtensions.ToJson(DateTimeOffset,JsonDateTimeFormat,bool)"/> extension methods.
+    /// Specifies how <see cref="DateTime"/> and <see cref="DateTimeOffset"/> instances are formatted and parsed by the <see cref="JsonValueExtensions"/> methods.
     /// </summary>
     public enum JsonDateTimeFormat
     {
         /// <summary>
-        /// <para>When converting to JSON, it is equivalent to <see cref="Iso8601JavaScript"/> when converting to a JSON <see cref="JsonValueType.String"/>,
-        /// or <see cref="UnixMilliseconds"/> if converting to a JSON <see cref="JsonValueType.Number"/>.</para>
-        /// <para>When parsing a <see cref="JsonValue"/>, it represents any format, including some ISO 8601 formats, which are not covered by the other values.</para>
+        /// <para>When converting to JSON, it is equivalent to <see cref="Iso8601JavaScript"/> in case of a JSON <see cref="JsonValueType.String"/>,
+        /// or <see cref="UnixMilliseconds"/> in case of a JSON <see cref="JsonValueType.Number"/>.</para>
+        /// <para>When parsing a <see cref="JsonValue"/>, it represents any format, including some ISO 8601 formats,
+        /// which are not covered by the other values in the <see cref="JsonDateTimeFormat"/> enumeration.</para>
         /// <note>Parsing date-time values with the <see cref="Auto"/> option formatted as numeric values (<see cref="UnixMilliseconds"/>, <see cref="UnixSeconds"/>,
-        /// <see cref="UnixMilliseconds"/> or <see cref="Ticks"/>) can ambiguous. Though a "sanity check" is applied for parsing such values use a
+        /// <see cref="UnixSecondsFloat"/> or <see cref="Ticks"/>) can be ambiguous. Though a "sanity check" is applied for parsing such values use a
         /// specific option whenever possible.</note>
         /// </summary>
         Auto,
 
         /// <summary>
         /// <para>Represents the time elapsed since the Unix Epoch time (1970-01-01T00:00Z) in milliseconds.
-        /// This is confirm with the constructor of the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date" target="_blank">Date</a>
+        /// This is conform with the constructor of the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date" target="_blank">Date</a>
         /// object and also with its <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime" target="_blank">getTime</a> method in JavaScript.</para>
         /// <para>When converting to JSON, local times will be adjusted to UTC. When parsing, the value is interpreted as UTC time.</para>
         /// <note>Example: 2020-01-01T00:00+01:00 becomes <c>1577833200000</c></note>
@@ -95,7 +95,7 @@ namespace KGySoft.Json
         /// <item>If <see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Local"/> and <see cref="DateTimeOffset"/> instances: <c>2020-01-01T00:00:00.0000000+01:00</c></item>
         /// </list></note>
         /// </summary>
-        Iso8601,
+        Iso8601Roundtrip,
 
         /// <summary>
         /// <para>Represents an ISO 8601 conform date/time format in UTC, which can encode .NET <see cref="DateTime"/> and <see cref="DateTimeOffset"/> instances without losing precision.
