@@ -490,6 +490,16 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(timeSpan, value.GetTimeSpanOrDefault());
         }
 
+        [Test]
+        public void GuidTest()
+        {
+            JsonValue value = JsonValue.Parse($"\"{Guid.NewGuid():D}\"");
+            Assert.IsTrue(value.TryGetGuid(out Guid guid));
+            Assert.AreEqual(value, guid.ToJson());
+            Assert.AreEqual(guid, value.AsGuid());
+            Assert.AreEqual(guid, value.GetGuidOrDefault());
+        }
+
         #endregion
     }
 }

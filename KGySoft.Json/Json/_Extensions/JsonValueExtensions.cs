@@ -1809,7 +1809,6 @@ namespace KGySoft.Json
 
             value = default;
             return false;
-
         }
 
         /// <summary>
@@ -1913,7 +1912,74 @@ namespace KGySoft.Json
         /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
         public static JsonValue ToJson(this TimeSpan? value, JsonTimeSpanFormat format = JsonTimeSpanFormat.Auto, bool asString = true)
             => value?.ToJson(format, asString) ?? JsonValue.Null;
-        
+
+        #endregion
+
+        #region Guid
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="Guid"/> value
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="Guid"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="Guid.Empty"/>. This parameter is passed uninitialized.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetGuid(this in JsonValue json, out Guid value)
+        {
+#if NET35
+            if (json.AsString is string { Length: 36 } s && s[8] == '-')
+            {
+                try
+                {
+                    value = new Guid(s);
+                    return true;
+                }
+                catch (FormatException)
+                {
+                }
+            }
+#else
+            if (json.AsString is string s)
+                return Guid.TryParseExact(s, "D", out value); 
+#endif
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="Guid"/> value
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="Guid"/>.</param>
+        /// <returns>A <see cref="Guid"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static Guid? AsGuid(this in JsonValue json) => json.TryGetGuid(out Guid result) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="Guid"/> value
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>
+        /// and it can be converted to <see cref="DateTime"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="Guid"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="Guid.Empty"/>.</param>
+        /// <returns>A <see cref="Guid"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static Guid GetGuidOrDefault(this in JsonValue json, Guid defaultValue = default) => json.TryGetGuid(out Guid result) ? result : defaultValue;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        public static JsonValue ToJson(this Guid value) => value.ToString("D");
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        public static JsonValue ToJson(this Guid? value) => value?.ToJson() ?? JsonValue.Null;
+
         #endregion
 
         #endregion
