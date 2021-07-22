@@ -28,6 +28,7 @@ namespace KGySoft.Json
     /// Represents a property in a <see cref="JsonObject"/>.
     /// </summary>
     /// <seealso cref="JsonObject"/>
+    [Serializable]
     public readonly struct JsonProperty : IEquatable<JsonProperty>
     {
         #region Properties

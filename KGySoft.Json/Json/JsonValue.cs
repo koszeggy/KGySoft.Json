@@ -63,6 +63,7 @@ namespace KGySoft.Json
     /// <seealso cref="JsonValueExtensions"/>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "False alarm, for some reason ReSharper triggers non_field_members_should_be_pascal_case for all As* members")]
     [SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "ReSharper issue")]
+    [Serializable]
     public readonly struct JsonValue : IEquatable<JsonValue>
     {
         #region Constants

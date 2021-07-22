@@ -40,6 +40,7 @@ namespace KGySoft.Json
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
+    [Serializable]
     public sealed class JsonArray : IList<JsonValue>
 #if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER
         , IReadOnlyList<JsonValue> 
