@@ -165,4 +165,7 @@
   <data name="TimeSpanFormatIsStringOnly_Format" xml:space="preserve">
     <value>Time span format '{0}' cannot be encoded as a JSON number.</value>
   </data>
+  <data name="JsonValueInvalidCast_Format" xml:space="preserve">
+    <value>A JsonValue with Type '{0}' cannot be cast to '{1}'.</value>
+  </data>
 </root>

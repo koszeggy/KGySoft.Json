@@ -18,6 +18,8 @@
 using System;
 using System.Globalization;
 
+using KGySoft.CoreLibraries;
+
 #endregion
 
 namespace KGySoft.Json
@@ -106,13 +108,6 @@ namespace KGySoft.Json
             TimeSpan offset = value.Offset;
             return $"{msPrefix}{ms}{(value.Offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}{Math.Abs(offset.Minutes):00}{msPostfix}";
         }
-
-        internal static DateTime AsUtc(this DateTime dateTime) => dateTime.Kind switch
-        {
-            DateTimeKind.Utc => dateTime,
-            DateTimeKind.Local => dateTime.ToUniversalTime(),
-            _ => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
-        };
 
         internal static DateTime AsLocal(this DateTime dateTime) => dateTime.Kind switch
         {
@@ -287,7 +282,7 @@ namespace KGySoft.Json
                         return DateTimeOffset.TryParseExact(s, Iso8601MillisecondsFormat, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AssumeUniversal, out value);
 
                     case JsonDateTimeFormat.MicrosoftLegacy:
-                        return TryParseMSDateTime(s, out value, out _);
+                        return TryParseMSDateTime(s, out value, out var _);
                 }
             }
 

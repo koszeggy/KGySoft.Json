@@ -25,16 +25,27 @@ namespace KGySoft
     internal static class Throw
     {
         #region Methods
+        
+        #region Internal Methods
 
-        [DoesNotReturn]internal static void ArgumentNullException(string paramName) => throw new ArgumentNullException(paramName);
-        [DoesNotReturn]internal static T ArgumentNullException<T>(string paramName) => throw new ArgumentNullException(paramName);
+        [DoesNotReturn]internal static void ArgumentNullException(string paramName) => throw CreateArgumentNullException(paramName);
+        [DoesNotReturn]internal static T ArgumentNullException<T>(string paramName) => throw CreateArgumentNullException(paramName);
 
-        [DoesNotReturn]internal static void ArgumentException(string message, string paramName) => throw new ArgumentException(message, paramName);
-        [DoesNotReturn]internal static T ArgumentException<T>(string message, string paramName) => throw new ArgumentException(message, paramName);
+        [DoesNotReturn]internal static void ArgumentException(string message, string paramName) => throw CreateArgumentException(message, paramName);
+        [DoesNotReturn]internal static T ArgumentException<T>(string message, string paramName) => throw CreateArgumentException(message, paramName);
 
-        [DoesNotReturn]internal static T InvalidCastException<T>() => throw new InvalidCastException();
+        [DoesNotReturn]internal static T InvalidCastException<T>(string message) => throw new InvalidCastException(message);
 
-        [DoesNotReturn]internal static void ArgumentOutOfRangeException(string paramName) => throw new ArgumentOutOfRangeException(paramName);
+        [DoesNotReturn]internal static void ArgumentOutOfRangeException(string message, string paramName) => throw new ArgumentOutOfRangeException(message, paramName);
+
+        #endregion
+
+        #region Private Methods
+
+        private static ArgumentNullException CreateArgumentNullException(string paramName) => new ArgumentNullException(PublicResources.ArgumentNull, paramName);
+        private static ArgumentException CreateArgumentException(string message, string paramName) => new ArgumentException(message, paramName);
+
+        #endregion
 
         #endregion
     }

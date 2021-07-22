@@ -369,11 +369,11 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(value ?? default, result);
         }
 
-        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.PascalCase, ',', "\"Alt,Control\"")]
-        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.LowerCase, '|', "\"alt|control\"")]
-        public void FormatFlagsEnumTest(ConsoleModifiers value, JsonEnumFormat format, char separator, string expectedResult)
+        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.PascalCase, ",", "\"Alt,Control\"")]
+        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.LowerCase, "|", "\"alt|control\"")]
+        public void FormatFlagsEnumTest(ConsoleModifiers value, JsonEnumFormat format, string separator, string expectedResult)
         {
-            JsonValue json = value.ToJson(format, separator.ToString());
+            JsonValue json = value.ToJson(format, separator);
             Assert.AreEqual(expectedResult, json.ToString());
             Assert.IsTrue(json.TryGetEnum(true, out ConsoleModifiers result, separator));
             Assert.AreEqual(value, result);

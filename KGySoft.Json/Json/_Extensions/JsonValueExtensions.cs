@@ -17,9 +17,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+
+using KGySoft.CoreLibraries;
 
 #endregion
 
@@ -1036,23 +1039,7 @@ namespace KGySoft.Json
             where TEnum : struct, Enum
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
-            {
-#if NET40_OR_GREATER || NETSTANDARD
-                return Enum.TryParse(s, out value);
-#else
-                // NOTE: using KGySoft.CoreLibraries.Enum<TEnum>.TryParse would be much-much efficient but this library has no dependencies
-                try
-                {
-                    value = (TEnum)Enum.Parse(typeof(TEnum), s);
-                    return true;
-                }
-                catch (Exception e) when (e is ArgumentException or OverflowException)
-                {
-                    value = default;
-                    return false;
-                }
-#endif
-            }
+                return Enum<TEnum>.TryParse(s, out value);
 
             value = default;
             return false;
@@ -1066,13 +1053,13 @@ namespace KGySoft.Json
         /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
         /// otherwise, the default value of <typeparamref name="TEnum"/>. This parameter is passed uninitialized.</param>
-        /// <param name="flagsSeparator">Specifies the separator character if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
-        /// <br/>Default value: <c>,</c>.</param>
+        /// <param name="flagsSeparator">Specifies the separator if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>, which uses the default <c>","</c> separator.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreFormat, out TEnum value, char flagsSeparator = ',', JsonValueType expectedType = default)
+        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreFormat, out TEnum value, string? flagsSeparator = null, JsonValueType expectedType = default)
             where TEnum : struct, Enum
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
@@ -1083,23 +1070,7 @@ namespace KGySoft.Json
                     s = s.Replace("-", String.Empty);
                 }
 
-                if (flagsSeparator != ',')
-                    s = s.Replace(flagsSeparator, ',');
-#if NET40_OR_GREATER || NETSTANDARD
-                return Enum.TryParse(s, ignoreFormat, out value);
-#else
-                // NOTE: using KGySoft.CoreLibraries.Enum<TEnum>.TryParse would be much-much efficient but this library has no dependencies
-                try
-                {
-                    value = (TEnum)Enum.Parse(typeof(TEnum), s, ignoreFormat);
-                    return true;
-                }
-                catch (Exception e) when (e is ArgumentException or OverflowException)
-                {
-                    value = default;
-                    return false;
-                }
-#endif
+                return Enum<TEnum>.TryParse(s, flagsSeparator, ignoreFormat, out value);
             }
 
             value = default;
@@ -1126,13 +1097,13 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
-        /// <param name="flagsSeparator">Specifies the separator character if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
-        /// <br/>Default value: <c>,</c>.</param>
+        /// <param name="flagsSeparator">Specifies the separator if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>, which uses the default <c>","</c> separator.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreFormat, char flagsSeparator = ',', JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreFormat, string? flagsSeparator = null, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : null;
 
         /// <summary>
@@ -1160,12 +1131,12 @@ namespace KGySoft.Json
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <param name="flagsSeparator">Specifies the separator character if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
-        /// <br/>Default value: <c>,</c>.</param>
+        /// <br/>Default value: <see langword="null"/>, which uses the default <c>","</c> separator.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, TEnum defaultValue = default, char flagsSeparator = ',', JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, TEnum defaultValue = default, string? flagsSeparator = null, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1209,49 +1180,42 @@ namespace KGySoft.Json
             #endregion
 
             if ((uint)format > (uint)JsonEnumFormat.NumberAsString)
-                Throw.ArgumentOutOfRangeException(nameof(format));
-            string enumValue;
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
+
+            if (format is JsonEnumFormat.Number or JsonEnumFormat.NumberAsString)
+                // TODO: Enum<TEnum>.ToString(value, EnumFormattingOptions.Number)
+                return new JsonValue(format == JsonEnumFormat.Number ? JsonValueType.Number : JsonValueType.String, value.ToString("D"));
+
+            string enumValue = Enum<TEnum>.ToString(value, flagsSeparator);
             switch (format)
             {
                 case JsonEnumFormat.PascalCase:
-                    enumValue = value.ToString();
-                    if (Char.IsLower(enumValue[0]))
-                        enumValue = Char.ToUpperInvariant(enumValue[0]) + enumValue.Substring(1);
-                    break;
+                    return Char.IsLower(enumValue[0]) ? Char.ToUpperInvariant(enumValue[0]) + enumValue.Substring(1) : enumValue;
+
                 case JsonEnumFormat.CamelCase:
-                    enumValue = value.ToString();
-                    if (Char.IsUpper(enumValue[0]))
-                        enumValue = Char.ToLowerInvariant(enumValue[0]) + enumValue.Substring(1);
-                    break;
+                    return Char.IsUpper(enumValue[0]) ? Char.ToLowerInvariant(enumValue[0]) + enumValue.Substring(1) : enumValue;
+
                 case JsonEnumFormat.LowerCase:
-                    enumValue = value.ToString().ToLowerInvariant();
-                    break;
+                    return enumValue.ToLowerInvariant();
+
                 case JsonEnumFormat.UpperCase:
-                    enumValue = value.ToString().ToUpperInvariant();
-                    break;
+                    return enumValue.ToUpperInvariant();
+
                 case JsonEnumFormat.LowerCaseWithUnderscores:
-                    enumValue = AdjustString(value.ToString(), false, '_');
-                    break;
+                    return AdjustString(enumValue, false, '_');
+
                 case JsonEnumFormat.UpperCaseWithUnderscores:
-                    enumValue = AdjustString(value.ToString(), true, '_');
-                    break;
+                    return AdjustString(enumValue, true, '_');
+
                 case JsonEnumFormat.LowerCaseWithHyphens:
-                    enumValue = AdjustString(value.ToString(), false, '-');
-                    break;
+                    return AdjustString(enumValue, false, '-');
+
                 case JsonEnumFormat.UpperCaseWithHyphens:
-                    enumValue = AdjustString(value.ToString(), true, '-');
-                    break;
-                case JsonEnumFormat.Number:
-                case JsonEnumFormat.NumberAsString:
-                    return new JsonValue(format == JsonEnumFormat.Number ? JsonValueType.Number : JsonValueType.String, value.ToString("D"));
-                default:
-                    Throw.ArgumentOutOfRangeException(nameof(format));
-                    return default;
+                    return AdjustString(enumValue, true, '-');
             }
 
-            if (flagsSeparator != null)
-                enumValue = enumValue.Replace(", ", flagsSeparator);
-            return enumValue;
+            Debug.Fail("This point should not be reached");
+            return default;
         }
 
         /// <summary>
@@ -1311,9 +1275,9 @@ namespace KGySoft.Json
         public static bool TryGetDateTime(this in JsonValue json, JsonDateTimeFormat format, out DateTime value, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
-                Throw.ArgumentOutOfRangeException(nameof(format));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if (desiredKind.HasValue && (uint)desiredKind > (uint)DateTimeKind.Local)
-                Throw.ArgumentOutOfRangeException(nameof(desiredKind));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(desiredKind.Value), nameof(desiredKind));
             if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.AsStringInternal is not string s)
             {
                 value = default;
@@ -1353,7 +1317,7 @@ namespace KGySoft.Json
             if (format == null!)
                 Throw.ArgumentNullException(nameof(format));
             if (desiredKind.HasValue && (uint)desiredKind > (uint)DateTimeKind.Local)
-                Throw.ArgumentOutOfRangeException(nameof(desiredKind));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(desiredKind.Value), nameof(desiredKind));
             if (json.AsString is not string s)
             {
                 value = default;
@@ -1486,7 +1450,7 @@ namespace KGySoft.Json
         public static JsonValue ToJson(this DateTime value, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, bool asString = true)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
-                Throw.ArgumentOutOfRangeException(nameof(format));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if (!asString && format > JsonDateTimeFormat.Ticks)
                 Throw.ArgumentException(Res.DateTimeFormatIsStringOnly(format), nameof(format));
 
@@ -1585,7 +1549,7 @@ namespace KGySoft.Json
         public static bool TryGetDateTimeOffset(this in JsonValue json, JsonDateTimeFormat format, out DateTimeOffset value, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
-                Throw.ArgumentOutOfRangeException(nameof(format));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return s.TryParseDateTimeOffset(format, json.Type == JsonValueType.Number, out value);
 
@@ -1703,7 +1667,7 @@ namespace KGySoft.Json
         public static JsonValue ToJson(this DateTimeOffset value, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, bool asString = true)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
-                Throw.ArgumentOutOfRangeException(nameof(format));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if (!asString && format > JsonDateTimeFormat.Ticks)
                 Throw.ArgumentException(Res.DateTimeFormatIsStringOnly(format), nameof(format));
 
@@ -1802,7 +1766,7 @@ namespace KGySoft.Json
         public static bool TryGetTimeSpan(this in JsonValue json, JsonTimeSpanFormat format, out TimeSpan value, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonTimeSpanFormat.Text)
-                Throw.ArgumentOutOfRangeException(nameof(format));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return s.TryParseTimeSpan(format, json.Type == JsonValueType.Number, out value);
 
@@ -1873,7 +1837,7 @@ namespace KGySoft.Json
         public static JsonValue ToJson(this TimeSpan value, JsonTimeSpanFormat format = JsonTimeSpanFormat.Auto, bool asString = true)
         {
             if ((uint)format > (uint)JsonTimeSpanFormat.Text)
-                Throw.ArgumentOutOfRangeException(nameof(format));
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if (!asString && format > JsonTimeSpanFormat.Ticks)
                 Throw.ArgumentException(Res.TimeSpanFormatIsStringOnly(format), nameof(format));
 

@@ -16,12 +16,12 @@
 #region Usings
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Resources;
 using System.Threading;
 
+using KGySoft.CoreLibraries;
 using KGySoft.Json;
+using KGySoft.Resources;
 
 #endregion
 
@@ -33,13 +33,16 @@ namespace KGySoft
 
         private const string unavailableResource = "Resource ID not found: {0}";
         private const string invalidResource = "Resource text is not valid for {0} arguments: {1}";
-        private const string nullRef = "<null>";
 
         #endregion
 
         #region Fields
 
-        private static readonly ResourceManager resourceManager = new ResourceManager("KGySoft.Json.Messages", typeof(Res).Assembly);
+        private static readonly DynamicResourceManager resourceManager = new DynamicResourceManager("KGySoft.Json.Messages", typeof(Res).Assembly)
+        {
+            SafeMode = true,
+            UseLanguageSettings = true,
+        };
 
         #endregion
 
@@ -99,6 +102,9 @@ namespace KGySoft
         /// <summary>Time span format '{0}' cannot be encoded as a JSON number.</summary>
         internal static string TimeSpanFormatIsStringOnly(JsonTimeSpanFormat format) => Get("TimeSpanFormatIsStringOnly_Format", format);
 
+        /// <summary>A JsonValue with Type '{0}' cannot be cast to '{1}'.</summary>
+        internal static string JsonValueInvalidCast<T>(JsonValueType actualType) => Get("JsonValueInvalidCast_Format", actualType, typeof(T).GetName(TypeNameKind.ShortName));
+
         #endregion
 
         #region Private Methods
@@ -119,7 +125,7 @@ namespace KGySoft
                 if (i >= 0)
                 {
                     for (; i < args.Length; i++)
-                        args[i] ??= nullRef;
+                        args[i] ??= PublicResources.Null;
                 }
 
                 return String.Format(Thread.CurrentThread.CurrentCulture, format, args);

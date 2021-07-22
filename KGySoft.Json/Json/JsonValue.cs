@@ -439,7 +439,7 @@ namespace KGySoft.Json
         /// A <see cref="bool">bool</see> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent a boolean value.</exception>
-        public static explicit operator bool?(JsonValue value) => value.IsNull ? null : value.AsBoolean ?? Throw.InvalidCastException<bool>();
+        public static explicit operator bool?(JsonValue value) => value.IsNull ? null : value.AsBoolean ?? Throw.InvalidCastException<bool>(Res.JsonValueInvalidCast<bool>(value.Type));
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="string">string</see>.
@@ -450,7 +450,7 @@ namespace KGySoft.Json
         /// A <see cref="string">string</see> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent a string value.</exception>
-        public static explicit operator string?(JsonValue value) => value.IsNull ? null : value.AsString ?? Throw.InvalidCastException<string>();
+        public static explicit operator string?(JsonValue value) => value.IsNull ? null : value.AsString ?? Throw.InvalidCastException<string>(Res.JsonValueInvalidCast<string>(value.Type));
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to nullable <see cref="double">double</see>.
@@ -461,7 +461,7 @@ namespace KGySoft.Json
         /// A <see cref="double">double</see> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent a numeric value.</exception>
-        public static explicit operator double?(JsonValue value) => value.IsNull ? null : value.AsNumber ?? Throw.InvalidCastException<double>();
+        public static explicit operator double?(JsonValue value) => value.IsNull ? null : value.AsNumber ?? Throw.InvalidCastException<double>(Res.JsonValueInvalidCast<double>(value.Type));
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="JsonArray"/>.
@@ -472,7 +472,7 @@ namespace KGySoft.Json
         /// A <see cref="JsonArray"/> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent an array.</exception>
-        public static explicit operator JsonArray?(JsonValue value) => value.IsNull ? null : value.AsArray ?? Throw.InvalidCastException<JsonArray>();
+        public static explicit operator JsonArray?(JsonValue value) => value.IsNull ? null : value.AsArray ?? Throw.InvalidCastException<JsonArray>(Res.JsonValueInvalidCast<JsonArray>(value.Type));
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="JsonValue"/> to <see cref="JsonObject"/>.
@@ -483,7 +483,7 @@ namespace KGySoft.Json
         /// A <see cref="JsonObject"/> instance that represents the original value.
         /// </returns>
         /// <exception cref="InvalidCastException"><paramref name="value"/> does not represent an object.</exception>
-        public static explicit operator JsonObject?(JsonValue value) => value.IsNull ? null : value.AsObject ?? Throw.InvalidCastException<JsonObject>();
+        public static explicit operator JsonObject?(JsonValue value) => value.IsNull ? null : value.AsObject ?? Throw.InvalidCastException<JsonObject>(Res.JsonValueInvalidCast<JsonArray>(value.Type));
 
         #endregion
 
