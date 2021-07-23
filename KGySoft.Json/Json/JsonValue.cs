@@ -595,8 +595,6 @@ namespace KGySoft.Json
 
         #region Static Methods
 
-        #region Public Methods
-
         /// <summary>
         /// Reads a <see cref="JsonValue"/> from a <see cref="TextReader"/> that contains JSON data.
         /// </summary>
@@ -700,64 +698,6 @@ namespace KGySoft.Json
 
         #endregion
 
-        #region Internal Methods
-
-        internal static void WriteJsonString(StringBuilder builder, string value)
-        {
-            builder.Append('"');
-            int len = value.Length;
-            for (var i = 0; i < len; i++)
-            {
-                char c = value[i];
-                switch (c)
-                {
-                    case > '\\': // 92
-                        builder.Append(c);
-                        break;
-
-                    case > '"': // 34
-                        if (c == '\\')
-                            builder.Append(@"\\");
-                        else
-                            builder.Append(c);
-                        break;
-
-                    case >= ' ': // 32
-                        if (c == '"')
-                            builder.Append(@"\""");
-                        else
-                            builder.Append(c);
-                        break;
-
-                    case '\r':
-                        builder.Append(@"\r");
-                        break;
-                    case '\n':
-                        builder.Append(@"\n");
-                        break;
-                    case '\t':
-                        builder.Append(@"\t");
-                        break;
-                    case '\f':
-                        builder.Append(@"\f");
-                        break;
-                    case '\b':
-                        builder.Append(@"\b");
-                        break;
-                    default:
-                        builder.Append("\\u");
-                        builder.Append(((int)c).ToString("X4", NumberFormatInfo.InvariantInfo));
-                        break;
-                }
-            }
-
-            builder.Append('"');
-        }
-
-        #endregion
-
-        #endregion
-
         #region Instance Methods
 
         #region Public Methods
@@ -842,8 +782,7 @@ namespace KGySoft.Json
                 return;
             }
 
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
-            new JsonWriter(new StringWriter(builder ?? Throw.ArgumentNullException<StringBuilder>(nameof(builder))), indent).Write(this);
+            new JsonWriter(new StringWriter(builder), indent).Write(this);
         }
 
         /// <summary>
@@ -869,7 +808,7 @@ namespace KGySoft.Json
             switch (Type)
             {
                 case JsonValueType.String:
-                    WriteJsonString(builder, AsLiteral!);
+                    JsonWriter.WriteJsonString(builder, AsLiteral!);
                     return;
 
                 case JsonValueType.Object:

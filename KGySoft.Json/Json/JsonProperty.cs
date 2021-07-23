@@ -152,7 +152,7 @@ namespace KGySoft.Json
         internal void Dump(StringBuilder builder)
         {
             Debug.Assert(Name != null && !Value.IsUndefined);
-            JsonValue.WriteJsonString(builder, Name!);
+            JsonWriter.WriteJsonString(builder, Name!);
             builder.Append(':');
             Value.Dump(builder);
         }

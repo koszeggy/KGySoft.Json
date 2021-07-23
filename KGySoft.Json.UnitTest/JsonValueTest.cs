@@ -236,12 +236,13 @@ namespace KGySoft.Json.UnitTest
         [TestCase("false")]
         [TestCase("unknown")]
         [TestCase("\"string\"")]
+        [TestCase("\"\"")]
         [TestCase("2435.2354")]
         [TestCase("-1.25e-10")]
         [TestCase("[]")]
         [TestCase("[ 1 ,\"aaa\" ]")]
         [TestCase("{}")]
-        [TestCase("{ \"NullProp\" : null , \"StrProp\": \"strValue\", \"ArrProp\": [ 1 , null, \"aaa\" , [ ] , { } ] , \"ObjProp\" : { \"xxx\" : null, \"yyy\" : {}, \"zzz\": \"Str\" } }")]
+        [TestCase("{ \"NullProp\" : null , \"StrProp\": \"strValue\", \"ArrProp\": [ 1 , null, \"aaa\" , [ ] , { }, \"\" ] , \"ObjProp\" : { \"xxx\" : null, \"yyy\" : {}, \"zzz\": \"Str\" } }")]
         public void ParseTest(string raw)
         {
             JsonValue json = JsonValue.Parse(raw);

@@ -216,15 +216,22 @@ namespace KGySoft.Json
         /// <br/>Default value: <see langword="true"/>.</param>
         /// <exception cref="ArgumentNullException">The <paramref name="properties"/> parameter is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">The <paramref name="properties"/> contains a <see cref="JsonProperty"/> with <see langword="null"/>&#160;<see cref="JsonProperty.Name"/>.</exception>
-        public JsonObject(IEnumerable<JsonProperty> properties, bool allowDuplicates = true) : this()
+        public JsonObject(IEnumerable<JsonProperty> properties, bool allowDuplicates = true)
         {
             if (properties == null!)
                 Throw.ArgumentNullException(nameof(properties));
 
-            // Initializing the dictionary only if duplicates are disabled and it is known that enough properties will be added
-            if (!allowDuplicates && properties is ICollection<JsonProperty> { Count: >= buildIndexMapThreshold } collection)
-                nameToIndex = new Dictionary<string, int>(collection.Count);
+            if (properties is ICollection<JsonProperty> collection)
+            {
+                this.properties = new List<JsonProperty>(collection.Count);
                 
+                // Initializing the dictionary only if duplicates are disabled and it is known that enough properties will be added
+                if (!allowDuplicates && collection.Count >= buildIndexMapThreshold)
+                    nameToIndex = new Dictionary<string, int>(collection.Count);
+            }
+            else
+                this.properties = new List<JsonProperty>();
+
             foreach (JsonProperty property in properties)
             {
                 if (property.Name == null)
@@ -242,10 +249,11 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="properties">The properties to be added to this <see cref="JsonObject"/>.</param>
         /// <exception cref="ArgumentNullException">The <paramref name="properties"/> parameter is <see langword="null"/>.</exception>
-        public JsonObject(IDictionary<string, JsonValue> properties) : this()
+        public JsonObject(IDictionary<string, JsonValue> properties)
         {
             if (properties == null!)
                 Throw.ArgumentNullException(nameof(properties));
+            this.properties = new List<JsonProperty>(properties.Count);
             if (properties.Count >= buildIndexMapThreshold)
                 nameToIndex = new Dictionary<string, int>(properties.Count);
             foreach (KeyValuePair<string, JsonValue> property in properties)
@@ -616,7 +624,7 @@ namespace KGySoft.Json
             }
 
             // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
-            new JsonWriter(new StringWriter(builder ?? Throw.ArgumentNullException<StringBuilder>(nameof(builder))), indent).Write(this);
+            new JsonWriter(new StringWriter(builder), indent).Write(this);
         }
 
         /// <summary>
@@ -670,6 +678,7 @@ namespace KGySoft.Json
 
         private void AddItem(in JsonProperty item)
         {
+            Debug.Assert(!item.IsDefault);
             properties.Add(item);
             if (nameToIndex != null)
                 nameToIndex[item.Name!] = Count - 1;
@@ -677,6 +686,7 @@ namespace KGySoft.Json
 
         private void SetItem(in JsonProperty property)
         {
+            Debug.Assert(!property.IsDefault);
             int index = TryGetIndex(property.Name!);
             if (index >= 0)
             {
