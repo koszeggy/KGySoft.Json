@@ -33,7 +33,7 @@ namespace KGySoft.Json.UnitTest
         public void ImplicitConversionsTest()
         {
             JsonArray array = new() { default, true, 1, 1.23, "value", (string?)null };
-            Assert.AreEqual(6, array.Count);
+            Assert.AreEqual(6, array.Length);
             Assert.IsTrue(array[0].IsUndefined);
             Assert.IsTrue(array[1] == true);
             Assert.IsTrue(array[2] == 1);
@@ -53,7 +53,7 @@ namespace KGySoft.Json.UnitTest
             string serialized = array.ToString();
             Console.WriteLine(serialized);
             JsonArray deserialized = JsonArray.Parse(serialized);
-            Assert.AreEqual(array.Count, deserialized.Count);
+            Assert.AreEqual(array.Length, deserialized.Length);
             Assert.IsTrue(deserialized[0].IsNull);
             CollectionAssert.AreEqual(array.Skip(1), deserialized.Skip(1));
         }
@@ -69,11 +69,11 @@ namespace KGySoft.Json.UnitTest
         public void ListTest()
         {
             JsonArray array = new() { true };
-            Assert.AreEqual(1, array.Count);
+            Assert.AreEqual(1, array.Length);
 
             array.Insert(0, 1);
             array.Add("string");
-            Assert.AreEqual(3, array.Count);
+            Assert.AreEqual(3, array.Length);
             Assert.AreEqual(JsonValueType.Number, array[0].Type);
             Assert.AreEqual(1, array[0].AsNumber);
             Assert.IsTrue(array[0] == 1);
@@ -83,19 +83,19 @@ namespace KGySoft.Json.UnitTest
             Assert.AreEqual(1, array.IndexOf(true));
             Assert.AreEqual(2, array.IndexOf("string"));
 
-            var values = new JsonValue[array.Count];
+            var values = new JsonValue[array.Length];
             array.CopyTo(values, 0);
             Assert.IsTrue(array.SequenceEqual(values));
 
             array.RemoveAt(0);
-            Assert.AreEqual(2, array.Count);
+            Assert.AreEqual(2, array.Length);
 
             Assert.IsFalse(array.Remove(42));
             Assert.IsTrue(array.Remove("string"));
-            Assert.AreEqual(1, array.Count);
+            Assert.AreEqual(1, array.Length);
 
             array.Clear();
-            Assert.AreEqual(0, array.Count);
+            Assert.AreEqual(0, array.Length);
         }
 
         [TestCase("undefined", false)]

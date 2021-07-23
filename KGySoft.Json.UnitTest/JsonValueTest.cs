@@ -164,7 +164,7 @@ namespace KGySoft.Json.UnitTest
             Console.WriteLine(serialized);
             JsonValue deserialized = JsonValue.Parse(serialized);
             Assert.AreEqual(JsonValueType.Array, deserialized.Type);
-            Assert.AreEqual(json.AsArray!.Count, deserialized.AsArray!.Count);
+            Assert.AreEqual(json.AsArray!.Length, deserialized.AsArray!.Length);
             Assert.IsTrue(deserialized[0].IsNull);
             CollectionAssert.AreEqual(json.AsArray.Skip(1), deserialized.AsArray.Skip(1));
         }

@@ -61,7 +61,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the number of elements contained in the <see cref="JsonArray"/>.
         /// </summary>
-        public int Count => items.Count;
+        public int Length => items.Count;
 
         #endregion
 
@@ -74,6 +74,10 @@ namespace KGySoft.Json
         #region Explicitly Implemented Interface Properties
 
         bool ICollection<JsonValue>.IsReadOnly => false;
+        int ICollection<JsonValue>.Count => Length;
+#if NET45_OR_GREATER || NETSTANDARD2_0_OR_GREATER
+        int IReadOnlyCollection<JsonValue>.Count => Length;
+#endif
 
         #endregion
 
@@ -87,10 +91,10 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="index">The zero-based index of the element to get or set.</param>
         /// <returns>The element at the specified index.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">The indexer is set and <paramref name="index"/> is less than zero or greater or equal to <see cref="Count"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The indexer is set and <paramref name="index"/> is less than zero or greater or equal to <see cref="Length"/>.</exception>
         public JsonValue this[int index]
         {
-            get => (uint)index < Count ? items[index] : JsonValue.Undefined;
+            get => (uint)index < Length ? items[index] : JsonValue.Undefined;
             set => items[index] = value;
         }
 
@@ -214,7 +218,7 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
         /// <param name="item">The <see cref="JsonValue"/> to insert into the <see cref="JsonArray"/>.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than zero or greater than <see cref="Count"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than zero or greater than <see cref="Length"/>.</exception>
         public void Insert(int index, JsonValue item) => items.Insert(index, item);
 
         /// <summary>
@@ -271,7 +275,7 @@ namespace KGySoft.Json
         /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
         public override int GetHashCode()
         {
-            int result = Count;
+            int result = Length;
             if (result == 0)
                 return result;
 
@@ -292,7 +296,7 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the specified object is equal to this instance; otherwise, <see langword="false"/>.</returns>
-        public override bool Equals(object? obj) => obj is JsonArray other && Count == other.Count && this.SequenceEqual(other);
+        public override bool Equals(object? obj) => obj is JsonArray other && Length == other.Length && this.SequenceEqual(other);
 
         /// <summary>
         /// Returns a minimized JSON string that represents this <see cref="JsonArray"/>.
@@ -349,7 +353,7 @@ namespace KGySoft.Json
             }
 
             // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
-            new JsonWriter(new StringWriter(builder ?? Throw.ArgumentNullException<StringBuilder>(nameof(builder))), indent).Write(this);
+            new JsonWriter(new StringWriter(builder), indent).Write(this);
         }
 
         /// <summary>
