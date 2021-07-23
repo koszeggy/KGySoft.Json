@@ -37,6 +37,7 @@ namespace KGySoft.Json
     /// methods replace <see cref="JsonValue.Undefined"/> values with <see cref="JsonValue.Null"/>.</para>
     /// <para>Obtaining an element by the <see cref="this[int]">indexer</see> using an invalid index also returns <see cref="JsonValue.Undefined"/>,
     /// which is also a JavaScript-compatible behavior.</para>
+    /// <note type="tip">See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> type for details and examples.</note>
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>

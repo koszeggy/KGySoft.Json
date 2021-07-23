@@ -51,6 +51,7 @@ namespace KGySoft.Json
     /// It's not an issue for JavaScript, which allows parsing such a JSON string where the duplicate keys will have the lastly defined value.
     /// But you can explicitly call the <see cref="EnsureUniqueKeys">EnsureUniqueKeys</see> method to remove the duplicate keys (keeping the lastly defined values)
     /// before producing the JSON string.</para>
+    /// <note type="tip">See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> type for details and examples.</note>
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>

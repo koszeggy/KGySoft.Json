@@ -34,30 +34,256 @@ namespace KGySoft.Json
     /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
     /// <remarks>
-    /// TODO
-    /// - JSON: ToString/WriteTo
-    /// - Implicit conversions
-    /// - numbers
-    ///   - ToString preserves any precision but that may be lost at JS side
-    ///   - ToString supports NaN/infinity even though they are not supported in JSON
-    ///   - AsNumber is compatible with JavaScript, use AsLiteral or extensions
-    ///   - Long, implicit cast with warning, use ToJson instead
-    /// - Objects
-    ///   - indexer access, tolerates nonexistent values
-    ///   - To set cast to JsonObject or use AsObject (needed because JsonValue is a struct)
-    ///   - JsonProperty implicit conversion to ValueTuple
-    /// - Arrays
-    ///   - Just like in JS, nonexistent index is tolerated
-    ///   - To set cast to JsonArray or use AsArray (needed because JsonValue is a struct)
-    /// - Undefined:
-    ///   - Unlike in JS, a standalone undefined is serialized as `undefined` by ToString
-    ///   - But WriteTo writes nothing so Parse will say unexpected end
-    ///   - It is replaced by null in arrays and skipped in objects
-    /// - ToString vs WriteTo
-    ///   - ToString always minimizes
-    ///   - ToString writes undefined as a root
-    ///   - WriteTo can indent and supports different encodings (eg. direct UTF8)
+    /// <para>A <see cref="JsonValue"/> instance represents any JavaScript type that can appear in JSON (see also the <see cref="Type"/> property
+    /// and the <see cref="JsonValueType"/> enumeration), including the <see cref="Undefined"/> value, which is not valid in JSON.</para>
+    /// <para>The default value of a <see cref="JsonValue"/> instance equals to the <see cref="Undefined"/> field, which represents the <c>undefined</c> type in JavaScript.
+    /// Just like in JavaScript, you can add <see cref="Undefined"/> values to arrays and objects but when you "stringify" them
+    /// by the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see> methods, they will be
+    /// either replaced with <see cref="Null"/> (in a <see cref="JsonArray"/>) or simply ignored (in a <see cref="JsonObject"/>).
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = default; // = JsonValue.Undefined; = new JsonValue();
+    /// 
+    /// Console.WriteLine(value); // undefined
+    /// Console.WriteLine(value.Type); // Undefined
+    /// Console.WriteLine(value.IsUndefined); // True
+    /// Console.WriteLine(value == JsonValue.Undefined); // True
+    /// ]]></code>
+    /// <note><see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> and <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see> behave differently
+    /// for a standalone <see cref="Undefined"/> value. Whereas <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> produces the string <c>undefined</c>,
+    /// <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see> will not write anything into the output.</note></para>
+    /// <para>The <see cref="Null"/> field represents the <c>null</c> type in JavaScript. Conversion from a .NET <see langword="null"/> is also possible
+    /// but only with an explicit type cast.
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = JsonValue.Null; // = (string)null; = (bool?)null; = (JsonObject)null; etc.
+    /// 
+    /// Console.WriteLine(value); // null
+    /// Console.WriteLine(value.Type); // Null
+    /// Console.WriteLine(value.IsNull); // True
+    /// Console.WriteLine(value == JsonValue.Null); // True
+    /// ]]></code></para>
+    /// <para>A <see cref="JsonValue"/> can also store a <see cref="JsonValueType.Boolean"/> value, which can be either the value of the <see cref="True"/> or <see cref="False"/> fields.
+    /// An implicit conversion from the .NET <see cref="bool"/> type also exists.
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = true; // = JsonValue.True; = new JsonValue(true);
+    /// 
+    /// Console.WriteLine(value); // true
+    /// Console.WriteLine(value.Type); // Boolean
+    /// Console.WriteLine(value.AsBoolean); // True
+    /// Console.WriteLine(value == JsonValue.True); // True
+    /// Console.WriteLine(value == true); // True
+    /// ]]></code></para>
+    /// <para>A <see cref="JsonValue"/> can also store a <see cref="JsonValueType.Number"/>. Though a JavaScript number is always
+    /// a <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" target="_blank">double-precision 64-bit binary format IEEE 754</a> value,
+    /// which is the same as the .NET <see cref="double"/> type, a <see cref="JsonValue"/> can hold any number with any precision.
+    /// You can use the <see cref="AsNumber"/> property to get the same value as JavaScript would also get and the <see cref="AsLiteral"/> property, which returns
+    /// the actual value as it will be dumped when converting the value to JSON. An implicit conversion from the .NET <see cref="double"/> type also exists.
+    /// <note type="warning">It is not recommended to write wide numeric .NET types (<see cref="long"/>, <see cref="decimal"/>, etc.) as a
+    /// JSON <see cref="JsonValueType.Number"/> because when processed by JavaScript, the precision of these value might be lost without any warning.
+    /// If you are sure that you want to store such values as numbers, use the <see cref="CreateNumberUnchecked"/> method or
+    /// the <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">JsonValueExtensions.ToJson</see> overloads with <c>asString: false</c> parameter.</note>
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = 1.25; // = new JsonValue(1.25);
+    /// 
+    /// Console.WriteLine(value); // 1.25
+    /// Console.WriteLine(value.Type); // Number
+    /// Console.WriteLine(value.AsNumber); // 1.25
+    ///
+    /// // Using a long value beyond double precision
+    /// long longValue = (1L << 53) + 1;
+    /// value = longValue; // this produces a comple-time warning about possible loss of precision
+    /// Console.WriteLine(value); // 9007199254740993
+    /// Console.WriteLine($"{value.AsNumber:R}"); // 9007199254740992 - this is what JavaScript will see
+    /// Console.WriteLine(value.AsLiteral); // 9007199254740993 - this is the actual stored value
+    ///
+    /// value = longValue.ToJson(asString: false); // this is how the compile-time warning can be avoided
+    /// Console.WriteLine(value); // 9007199254740993
+    ///
+    /// value = longValue.ToJson(); // this is the recommended solution to prevent losing precision
+    /// Console.WriteLine(value); // "9007199254740993" - note that ToJson produces strings for wide numeric types by default
+    /// ]]></code></para>
+    /// <para>A <see cref="JsonValue"/> can also store a <see cref="JsonValueType.String"/>. An implicit conversion from the .NET <see cref="string"/> type also exists.
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = "some \"value\""; // = new JsonValue("some \"value\"");
+    /// 
+    /// Console.WriteLine(value); // "some \"value\""
+    /// Console.WriteLine(value.Type); // String
+    /// Console.WriteLine(value.AsString); // some "value"
+    /// ]]></code></para>
+    /// <para>A <see cref="JsonValue"/> can also store an <see cref="JsonValueType.Array"/>, which is represented by the <see cref="JsonArray"/> type.
+    /// An implicit conversion from <see cref="JsonArray"/> also exists. If a <see cref="JsonValue"/> represents an array, then you can use the
+    /// <see cref="this[int]">int indexer</see> to access the array elements. Just like in JavaScript, accessing an invalid index returns <see cref="Undefined"/>.
+    /// To change array values use the <see cref="JsonArray"/> instance returned by the <see cref="AsArray"/> property.
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = new JsonArray { true, 1, 2.35, JsonValue.Null, "value" };
+    /// // which is the shorthand of: new JsonValue(new JsonArray { JsonValue.True, new JsonValue(1d), new JsonValue(2.35), JsonValue.Null, new JsonValue("value") });
+    /// 
+    /// Console.WriteLine(value); // [true,1,2.35,null,"value"]
+    /// Console.WriteLine(value.Type); // Array
+    /// Console.WriteLine(value[2]); // 2.35
+    /// Console.WriteLine(value[42]); // undefined
+    /// ]]></code></para>
+    /// <para>A <see cref="JsonValue"/> can also store an <see cref="JsonValueType.Object"/>, which is represented by the <see cref="JsonObject"/> type.
+    /// An implicit conversion from <see cref="JsonObject"/> also exists. If a <see cref="JsonValue"/> represents an object, then you can use the
+    /// <see cref="this[string]">string indexer</see> to access the properties by name. Just like in JavaScript, accessing a nonexistent property returns <see cref="Undefined"/>.
+    /// To change object properties use the <see cref="JsonObject"/> instance returned by the <see cref="AsObject"/> property.
+    /// <code lang="C#"><![CDATA[
+    /// JsonValue value = new JsonObject
+    /// {
+    ///     ("Bool", true), // which is the shorthand of new JsonProperty("Bool", new JsonValue(true))
+    ///     // { "Bool", true }, // alternative syntax on platforms where ValueTuple types are not available
+    ///     ("Number", 1.23),
+    ///     ("String", "value"),
+    ///     ("Object", new JsonObject
+    ///     {
+    ///        ("Null", JsonValue.Null),
+    ///        ("Array", new JsonArray { 42 }),
+    ///     })
+    /// };
+    ///
+    /// Console.WriteLine(value); // {"Bool":true,"Number":1.23,"String":"value","Object":{"Null":null,"Array":[42]}}
+    /// Console.WriteLine(value.Type); // Object
+    /// Console.WriteLine(value["Object"]); // {"Null":null,"Array":[42]}
+    /// Console.WriteLine(value["Object"]["Array"]); // [42]
+    /// Console.WriteLine(value["Object"]["Array"][0]); // 42
+    /// Console.WriteLine(value["UnknownProperty"]); // undefined
+    /// ]]></code></para>
+    /// <note type="tip">
+    /// <see cref="JsonValue"/> members provide conversions to and from JavaScript related types that can present in a JSON document.
+    /// If you want to handle the JSON <see cref="JsonValueType.Number"/> and <see cref="JsonValueType.String"/> types as .NET types
+    /// such as <see cref="long"/>, <see cref="decimal"/>, <see cref="Enum"/>, <see cref="DateTime"/>, <see cref="Guid"/> and more,
+    /// then use the extension methods of the <see cref="JsonValueExtensions"/> class. It also has a bunch of <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">ToJson</see>
+    /// methods that can convert the common .NET types to <see cref="JsonValue"/>.
+    /// </note>
     /// </remarks>
+    /// <example>
+    /// <para>The following example demonstrates how to serialize and deserialize objects to and from <see cref="JsonValue"/>.
+    /// <note><see cref="N:KGySoft.Json">KGySoft.Json</see> has no built-in automated ways to serialize and deserialize C# types.
+    /// But in practice even when using other serializers you either need to decorate the C# classes with attributes or you have to
+    /// define converters where you specify the exact mapping because in practice .NET classes and JSON objects usually cannot be
+    /// just automatically mapped to each other if they both follow the usual naming conventions. The following example shows
+    /// how to manually do the serialization and deserialization, which actually can be more effective than letting a serializer
+    /// resolve attributes or expressions by reflection.</note>
+    /// </para>
+    /// <para>Consider the following JSON document:
+    /// <code lang="json"><![CDATA[
+    /// {
+    ///   "id": "a4a5b192-fac9-4d7c-a826-1653761fe200",
+    ///   "firstName": "John",
+    ///   "lastName": "Smith",
+    ///   "birth": "19780611",
+    ///   "active": true,
+    ///   "lastLogin": 1579955315,
+    ///   "status": "fully-trusted",
+    ///   "balances": [
+    ///     {
+    ///       "currency": "USD",
+    ///       "balance": "23462.4527"
+    ///     },
+    ///     {
+    ///       "currency": "BTC",
+    ///       "balance": "0.0567521461"
+    ///     }
+    ///   ]
+    /// }]]></code></para>
+    /// <para>And the corresponding C# model:
+    /// <code lang="C#"><![CDATA[
+    /// public class Account
+    /// {
+    ///     public Guid Id { get; set; }
+    ///     public string FirstName { get; set; }
+    ///     public string? MiddleName { get; set; } // optional
+    ///     public string LastName { get; set; }
+    ///     public DateTime DateOfBirth { get; set; } // yyyyMMdd
+    ///     public bool IsActive { get; set; }
+    ///     public DateTime? LastLogin { get; set; } // Stored as Unix seconds
+    ///     public AccountStatus Status { get; set; } // Stored as lowercase values with hyphens
+    ///     public IList<AccountBalance> Balances { get; } = new BalancesCollection();
+    /// }
+    ///
+    /// public enum AccountStatus { Basic, Confirmed, FullyTrusted, Disabled } // It follows the .NET naming conventions
+    /// 
+    /// public class AccountBalance
+    /// {
+    ///    public string Currency { get; set; }
+    ///    public decimal Balance { get; set; }
+    /// }
+    /// ]]></code></para>
+    /// <para><strong>Serialization:</strong> When serializing, we just build a <see cref="JsonValue"/>. The actual serialization is done by the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see>
+    /// or <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see> methods.
+    /// <code lang="C#"><![CDATA[
+    /// // in this example conversion is separated from the model as an extension method
+    /// public static JsonValue ToJson(this Account acc)
+    /// {
+    ///     var result = new JsonObject
+    ///     {
+    ///         ("id", acc.Id.ToJson()), // using ToJson(Guid)
+    ///         ("firstName", acc.FirstName), // imlicit conversion from string
+    ///         ("lastName", acc.LastName), // imlicit conversion from string
+    ///         ("birth", acc.DateOfBirth.ToJson("yyyyMMdd")), // ToJson(DateTime, string) with exact format
+    ///         ("active", acc.IsActive), // implicit conversion from bool
+    ///         ("lastLogin", acc.LastLogin.ToJson(JsonDateTimeFormat.UnixSeconds, asString: false)), // Unix seconds as number
+    ///         ("status", acc.Status.ToJson(JsonEnumFormat.LowerCaseWithHyphens)) // using ToJson<TEnum>()
+    ///     };
+    ///
+    ///     // adding the optional middle name (it wasn't defined in the example JSON above)
+    ///     if (acc.MiddleName != null)
+    ///         result.Add("middleName", acc.MiddleName); // or: result["middleName"] = acc.MiddleName;
+    ///
+    ///     // for collections and nested objects we can delegate the job to other extension methods
+    ///     if (acc.Balances.Count > 0)
+    ///         result["balances"] = new JsonArray(acc.Balances.Select(b => b.ToJson()));
+    ///
+    ///     return result; // now it will be converted to JsonValue but we can also change the return type to JsonObject
+    /// }
+    ///
+    /// public static JsonValue ToJson(this AccountBalance balance) => return new JsonObject
+    /// {
+    ///     ("currency", balance.Currency), // // imlicit conversion from string
+    ///     ("balance", balance.Balance.ToJson(asString: true)), // the default of ToJson(decimal) would be a string anyway
+    /// };
+    /// ]]></code></para>
+    /// <para><strong>Deserialization:</strong> Once you have a parsed <see cref="JsonValue"/> (see the <see cref="O:KGySoft.Json.JsonValue.Parse">Parse</see>
+    /// and <see cref="O:KGySoft.Json.JsonValue.TryParse">TryParse</see> methods), retrieving the values becomes very simple:
+    /// <code lang="C#"><![CDATA[
+    /// // as above, this is now an extension method but could be even a constructor with JsonValue or JsonObject parameter
+    /// public static Account ToAccount(this JsonValue json)
+    /// {
+    ///     // Here we mainly use the As... methods that return null if the conversion fails
+    ///     // but you can also use the TryGet... or Get...OrDefault methods.
+    ///     var result = new Account
+    ///     {
+    ///         Id = json["id"].AsGuid() ?? throw new ArgumentException("'id' is missing or invalid"),
+    ///         FirstName = json["firstName"].AsString ?? throw new ArgumentException("'firstName' is missing or invalid"),
+    ///         FirstName = json["middleName"].AsString, // simply returns null if missing (json["middleName"].IsUndefined)
+    ///         LastName = json["lastName"].AsString ?? throw new ArgumentException("'lastName' is missing or invalid"),
+    ///         DateOfBirth = json["birth"].AsDateTime("yyyyMMdd") ?? throw new ArgumentException("'birth' is missing or invalid"),
+    ///         IsActive = json["active"].GetBooleanOrDefault(false), // it will be false if missing (could be AsBoolean ?? false)
+    ///         LastLogin = json["lastLogin"].AsDateTime(JsonDateTimeFormat.UnixSeconds), // will be null if missing or invalid
+    ///         Status = json["status"].GetEnumOrDefault(true, AccountStatus.Disabled) // true to ignore case and hyphens
+    ///     };
+    ///
+    ///     // a missing 'balances' is accepted
+    ///     var balances = json["balances"];
+    ///     if (balances.IsUndefined) // or: balances == JsonValue.Undefined
+    ///         return result;
+    ///
+    ///     // but if exists, must be an array
+    ///     if (balances.Type != JsonValueType.Array) // or: balances.AsArray is not JsonArray
+    ///         throw new ArgumentException("'balances' is invalid");
+    ///
+    ///     foreach (JsonValue balance in balances)
+    ///         result.Add(balance.ToBalance());
+    ///
+    ///     return result;
+    /// }
+    ///
+    /// public static AccountBalance ToBalance(this JsonValue json) => return new AccountBalance
+    /// {
+    ///     Currency = json["currency"].AsString ?? throw new ArgumentException("'currency' is missing or invalid"),
+    ///     Balance = json["balance"].AsDecimal() ?? 0m // or AsDecimal(JsonValueType.String) to disallow JSON numbers
+    /// }
+    /// ]]></code></para>
+    /// </example>
     /// <seealso cref="JsonArray"/>
     /// <seealso cref="JsonObject"/>
     /// <seealso cref="JsonValueExtensions"/>
@@ -520,6 +746,7 @@ namespace KGySoft.Json
         /// Initializes a new <see cref="JsonValue"/> struct that represents a number.
         /// An implicit conversion from the <see cref="double">double</see> type also exists.
         /// Some .NET numeric types such as <see cref="long">long</see> and <see cref="decimal">decimal</see> are not recommended to be encoded as JSON numbers.
+        /// Use the <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">ToJson</see> extension methods if you still want to do so.
         /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <param name="value">The value to initialize the <see cref="JsonValue"/> from.</param>

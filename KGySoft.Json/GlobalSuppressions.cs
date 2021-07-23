@@ -5,5 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+[assembly: SuppressMessage("Style", "IDE0056:Indexing can be simplified", Justification = "Not every targeted platform supports it")]
 [assembly: SuppressMessage("Style", "IDE0057:Use range operator", Justification = "Not every targeted platform supports it")]
 [assembly: SuppressMessage("Style", "IDE0090:Use 'new(...)'", Justification = "Decided individually")]
