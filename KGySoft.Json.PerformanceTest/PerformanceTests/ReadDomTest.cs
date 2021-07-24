@@ -18,15 +18,13 @@
 using System;
 using System.Text.Json;
 
-using KGySoft.Diagnostics;
-
 using Newtonsoft.Json.Linq;
 
 using NUnit.Framework;
 
 #endregion
 
-namespace KGySoft.Json.PerformanceTest
+namespace KGySoft.Json.PerformanceTests
 {
     [TestFixture]
     public class ReadDomTest

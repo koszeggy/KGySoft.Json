@@ -22,7 +22,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace KGySoft.Json.UnitTest
+namespace KGySoft.Json.UnitTests
 {
     [TestFixture]
     public class JsonValueTest

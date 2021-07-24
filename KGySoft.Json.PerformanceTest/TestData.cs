@@ -13,7 +13,7 @@
 
 #endregion
 
-namespace KGySoft.Json.PerformanceTest
+namespace KGySoft.Json
 {
     internal static class TestData
     {

@@ -27,7 +27,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace KGySoft.Json.PerformanceTest
+namespace KGySoft.Json.PerformanceTests
 {
     [TestFixture]
     public class ParseTest
@@ -37,7 +37,7 @@ namespace KGySoft.Json.PerformanceTest
         [TestCase("Small", TestData.SmallObject)]
         [TestCase("Medium", TestData.MediumObject)]
         [TestCase("Large", TestData.LargeObject)]
-        public void FromString(string name, string json) => new Diagnostics.PerformanceTest
+        public void FromString(string name, string json) => new PerformanceTest
             {
                 TestName = name,
                 TestTime = 500
@@ -54,7 +54,7 @@ namespace KGySoft.Json.PerformanceTest
         public void FromUtf8Stream(string name, string json)
         {
             var utf8 = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            new Diagnostics.PerformanceTest
+            new PerformanceTest
                 {
                     TestName = name,
                     TestTime = 500
