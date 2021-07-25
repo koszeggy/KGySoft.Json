@@ -1,4 +1,4 @@
-﻿#if !(NET47_OR_GREATER || NETSTANDARD)
+﻿#if !(NET47_OR_GREATER || NETSTANDARD || NETCOREAPP)
 // ReSharper disable NonReadonlyMemberInGetHashCode
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 using System.Collections.Generic;

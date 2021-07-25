@@ -74,7 +74,7 @@ namespace KGySoft.Json
         /// <returns>The result of the inequality check.</returns>
         public static bool operator !=(JsonProperty left, JsonProperty right) => !left.Equals(right);
 
-#if NETSTANDARD2_0_OR_GREATER || NET47_OR_GREATER
+#if NET47_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NETCOREAPP
         /// <summary>
         /// Performs an implicit conversion from <see cref="ValueTuple{T1, T2}"/> to <see cref="JsonProperty"/>.
         /// </summary>

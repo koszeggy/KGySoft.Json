@@ -23,14 +23,14 @@ namespace KGySoft.Json
     {
         /// <summary>
         /// Represents Pascal casing, eg. <c>EnumValue</c>.
-        /// Assuming that enums are already use Pascal casing as per .NET conventions this formatting preserves the original format.
+        /// Assuming that enums already use Pascal casing as per .NET conventions this formatting preserves the original format.
         /// When using the <see cref="JsonValueExtensions.ToJson{TEnum}(TEnum, JsonEnumFormat, string)"/> method it adjusts only the first character if that is not an upper case one.
         /// </summary>
         PascalCase,
 
         /// <summary>
         /// Represents camel casing, eg. <c>enumValue</c>.
-        /// Assuming that enums are already use Pascal casing as per .NET conventions this formatting adjusts the first character only.
+        /// Assuming that enums already use Pascal casing as per .NET conventions this formatting adjusts the first character only.
         /// When using the <see cref="JsonValueExtensions.ToJson{TEnum}(TEnum, JsonEnumFormat, string)"/> method it adjusts only the first character if that is not a lower case one.
         /// </summary>
         CamelCase,
@@ -51,7 +51,7 @@ namespace KGySoft.Json
         LowerCaseWithUnderscores,
 
         /// <summary>
-        /// Represents lower casing with underscores, eg. <c>ENUM_VALUE</c>.
+        /// Represents upper casing with underscores, eg. <c>ENUM_VALUE</c>.
         /// </summary>
         UpperCaseWithUnderscores,
 
@@ -61,7 +61,7 @@ namespace KGySoft.Json
         LowerCaseWithHyphens,
 
         /// <summary>
-        /// Represents lower casing with hyphens, eg. <c>ENUM-VALUE</c>.
+        /// Represents upper casing with hyphens, eg. <c>ENUM-VALUE</c>.
         /// </summary>
         UpperCaseWithHyphens,
 

@@ -1028,6 +1028,7 @@ namespace KGySoft.Json
         /// Tries to get the specified <see cref="JsonValue"/> as a <typeparamref name="TEnum"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
         /// otherwise, the default value of <typeparamref name="TEnum"/>. This parameter is passed uninitialized.</param>
@@ -1049,6 +1050,7 @@ namespace KGySoft.Json
         /// Tries to get the specified <see cref="JsonValue"/> as <typeparamref name="TEnum"/> if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
@@ -1082,6 +1084,7 @@ namespace KGySoft.Json
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
         /// otherwise, returns <see langword="null"/>.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
@@ -1095,6 +1098,7 @@ namespace KGySoft.Json
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
         /// otherwise, returns <see langword="null"/>.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
         /// <param name="flagsSeparator">Specifies the separator if the <paramref name="json"/> value consists of multiple flags. This parameter is optional.
@@ -1111,6 +1115,7 @@ namespace KGySoft.Json
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
         /// otherwise, returns <paramref name="defaultValue"/>.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
@@ -1126,6 +1131,7 @@ namespace KGySoft.Json
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <typeparamref name="TEnum"/>;
         /// otherwise, returns <paramref name="defaultValue"/>.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <typeparamref name="TEnum"/>.</param>
         /// <param name="ignoreFormat"><see langword="true"/> to remove underscores or hyphens, and ignore case when parsing the value; otherwise, <see langword="false"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -1142,6 +1148,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="value">The value to convert.</param>
         /// <param name="format">Specifies the format of the enum in the JSON value. This parameter is optional.
         /// <br/>Default value: <see cref="JsonEnumFormat.PascalCase"/>.</param>
@@ -1221,6 +1228,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
         /// </summary>
+        /// <typeparam name="TEnum">The type of the enumeration. Must be an <see cref="Enum"/> type.</typeparam>
         /// <param name="value">The value to convert.</param>
         /// <param name="format">Specifies the format of the enum in the JSON value. This parameter is optional.
         /// <br/>Default value: <see cref="JsonEnumFormat.PascalCase"/>.</param>
@@ -1377,7 +1385,8 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTime"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTime"/>;
-        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
+        /// other <see cref="O:KGySoft.Json.JsonValueExtensions.GetDateTimeOrDefault">GetDateTimeOrDefault</see> overloads.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTime"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -1609,7 +1618,8 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateTimeOffset"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTimeOffset"/>;
-        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
+        /// other <see cref="O:KGySoft.Json.JsonValueExtensions.GetDateTimeOffsetOrDefault">GetDateTimeOffsetOrDefault</see> overloads.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -1739,7 +1749,7 @@ namespace KGySoft.Json
         /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// other <see cref="TryGetTimeSpan(in JsonValue, JsonTimeSpanFormat, out TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="TryGetTimeSpan(in JsonValue, JsonTimeSpanFormat, out TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
@@ -1792,7 +1802,8 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTime"/>;
-        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
+        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeSpanFormat, TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -1921,7 +1932,7 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="Guid"/> value
         /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>
-        /// and it can be converted to <see cref="DateTime"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// and it can be converted to <see cref="Guid"/>; otherwise, returns <paramref name="defaultValue"/>.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="Guid"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.

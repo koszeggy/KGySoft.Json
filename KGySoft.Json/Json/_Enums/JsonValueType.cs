@@ -22,7 +22,7 @@ namespace KGySoft.Json
     {
         /// <summary>
         /// The <see cref="JsonValue"/> contains an unknown JSON literal.
-        /// Can occur when parsing an invalid JSON or when the <see cref="JsonValue"/> was created by the <see cref="JsonValue.CreateLiteralUnchecked"/> method.
+        /// Can occur when parsing an invalid JSON or when the <see cref="JsonValue"/> was created by the <see cref="JsonValue.CreateLiteralUnchecked">CreateLiteralUnchecked</see> method.
         /// If the <see cref="JsonValue.Type"/> property of a <see cref="JsonValue"/> instance is <see cref="UnknownLiteral"/>,
         /// then both <see cref="JsonValue.AsLiteral"/> and <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> return the actual value.
         /// </summary>

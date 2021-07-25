@@ -38,20 +38,20 @@ namespace KGySoft.Json
     /// <remarks>
     /// <para>Just like in JavaScript, the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see> (and <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see>)
     /// methods filter out properties with <see cref="JsonValue.Undefined"/> values.</para>
-    /// <para>Obtaining a nonexistent property by the <see cref="this[string]">string indexer</see> also returns <see cref="JsonValue.Undefined"/>,
+    /// <para>Obtaining a nonexistent property by the <see cref="this[string]">string indexer</see> returns <see cref="JsonValue.Undefined"/>,
     /// which is also a JavaScript-compatible behavior.</para>
     /// <note>Using LINQ extension methods on a <see cref="JsonObject"/> may cause ambiguity due to its list/dictionary duality.
     /// It is recommended to perform the LINQ operations on the <see cref="Entries"/> property so it is not needed to specify the type arguments of the LINQ extension methods.</note>
     /// <para>Due to performance reasons <see cref="JsonObject"/> allows adding duplicate keys; however, getting the properties by
     /// the <see cref="this[string]">string indexer</see> retrieves always the lastly set value, just like in JavaScript.
     /// <note type="tip">Populating the <see cref="JsonObject"/> only by the <see cref="JsonObject(IDictionary{string, JsonValue})">dictionary constructor</see>
-    /// or the <see cref="this[string]">string indexer</see> ensures that no duplicate property names are added/</note></para>
+    /// or the <see cref="this[string]">string indexer</see> ensures that no duplicate property names are added.</note></para>
     /// <para>If the <see cref="JsonObject"/> contains duplicate property names, then the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see>
     /// and <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see> methods dump all of them by default.
     /// It's not an issue for JavaScript, which allows parsing such a JSON string where the duplicate keys will have the lastly defined value.
     /// But you can explicitly call the <see cref="EnsureUniqueKeys">EnsureUniqueKeys</see> method to remove the duplicate keys (keeping the lastly defined values)
     /// before producing the JSON string.</para>
-    /// <note type="tip">See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> type for details and examples.</note>
+    /// <note type="tip">See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> type for more details and examples.</note>
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
@@ -89,13 +89,13 @@ namespace KGySoft.Json
 
         /// <summary>
         /// Gets a collection of the property names in this <see cref="JsonObject"/>.
-        /// This property returns distinct property names even if there are duplicated keys.
+        /// This property returns distinct property names even if there are duplicate keys.
         /// </summary>
         public ICollection<string> Keys
         {
             get
             {
-                // ensuring that duplicated keys are returned only once.
+                // ensuring that duplicate keys are returned only once.
                 EnsureMap();
                 return nameToIndex!.Keys;
             }
@@ -103,7 +103,7 @@ namespace KGySoft.Json
 
         /// <summary>
         /// Gets a collection of the property values in this <see cref="JsonObject"/>.
-        /// If there are duplicated property names, then this property may return more elements than the <see cref="Keys"/> property.
+        /// If there are duplicate property names, then this property may return more elements than the <see cref="Keys"/> property.
         /// To avoid that call the <see cref="EnsureUniqueKeys">EnsureUniqueKeys</see> method before getting this property.
         /// </summary>
         public ICollection<JsonValue> Values
@@ -216,7 +216,7 @@ namespace KGySoft.Json
         /// <see langword="false"/> to overwrite recurring names with the latest value. This parameter is optional.
         /// <br/>Default value: <see langword="true"/>.</param>
         /// <exception cref="ArgumentNullException">The <paramref name="properties"/> parameter is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException">The <paramref name="properties"/> contains a <see cref="JsonProperty"/> with <see langword="null"/>&#160;<see cref="JsonProperty.Name"/>.</exception>
+        /// <exception cref="ArgumentException">The <paramref name="properties"/> parameter contains a <see cref="JsonProperty"/> with <see langword="null"/>&#160;<see cref="JsonProperty.Name"/>.</exception>
         public JsonObject(IEnumerable<JsonProperty> properties, bool allowDuplicates = true)
         {
             if (properties == null!)
@@ -501,10 +501,7 @@ namespace KGySoft.Json
         }
 
         /// <summary>
-        /// Removes possible duplicate keys from the <see cref="JsonObject"/> so <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see>,
-        /// <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see> and <see cref="GetEnumerator">GetEnumerator</see> methods will return
-        /// only the last occurrence the properties before calling this method.
-        /// It does not affect the behavior of the <see cref="this[string]">string indexer</see>.
+        /// Removes possible duplicate keys from the <see cref="JsonObject"/>, keeping only the last occurrence of each key.
         /// </summary>
         public void EnsureUniqueKeys()
         {
@@ -564,11 +561,17 @@ namespace KGySoft.Json
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to this instance.
+        /// Determines whether the specified <see cref="object"/> is equal to this instance. This method performs a deep comparison.
+        /// Allows comparing also to <see cref="JsonValue"/> instances with <see cref="JsonValueType.Object"/>&#160;<see cref="JsonValue.Type"/>.
         /// </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the specified object is equal to this instance; otherwise, <see langword="false"/>.</returns>
-        public override bool Equals(object? obj) => obj is JsonObject other && Count == other.Count && properties.SequenceEqual(other.properties);
+        public override bool Equals(object? obj) => obj switch
+        {
+            JsonObject other => ReferenceEquals(this, other) || Entries.SequenceEqual(other),
+            JsonValue { Type: JsonValueType.Object } value => ReferenceEquals(this, value.AsObject) || Entries.SequenceEqual(value.AsObject!),
+            _ => false
+        };
 
         /// <summary>
         /// Returns a minimized JSON string that represents this <see cref="JsonObject"/>.

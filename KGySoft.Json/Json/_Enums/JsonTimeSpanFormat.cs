@@ -23,12 +23,12 @@ namespace KGySoft.Json
     public enum JsonTimeSpanFormat
     {
         /// <summary>
-        /// <para>When converting to JSON, it is equivalent to <see cref="Text"/> in case of a JSON <see cref="JsonValueType.String"/>,
-        /// or <see cref="Milliseconds"/> in case of a JSON <see cref="JsonValueType.Number"/>.</para>
-        /// <para>When parsing a <see cref="JsonValue"/>, it represents any predefined format in the <see cref="JsonTimeSpanFormat"/> enumeration.</para>
-        /// <note>Parsing <see cref="TimeSpan"/> values with the <see cref="Auto"/> option formatted as numeric values (<see cref="Milliseconds"/>
-        /// and <see cref="Ticks"/>) can ambiguous. Though a "sanity check" is applied for parsing such values use a
-        /// specific option whenever possible.</note>
+        /// <para>When converting to JSON, it is equivalent to the <see cref="Text"/> format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.String"/>,
+        /// or the <see cref="Milliseconds"/> format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.Number"/>.</para>
+        /// <para>When parsing a <see cref="JsonValue"/>, it represents any defined <see cref="JsonTimeSpanFormat"/> format.</para>
+        /// <para><strong>Note:</strong> Parsing <see cref="TimeSpan"/> values with the <see cref="Auto"/> option formatted as numeric values (<see cref="Milliseconds"/>
+        /// and <see cref="Ticks"/>) can be ambiguous. Though a "sanity check" is applied for parsing such values use a
+        /// specific option whenever possible.</para>
         /// </summary>
         Auto,
 

@@ -35,9 +35,9 @@ namespace KGySoft.Json
     /// <remarks>
     /// <para>Just like in JavaScript, the <see cref="O:KGySoft.Json.JsonArray.ToString">ToString</see> (and <see cref="O:KGySoft.Json.JsonArray.WriteTo">WriteTo</see>)
     /// methods replace <see cref="JsonValue.Undefined"/> values with <see cref="JsonValue.Null"/>.</para>
-    /// <para>Obtaining an element by the <see cref="this[int]">indexer</see> using an invalid index also returns <see cref="JsonValue.Undefined"/>,
+    /// <para>Obtaining an element by the <see cref="this[int]">indexer</see> using an invalid index returns <see cref="JsonValue.Undefined"/>,
     /// which is also a JavaScript-compatible behavior.</para>
-    /// <note type="tip">See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> type for details and examples.</note>
+    /// <note type="tip">See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> type for more details and examples.</note>
     /// </remarks>
     /// <seealso cref="JsonValue"/>
     /// <seealso cref="JsonObject"/>
@@ -293,11 +293,17 @@ namespace KGySoft.Json
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to this instance.
+        /// Determines whether the specified <see cref="object"/> is equal to this instance. This method performs a deep comparison.
+        /// Allows comparing also to <see cref="JsonValue"/> instances with <see cref="JsonValueType.Array"/>&#160;<see cref="JsonValue.Type"/>.
         /// </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the specified object is equal to this instance; otherwise, <see langword="false"/>.</returns>
-        public override bool Equals(object? obj) => obj is JsonArray other && Length == other.Length && this.SequenceEqual(other);
+        public override bool Equals(object? obj) => obj switch
+        {
+            JsonArray array => ReferenceEquals(this, array) || this.SequenceEqual(array),
+            JsonValue { Type: JsonValueType.Array } value => ReferenceEquals(this, value.AsArray) || this.SequenceEqual(value.AsArray!),
+            _ => false
+        };
 
         /// <summary>
         /// Returns a minimized JSON string that represents this <see cref="JsonArray"/>.
