@@ -12,7 +12,7 @@
     <icon>Icon64.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>Fast and simple library for in-memory JSON manipulation (DOM). Can be considered as LINQ to JSON.</summary>
-    <description xml:space="preserve">KGy SOFT JSON Libraries offer simple and fast building and parsing JSON content.
+    <description xml:space="preserve">KGy SOFT JSON Libraries offer a simple and fast way to build and parse JSON content.
 
 Main highlights:
 - Fast parsing from string, Stream or any TextReader
