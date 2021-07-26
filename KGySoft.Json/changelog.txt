@@ -1,0 +1,60 @@
+﻿Legend:
+! Breaking change
+* Compatible change
+- Bugfix
++ New feature
+===============================================================================
+
+~~~~~~~~~
+! v1.1.0:
+~~~~~~~~~
+
+Note: This JSON library used to be the part of a private repository. Changes are breaking only if migrating from the
+private TradeSystem platform, which is not publicly available anyway.
+
++ Assembly changes:
+===================
++ More targeted platforms
+* Members are annotated for using C# 8.0 nullable references
+
+! KGySoft.Json namespace:
+=========================
+! The TradeSystem.Json namespace has been extracted here as a new, standalone public library. The change is breaking
+only for the users of the private TradeSystem platform.
++ New JsonEnumFormat enumeration
++ New JsonDateTimeFormat enumeration
++ New JsonTimeSpanFormat enumeration
+
+! JsonValue struct:
+===================
+! In this new library FromNumberUnchecked and FromLiteralUnchecked are now called CreateNumberUnchecked and
+  CreateLiteralUnchecked, respectively.
++ A pair of implicit operators from long/ulong have been added (as obsolete) just to produce a compile time warning
+  about possible precision loss when the result JSON is processed by JavaScript. You still can use the ToJson
+  extension methods with asString: false parameter to create JSON numbers from long/ulong.
++ New ToString/WriteTo overloads to create indented JSON.
++ New TryParse overloads
+- Parse fix: "\/" was not treated as a valid escape sequence. Note: "/" still remains unescaped when writing JSON.
+
++ JsonArray class:
+==================
++ Now the JsonArray class also has Parse/TryParse methods. Use them only if you know that the JSON to be parsed is
+  expected to be an array.
+
++ JsonObject class:
+===================
++ Now the JsonObject class also has Parse/TryParse methods. Use them only if you know that the JSON to be parsed is
+  expected to be an object.
++ New EnsureUniqueKeys method: Due to performance reasons duplicate keys are allowed by default. Now you can call
+  this method explicitly to remove possible duplicates.
+* Performance improvement: the internal index map dictionary is not created under 5 properties.
+
+! JsonValueExtensions class:
+============================
+! AsEnum<TEnum>/TryGetEnum<TEnum>: The ignoreCase parameter has been renamed to ignoreFormat to be conform with
+  the possible formats represented by the new JsonEnumFormat enumeration.
++ New ToJson<TEnum> overload with a JsonEnumFormat parameter
++ New Get*OrDefault methods: A 3rd possible way to extract simple .NET types from JsonValue instances. Unlike the
+  As* methods (which return nullable types) or the TryGet* methods (with bool return type and an out parameter) the
+  Get*OrDefault methods have an optional defaultValue parameter.
++ New methods and ToJson overloads to support DateTime/DateTimeOffset/TimeSpan/Guid types as well.
