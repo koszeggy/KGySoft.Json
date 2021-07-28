@@ -78,7 +78,7 @@ namespace KGySoft.Json
     /// You can use the <see cref="AsNumber"/> property to get the same value as JavaScript would also get and the <see cref="AsLiteral"/> property, which returns
     /// the actual value as it will be dumped when converting the value to JSON. An implicit conversion from the .NET <see cref="double"/> type also exists.
     /// <note type="warning">It is not recommended to write wide numeric .NET types (<see cref="long"/>, <see cref="decimal"/>, etc.) as a
-    /// JSON <see cref="JsonValueType.Number"/> because when processed by JavaScript, the precision of these value might be lost without any warning.
+    /// JSON <see cref="JsonValueType.Number"/> because when processed by JavaScript, the precision of these values might be lost without any warning.
     /// If you are sure that you want to store such values as numbers, use the <see cref="CreateNumberUnchecked"/> method or
     /// the <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">JsonValueExtensions.ToJson</see> overloads with <c>asString: false</c> parameter.</note>
     /// <code lang="C#"><![CDATA[
