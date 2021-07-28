@@ -215,7 +215,7 @@ The example above prints the following in the Console:
 
 ### Parsing JSON
 
-Use the [`JsonValue.Parse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_Parse.htm)/[`TryParse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_TryParse.htm) methods to parse a JSON document from `string`, `TextReader` or `Stream`. You can also specify an `Encoding` for the `Stream` overload. If you expect the result to be an array or an object, then you can also find these methods on the [`JsonArray`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) types as well.
+Use the [`JsonValue.Parse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_Parse.htm)/[`TryParse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_TryParse.htm) methods to parse a JSON document from `string`, `TextReader` or `Stream`. You can also specify an `Encoding` for the `Stream` overload. If you expect the result to be an array or an object, then you can find these methods on the [`JsonArray`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) types as well.
 
 As you could see [above](#object) navigation in a parsed object graph is pretty straightforward. You can use the `int` indexer for arrays and the `string` indexer for objects. Using an invalid array index or property name returns an `undefined` value:
 
