@@ -10,9 +10,9 @@ KGy SOFT JSON Libraries offer a simple and fast way to build and parse JSON cont
 [![Nuget](https://img.shields.io/nuget/vpre/KGySoft.Json.svg)](https://www.nuget.org/packages/KGySoft.Json)
 
 ## Table of Contents:
-1. [What is KGySoft.Json](#what-is-kgysoft-json)
-   - [What's wrong with JSON.NET?](#what-s-wrong-with-json-net)
-   - [What's wrong with System.Text.Json?](#what-s-wrong-with-system-text-json)
+1. [What is KGySoft.Json](#what-is-kgysoftjson)
+   - [What's wrong with JSON.NET?](#whats-wrong-with-jsonnet)
+   - [What's wrong with System.Text.Json?](#whats-wrong-with-systemtextjson)
 2. [Examples](#examples)
    - [Simple syntax](#simple-syntax)
    - [Writing JSON](#writing-json)
@@ -20,7 +20,7 @@ KGy SOFT JSON Libraries offer a simple and fast way to build and parse JSON cont
    - [Manipulating JSON](#manipulating-json)
 3. [Performance Comparisons](#performance-comparisons)
    - [Parse test](#parse-test)
-   - [Access data test](#access-data-test)
+   - [Access element test](#access-element-test)
    - [Write minimized JSON test](#write-minimized-json-test)
 4. [Download](#download)
    - [Download Binaries](#download-binaries)
@@ -31,7 +31,7 @@ KGy SOFT JSON Libraries offer a simple and fast way to build and parse JSON cont
 
 ## What is KGySoft.Json
 
-First of all, what it is **not**: It's _not_ a serializer (though see the **Examples** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type). It is rather a simple Domain Object Model (DOM) for JSON (or LINQ to JSON if you like), which makes possible to manipulate JSON content in memory in an object-oriented way (similarly to `XDocument` and friends for XML).
+First of all, what it is **not**: It's _not_ a serializer (though see the **Examples** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type). It is rather a simple Domain Object Model (DOM) for JSON (or LINQ to JSON if you like), which makes possible to manipulate JSON content in memory in an object-oriented way (similarly to `XDocument` and its friends for XML).
 
 ### What's wrong with JSON.NET?
 
@@ -47,7 +47,7 @@ Well, it's a bit different thing. As an in-memory JSON tool, it is read-only (`J
 
 ### Simple Syntax
 
-The [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type is the base building block of JSON content, which can be considered as a representation of a JavaScript variable (see also the [`JsonValueType`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueType.htm) enumeration). It also behaves somewhat similarly to a JavaScript variable:
+The [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type is the base building block of JSON content, which can be considered as a representation of a JavaScript variable (see also the [`JsonValueType`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueType.htm) enumeration). It also behaves somewhat similarly to JavaScript:
 
 #### `undefined`
 
@@ -89,7 +89,7 @@ Console.WriteLine(value.Type); // Number
 Console.WriteLine(value.AsNumber); // 1.23
 ```
 
-> _Note:_  A JavaScript number is always a [double-precision 64-bit binary format IEEE 754 value](https://en.wikipedia.org/wiki/Double-precision_floating-point_format), which has the same precision as the .NET `Double` type. Though supported, it is **not recommended** to encode any numeric .NET type as a JSON Number (eg. `Int64` or `Decimal`) because when such a JSON content is processed by JavaScript the precision might be lost without any error.
+> _Note:_  A JavaScript number is always a [double-precision 64-bit binary format IEEE 754 value](https://en.wikipedia.org/wiki/Double-precision_floating-point_format), which has the same precision as the .NET `Double` type. Though supported, it is **not recommended** to encode any numeric .NET type as a JSON Number (eg. `Int64` or `Decimal`) because when such a JSON content is processed by JavaScript the precision might be silently lost.
 
 ```cs
 // Using a long value beyond double precision
@@ -99,7 +99,7 @@ JsonValue value = longValue; // this produces a compile-time warning about possi
 value = longValue.ToJson(asString: false); // this is how the compile-time warning can be avoided
 
 Console.WriteLine(value); // 9007199254740993
-Console.WriteLine($"{value.AsNumber:R}"); // 9007199254740992 - this is how JavaScript will parse it
+Console.WriteLine($"{value.AsNumber:R}"); // 9007199254740992 - this is how JavaScript interprets it
 Console.WriteLine(value.AsLiteral); // 9007199254740993 - this is the actual stored value
 ```
 
@@ -117,7 +117,7 @@ Console.WriteLine(value.AsString); // value
 
 ```cs
 JsonValue array = new JsonArray { true, 1, 2.35, JsonValue.Null, "value" };
-// which is the shorthand of: new JsonValue(new JsonArray { JsonValue.True, new JsonValue(1), new JsonValue.35), JsonValue.Null, new JsonValue("value") });
+// which is the shorthand of: new JsonValue(new JsonArray { JsonValue.True, new JsonValue(1), new JsonValue(2.35), JsonValue.Null, new JsonValue("value") });
 
 Console.WriteLine(array); // [true,1,2.35,null,"value"]
 Console.WriteLine(array.Type); // Array
@@ -215,16 +215,17 @@ The example above prints the following in the Console:
 
 ### Parsing JSON
 
-Use the [`JsonValue.Parse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_Parse.htm)/[`TryParse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_TryParse.htm) methods to parse a JSON document from `string`, `TextReader` or `Stream`. You can also specify an `Encoding` for the `Stream` overload. If you expect the result to be an array or an object, then you can also find these methods on the `JsonArray` and `JsonObject` types as well.
+Use the [`JsonValue.Parse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_Parse.htm)/[`TryParse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_TryParse.htm) methods to parse a JSON document from `string`, `TextReader` or `Stream`. You can also specify an `Encoding` for the `Stream` overload. If you expect the result to be an array or an object, then you can also find these methods on the 
+[`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonOValue.htm) is a read-only struct but [`JsonArray`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) types as well.
 
-As you could see [above](#object) navigation in a parsed value is pretty straightforward. You can use the `int` indexer for arrays and the `string` indexer for objects. Using an invalid array index or property name returns an `undefined` value:
+As you could see [above](#object) navigation in a parsed object graph is pretty straightforward. You can use the `int` indexer for arrays and the `string` indexer for objects. Using an invalid array index or property name returns an `undefined` value:
 
 ```cs
 var json = JsonValue.Parse(someStream);
 
 // a possible way of validation
 var value = json["data"][0]["id"];
-if (value.IsUndedined)
+if (value.IsUndefined)
     throw new ArgumentException("Unexpected content");
 // ... do something with value
 
@@ -248,19 +249,20 @@ toBeChanged["newProp"] = 123; // or: toBeChanged.Add("newProp", 123);
 Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 ```
 
-> _Tip:_ [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) implements both `IList<JsonProperty>` and `IDictionary<string, JsonValue>` interfaces so without casting or specifying some type arguments many LINQ methods might be ambiguous on `JsonObject` instances. To avoid ambiguity and to keep also the syntax simple you can perform the LINQ operations on its `Entries` property.
+> _Tip:_ [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) implements both `IList<JsonProperty>` and `IDictionary<string, JsonValue>` so without casting or specifying some type arguments many LINQ methods might be ambiguous on a `JsonObject` instance. To avoid ambiguity and to keep also the syntax simple you can perform the LINQ operations on its `Entries` property.
 
 ## Performance Comparisons
 
-* The tests compare JSON.NET (aka. Newtonsoft.Json), System.Text.Json and KGy SOFT JSON.
+**Notes:**
+* The tests compare JSON.NET (aka. Newtonsoft.Json), System.Text.Json and KGy SOFT JSON Libraries.
 * The test cases were executed for 500ms after a warp-up period.
 * The test cases below all used the same formatted JSON [test data](https://github.com/koszeggy/KGySoft.Json/blob/Development/KGySoft.Json.PerformanceTest/TestData.cs#L24) as an input
 
-> _Note:_ See the source code of the tests along with more test cases in the `KGySoft.Json.PerformanceTest` project.
+> _Tip:_ See the source code of the tests along with more test cases in the `KGySoft.Json.PerformanceTest` project.
 
 ### Parse test
 
-Parsing the test data above from an UTF8 stream. For System.Text.Json this provides the best performance, in which case it is completely allocation free. It is reflected in the results, too:
+Parsing a test JSON from an UTF8 stream. For System.Text.Json this provides the best performance, in which case it is completely allocation free. It is reflected in the results, too:
 
 ```
 1. System.Text.Json: 44,536 iterations in 500.00 ms. Adjusted for 500 ms: 44,535.63
@@ -270,9 +272,9 @@ Parsing the test data above from an UTF8 stream. For System.Text.Json this provi
 
 As you can see, if we don't do anything with the parsed data, System.Text.Json is the fastest one, and it is twice as fast as KGy SOFT, and 3x faster than the slowest JSON.NET (Newtonsoft.Json).
 
-### Access data test
+### Access element test
 
-Using the same JSON as above, this test reads a deeply embedded string element. Here KGySoft.Json becomes the fastest one and System.Text.Json is the slowest one:
+Using the same JSON as above, this test reads a deeply embedded string element. When retrieving DOM elements, KGySoft.Json becomes the fastest one and System.Text.Json is the slowest one:
 
 ```
 1. KGySoft.Json: 5,049,092 iterations in 500.00 ms. Adjusted for 500 ms: 5,049,082.91
@@ -286,7 +288,7 @@ Please also note that KGySoft.Json has the most [compact](https://github.com/kos
 
 Creating a minimized JSON string of the input stream.
 
-> _Note:_ System.Text.Json doesn't really count here as its `JsonDocument` type is read-only anyway. Still, it can be used to reformat the original JSON stream either with or without indenting.
+> _Note:_ System.Text.Json doesn't really count here as its `JsonDocument`/`JsonElement` types are read-only anyway. Still, it can be used to reformat the original JSON stream either with or without indenting.
 
 ```
 1. KGySoft.Json: 130,882 iterations in 500.00 ms. Adjusted for 500 ms: 130,881.16
