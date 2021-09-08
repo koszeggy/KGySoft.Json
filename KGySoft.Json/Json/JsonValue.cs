@@ -238,7 +238,7 @@ namespace KGySoft.Json
     ///
     /// public static JsonValue ToJson(this AccountBalance balance) => new JsonObject
     /// {
-    ///     ("currency", balance.Currency), // // implicit conversion from string
+    ///     ("currency", balance.Currency), // implicit conversion from string
     ///     ("balance", balance.Balance.ToJson(asString: true)), // the default of ToJson(decimal) would be a string anyway
     /// };
     /// ]]></code></para>
