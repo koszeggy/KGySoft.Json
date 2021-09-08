@@ -1190,8 +1190,7 @@ namespace KGySoft.Json
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
 
             if (format is JsonEnumFormat.Number or JsonEnumFormat.NumberAsString)
-                // TODO: Enum<TEnum>.ToString(value, EnumFormattingOptions.Number)
-                return new JsonValue(format == JsonEnumFormat.Number ? JsonValueType.Number : JsonValueType.String, value.ToString("D"));
+                return new JsonValue(format == JsonEnumFormat.Number ? JsonValueType.Number : JsonValueType.String, Enum<TEnum>.ToString(value, EnumFormattingOptions.Number));
 
             string enumValue = Enum<TEnum>.ToString(value, flagsSeparator);
             switch (format)
