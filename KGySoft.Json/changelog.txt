@@ -6,6 +6,18 @@
 ===============================================================================
 
 ~~~~~~~~~
+* v1.2.0:
+~~~~~~~~~
+* JsonObject class:
+===================
+* Security improvement: Using randomized hash calculation even on platforms where this is not the default behavior.
+
++ JsonValueExtensions class:
+============================
++ New TryGetEnum, AsEnum, GetEnumOrDefault overloads.
+
+
+~~~~~~~~~
 ! v1.1.0:
 ~~~~~~~~~
 
