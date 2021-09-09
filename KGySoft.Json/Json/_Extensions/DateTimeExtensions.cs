@@ -44,9 +44,6 @@ namespace KGySoft.Json
         #region Private Constants
 
         private const long maxDateTimeTicks = 3_155_378_975_999_999_999; // DateTime.MaxValue.Ticks
-        private const long unixEpochTicks = 621_355_968_000_000_000; // new DateTime(1970, 1, 1).Ticks
-        private const long unixEpochMilliseconds = unixEpochTicks / TimeSpan.TicksPerMillisecond;
-        private const long unixEpochSeconds = unixEpochTicks / TimeSpan.TicksPerSecond;
         private const long minUnixMilliseconds = -62_135_596_800_000; // DateTimeOffset.MinValue.ToUnixTimeMilliseconds()
         private const long maxUnixMilliseconds = 253_402_300_799_999; // DateTimeOffset.MaxValue.ToUnixTimeMilliseconds()
         private const long minUnixSeconds = -62_135_596_800;
@@ -83,14 +80,6 @@ namespace KGySoft.Json
 
         #region Internal Methods
 
-        internal static long ToUnixMilliseconds(this DateTime value)
-            // we could use DateTimeOffset.ToUnixTimeMilliseconds but it is not available on every targeted platform
-            => value.AsUtc().Ticks / TimeSpan.TicksPerMillisecond - unixEpochMilliseconds;
-
-        internal static long ToUnixSeconds(this DateTime value)
-            // we could use DateTimeOffset.ToUnixTimeMilliseconds but it is not available on every targeted platform
-            => value.AsUtc().Ticks / TimeSpan.TicksPerSecond - unixEpochSeconds;
-
         internal static double ToUnixSecondsFloat(this DateTime value) => value.ToUnixMilliseconds() / 1000d;
 
         internal static string ToMicrosoftJsonDate(this DateTime value)
@@ -109,13 +98,6 @@ namespace KGySoft.Json
             return $"{msPrefix}{ms}{(value.Offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}{Math.Abs(offset.Minutes):00}{msPostfix}";
         }
 
-        internal static DateTime AsLocal(this DateTime dateTime) => dateTime.Kind switch
-        {
-            DateTimeKind.Local => dateTime,
-            DateTimeKind.Utc => dateTime.ToLocalTime(),
-            _ => DateTime.SpecifyKind(dateTime, DateTimeKind.Local),
-        };
-
         internal static bool TryParseDateTime(this string s, JsonDateTimeFormat format, bool isNumber, out DateTime value)
         {
             if (!isNumber || format <= JsonDateTimeFormat.Ticks)
@@ -129,7 +111,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.UnixMilliseconds:
                         if (TryParseInt64(s, minUnixMilliseconds, maxUnixMilliseconds, out longValue))
                         {
-                            value = new DateTime(UnixMillisecondsToTicks(longValue), DateTimeKind.Utc);
+                            value = FromUnixMilliseconds(longValue);
                             return true;
                         }
 
@@ -138,7 +120,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.UnixSeconds:
                         if (TryParseInt64(s, minUnixSeconds, maxUnixSeconds, out longValue))
                         {
-                            value = new DateTime(UnixSecondsToTicks(longValue), DateTimeKind.Utc);
+                            value = FromUnixSeconds(longValue);
                             return true;
                         }
 
@@ -156,7 +138,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.UnixSecondsFloat:
                         if (TryParseFloatUnixSeconds(s, out double doubleValue))
                         {
-                            value = new DateTime(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), DateTimeKind.Utc);
+                            value = FromUnixMilliseconds((long)(doubleValue * 1000d));
                             return true;
                         }
 
@@ -222,7 +204,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.UnixMilliseconds:
                         if (TryParseInt64(s, minUnixMilliseconds, maxUnixMilliseconds, out longValue))
                         {
-                            value = new DateTimeOffset(UnixMillisecondsToTicks(longValue), TimeSpan.Zero);
+                            value = new DateTimeOffset(FromUnixMilliseconds(longValue));
                             return true;
                         }
 
@@ -231,7 +213,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.UnixSeconds:
                         if (TryParseInt64(s, minUnixSeconds, maxUnixSeconds, out longValue))
                         {
-                            value = new DateTimeOffset(UnixSecondsToTicks(longValue), TimeSpan.Zero);
+                            value = new DateTimeOffset(FromUnixSeconds(longValue));
                             return true;
                         }
 
@@ -249,7 +231,7 @@ namespace KGySoft.Json
                     case JsonDateTimeFormat.UnixSecondsFloat:
                         if (TryParseFloatUnixSeconds(s, out double doubleValue))
                         {
-                            value = new DateTimeOffset(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), TimeSpan.Zero);
+                            value = new DateTimeOffset(FromUnixMilliseconds((long)(doubleValue * 1000d)));
                             return true;
                         }
 
@@ -341,9 +323,8 @@ namespace KGySoft.Json
         private static bool TryParseFloatUnixSeconds(string s, out double value)
             => Double.TryParse(s, NumberStyles.Integer | NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out value) && value is >= minUnixSeconds and <= maxUnixSeconds;
 
-        // we could use DateTimeOffset.FromUnixTimeMilliseconds but it is not available on every targeted platform
-        private static long UnixMillisecondsToTicks(long milliseconds) => milliseconds * TimeSpan.TicksPerMillisecond + unixEpochTicks;
-        private static long UnixSecondsToTicks(long seconds) => seconds * TimeSpan.TicksPerSecond + unixEpochTicks;
+        private static DateTime FromUnixMilliseconds(long milliseconds) => CoreLibraries.DateTimeExtensions.FromUnixMilliseconds(milliseconds);
+        private static DateTime FromUnixSeconds(long seconds) => CoreLibraries.DateTimeExtensions.FromUnixSeconds(seconds);
 
         private static bool TryParseDateTimeDetectFormat(string s, bool isNumber, out DateTime value)
         {
@@ -365,15 +346,15 @@ namespace KGySoft.Json
             if (TryParseInt64(s, minUnixMilliseconds, maxDateTimeTicks, out long longValue))
             {
                 value = longValue > maxUnixMilliseconds ? new DateTime(longValue, DateTimeKind.Utc)
-                    : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTime(UnixSecondsToTicks(longValue), DateTimeKind.Utc)
-                    : new DateTime(UnixMillisecondsToTicks(longValue), DateTimeKind.Utc);
+                    : longValue is >= Int32.MinValue and <= Int32.MaxValue ? FromUnixSeconds(longValue)
+                    : FromUnixMilliseconds(longValue);
                 return true;
             }
 
             // double: allowing only Unix time seconds
             if (TryParseFloatUnixSeconds(s, out double doubleValue))
             {
-                value = new DateTime(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), DateTimeKind.Utc);
+                value = FromUnixMilliseconds((long)(doubleValue * 1000d));
                 return true;
             }
 
@@ -401,15 +382,15 @@ namespace KGySoft.Json
             if (TryParseInt64(s, minUnixMilliseconds, maxDateTimeTicks, out long longValue))
             {
                 value = longValue > maxUnixMilliseconds ? new DateTimeOffset(longValue, TimeSpan.Zero)
-                    : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTimeOffset(UnixSecondsToTicks(longValue), TimeSpan.Zero)
-                    : new DateTimeOffset(UnixMillisecondsToTicks(longValue), TimeSpan.Zero);
+                    : longValue is >= Int32.MinValue and <= Int32.MaxValue ? new DateTimeOffset(FromUnixSeconds(longValue))
+                    : new DateTimeOffset(FromUnixMilliseconds(longValue));
                 return true;
             }
 
             // double: allowing only Unix time seconds
             if (TryParseFloatUnixSeconds(s, out double doubleValue))
             {
-                value = new DateTimeOffset(UnixMillisecondsToTicks((long)(doubleValue * 1000d)), TimeSpan.Zero);
+                value = new DateTimeOffset(FromUnixMilliseconds((long)(doubleValue * 1000d)));
                 return true;
             }
 
@@ -457,7 +438,7 @@ namespace KGySoft.Json
 
                     NumberStyles.AllowLeadingSign, NumberFormatInfo.InvariantInfo, out long longValue))
                 {
-                    value = new DateTimeOffset(UnixMillisecondsToTicks(longValue), TimeSpan.Zero);
+                    value = new DateTimeOffset(FromUnixMilliseconds(longValue));
                     if (!hasTimeZone)
                         return true;
 
