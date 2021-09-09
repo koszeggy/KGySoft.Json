@@ -25,6 +25,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
+using KGySoft.Collections;
+using KGySoft.CoreLibraries;
+
 #endregion
 
 namespace KGySoft.Json
@@ -71,7 +74,7 @@ namespace KGySoft.Json
 
         private List<JsonProperty> properties;
 
-        private Dictionary<string, int>? nameToIndex;
+        private StringKeyedDictionary<int>? nameToIndex;
 
         #endregion
 
@@ -166,7 +169,7 @@ namespace KGySoft.Json
                     Throw.ArgumentException(Res.DefaultJsonPropertyInvalid, nameof(value));
                 properties[index] = value;
 
-                Dictionary<string, int>? map = nameToIndex;
+                StringKeyedDictionary<int>? map = nameToIndex;
                 if (map == null)
                     return;
 
@@ -228,7 +231,7 @@ namespace KGySoft.Json
                 
                 // Initializing the dictionary only if duplicates are disabled and it is known that enough properties will be added
                 if (!allowDuplicates && collection.Count >= buildIndexMapThreshold)
-                    nameToIndex = new Dictionary<string, int>(collection.Count);
+                    nameToIndex = new StringKeyedDictionary<int>(collection.Count, StringSegmentComparer.OrdinalRandomized);
             }
             else
                 this.properties = new List<JsonProperty>();
@@ -256,7 +259,7 @@ namespace KGySoft.Json
                 Throw.ArgumentNullException(nameof(properties));
             this.properties = new List<JsonProperty>(properties.Count);
             if (properties.Count >= buildIndexMapThreshold)
-                nameToIndex = new Dictionary<string, int>(properties.Count);
+                nameToIndex = new StringKeyedDictionary<int>(properties.Count, StringSegmentComparer.OrdinalRandomized);
             foreach (KeyValuePair<string, JsonValue> property in properties)
                 this[property.Key] = property.Value;
         }
@@ -463,7 +466,7 @@ namespace KGySoft.Json
             if (propertyName == null!)
                 Throw.ArgumentNullException(nameof(propertyName));
 
-            Dictionary<string, int>? map = nameToIndex;
+            StringKeyedDictionary<int>? map = nameToIndex;
             if (map != null)
             {
                 if (!map.TryGetValue(propertyName, out int index))
@@ -734,7 +737,7 @@ namespace KGySoft.Json
             // Initializing index map. Duplicate names will map to the last occurrence.
             List<JsonProperty> items = properties;
             int count = items.Count;
-            var map = new Dictionary<string, int>(count);
+            var map = new StringKeyedDictionary<int>(count, StringSegmentComparer.OrdinalRandomized);
             for (int i = 0; i < count; i++)
                 map[items[i].Name!] = i;
             nameToIndex = map;
