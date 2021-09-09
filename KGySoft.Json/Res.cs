@@ -81,6 +81,13 @@ namespace KGySoft
 
         #region Internal Methods
 
+        /// <summary>
+        /// Just an empty method to be able to trigger the static constructor without running any code other than field initializations.
+        /// </summary>
+        internal static void EnsureInitialized()
+        {
+        }
+
         /// <summary>Unexpected character in JSON value: '{0}'</summary>
         internal static string UnexpectedCharInJsonValue(char c) => Get("UnexpectedCharInJsonValue_Format", c);
 

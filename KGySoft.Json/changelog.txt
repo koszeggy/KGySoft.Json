@@ -6,15 +6,16 @@
 ===============================================================================
 
 ~~~~~~~~~
-* v1.2.0:
+* v1.2.1:
 ~~~~~~~~~
-* JsonObject class:
-===================
-* Security improvement: Using randomized hash calculation even on platforms where this is not the default behavior.
 
+* KGySoft.Json namespace:
+=========================
+* JsonObject class:
+  * Security: Using randomized hash calculation even on platforms where this is not the default behavior.
 + JsonValueExtensions class:
-============================
-+ New TryGetEnum, AsEnum, GetEnumOrDefault overloads.
+  + New TryGetEnum, AsEnum, GetEnumOrDefault overloads.
++ New JsonModule class: To be able to trigger module initialization without calling any specific feature.
 
 
 ~~~~~~~~~
