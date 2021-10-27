@@ -16,7 +16,9 @@
 + JsonValueExtensions class:
   + New TryGetEnum, AsEnum, GetEnumOrDefault overloads.
   + New Get*OrDefault overloads to be able to omit specifying the default value, in which case the default value of
-    the requested type is returned as the fallback value.
+    the requested type (bitwise zero or null reference) is returned as the fallback value.
+  + New TryGetBigInteger, AsBigInteger, GetBigIntegerOrDefault methods (.NET Framework 4.0 and above)
+  + New ToJson overload for BigInteger
 + New JsonModule class: To be able to trigger module initialization without calling any specific feature.
 
 

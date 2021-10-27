@@ -21,6 +21,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+#if !NET35
+using System.Numerics;
+#endif
 
 using KGySoft.CoreLibraries;
 
@@ -847,6 +850,97 @@ namespace KGySoft.Json
         [CLSCompliant(false)]
         public static JsonValue ToJson(this ulong? value, bool asString = true) => value?.ToJson(asString) ?? JsonValue.Null;
 
+        #endregion
+
+        #region BigInteger
+#if !NET35
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="BigInteger"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="BigInteger"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <c>0</c>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetBigInteger(this in JsonValue json, out BigInteger value, JsonValueType expectedType = default)
+        {
+            if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
+                return BigInteger.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="BigInteger"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="BigInteger"/>;
+        /// otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="BigInteger"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="BigInteger"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static BigInteger? AsBigInteger(this in JsonValue json, JsonValueType expectedType = default)
+            => json.TryGetBigInteger(out BigInteger result, expectedType) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="BigInteger"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="BigInteger"/>;
+        /// otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="BigInteger"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <c>0</c>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="BigInteger"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static BigInteger GetBigIntegerOrDefault(this in JsonValue json, BigInteger defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetBigInteger(out BigInteger result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="BigInteger"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="BigInteger"/>;
+        /// otherwise, returns <c>0</c>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="BigInteger"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
+        /// <returns>A <see cref="BigInteger"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
+        public static BigInteger GetBigIntegerOrDefault(this in JsonValue json, JsonValueType expectedType)
+            => json.TryGetBigInteger(out BigInteger result, expectedType) ? result : default;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// To prevent losing precision the default value of the <paramref name="asString"/> parameter is <see langword="true"/> in this overload.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="JsonValue.AsNumber"/> property for details.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; otherwise, <see langword="false"/>. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        public static JsonValue ToJson(this BigInteger value, bool asString = true)
+            => new JsonValue(asString ? JsonValueType.String : JsonValueType.Number, value.ToString(NumberFormatInfo.InvariantInfo));
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// To prevent losing precision the default value of the <paramref name="asString"/> parameter is <see langword="true"/> in this overload.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="JsonValue.AsNumber"/> property for details.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; otherwise, <see langword="false"/>. This parameter is optional.
+        /// <br/>Default value: <see langword="false"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        public static JsonValue ToJson(this BigInteger? value, bool asString = true) => value?.ToJson(asString) ?? JsonValue.Null;
+
+#endif
         #endregion
 
         #region Single

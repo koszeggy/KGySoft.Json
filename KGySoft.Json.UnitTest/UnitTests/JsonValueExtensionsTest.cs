@@ -16,6 +16,9 @@
 #region Usings
 
 using System;
+#if !NET35
+using System.Numerics;
+#endif
 
 using NUnit.Framework;
 
@@ -221,6 +224,30 @@ namespace KGySoft.Json.UnitTests
             Assert.AreEqual(expectedResult, expectedResult.ToJson(false).AsUInt64());
             Assert.AreEqual(expectedResult, expectedResult.ToJson().AsUInt64());
         }
+
+#if !NET35
+        [TestCase("1", JsonValueType.Undefined, 1)]
+        [TestCase("1", JsonValueType.Number, 1)]
+        [TestCase("1", JsonValueType.String, null)]
+        [TestCase("\"1\"", JsonValueType.Undefined, 1)]
+        [TestCase("\"1\"", JsonValueType.Number, null)]
+        [TestCase("\"1\"", JsonValueType.String, 1)]
+        [TestCase("null", JsonValueType.Number, null)]
+        [TestCase("null", JsonValueType.String, null)]
+        [TestCase("1.23", JsonValueType.Number, null)]
+        [TestCase("\"x\"", JsonValueType.String, null)]
+        public void BigIntegerTest(string json, JsonValueType expectedType, int? expectedResultAsInt)
+        {
+            BigInteger? expectedResult = expectedResultAsInt;
+            JsonValue value = JsonValue.Parse(json);
+            Assert.AreEqual(expectedResult, value.AsBigInteger(expectedType));
+            Assert.AreEqual(expectedResult.HasValue, value.TryGetBigInteger(out BigInteger actualValue, expectedType));
+            Assert.AreEqual(expectedResult ?? BigInteger.Zero, actualValue);
+            Assert.AreEqual(expectedResult ?? BigInteger.Zero, value.GetBigIntegerOrDefault(default, expectedType));
+            Assert.AreEqual(expectedResult, expectedResult.ToJson(false).AsBigInteger());
+            Assert.AreEqual(expectedResult, expectedResult.ToJson().AsBigInteger());
+        }
+#endif
 
         [TestCase("1", JsonValueType.Undefined, 1f)]
         [TestCase("1", JsonValueType.Number, 1f)]
