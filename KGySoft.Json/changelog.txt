@@ -6,8 +6,12 @@
 ===============================================================================
 
 ~~~~~~~~~
-* v1.2.1:
+* v2.0.0:
 ~~~~~~~~~
+
++ Assembly changes:
+===================
++ Specifically targeting also .NET [Core] platforms.
 
 * KGySoft.Json namespace:
 =========================
@@ -18,7 +22,8 @@
   + New Get*OrDefault overloads to be able to omit specifying the default value, in which case the default value of
     the requested type (bitwise zero or null reference) is returned as the fallback value.
   + New TryGetBigInteger, AsBigInteger, GetBigIntegerOrDefault methods (.NET Framework 4.0 and above)
-  + New ToJson overload for BigInteger
+  + New TryGetHalf, AsHalf, GetHalfOrDefault methods (.NET 5.0 and above)
+  + New ToJson overloads for BigInteger and Half types (on platforms where they are available)
 + New JsonModule class: To be able to trigger module initialization without calling any specific feature.
 
 

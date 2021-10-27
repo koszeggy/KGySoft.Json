@@ -249,6 +249,30 @@ namespace KGySoft.Json.UnitTests
         }
 #endif
 
+#if NET5_0_OR_GREATER
+        [TestCase("1", JsonValueType.Undefined, 1f)]
+        [TestCase("1", JsonValueType.Number, 1f)]
+        [TestCase("1", JsonValueType.String, null)]
+        [TestCase("\"1\"", JsonValueType.Undefined, 1f)]
+        [TestCase("\"1\"", JsonValueType.Number, null)]
+        [TestCase("\"1\"", JsonValueType.String, 1f)]
+        [TestCase("null", JsonValueType.Number, null)]
+        [TestCase("null", JsonValueType.String, null)]
+        [TestCase("1.23", JsonValueType.Number, 1.23f)]
+        [TestCase("\"x\"", JsonValueType.String, null)]
+        public void HalfTest(string json, JsonValueType expectedType, float? expectedResultAsFloat)
+        {
+            Half? expectedResult = (Half?)expectedResultAsFloat;
+            JsonValue value = JsonValue.Parse(json);
+            Assert.AreEqual(expectedResult, value.AsHalf(expectedType));
+            Assert.AreEqual(expectedResult.HasValue, value.TryGetHalf(out Half actualValue, expectedType));
+            Assert.AreEqual(expectedResult ?? default, actualValue);
+            Assert.AreEqual(expectedResult ?? default, value.GetHalfOrDefault(default, expectedType));
+            Assert.AreEqual(expectedResult, expectedResult.ToJson().AsHalf());
+            Assert.AreEqual(expectedResult, expectedResult.ToJson(true).AsHalf());
+        }
+#endif
+
         [TestCase("1", JsonValueType.Undefined, 1f)]
         [TestCase("1", JsonValueType.Number, 1f)]
         [TestCase("1", JsonValueType.String, null)]
