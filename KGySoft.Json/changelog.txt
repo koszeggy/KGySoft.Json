@@ -15,6 +15,8 @@
   * Security: Using randomized hash calculation even on platforms where this is not the default behavior.
 + JsonValueExtensions class:
   + New TryGetEnum, AsEnum, GetEnumOrDefault overloads.
+  + New Get*OrDefault overloads to be able to omit specifying the default value, in which case the default value of
+    the requested type is returned as the fallback value.
 + New JsonModule class: To be able to trigger module initialization without calling any specific feature.
 
 
