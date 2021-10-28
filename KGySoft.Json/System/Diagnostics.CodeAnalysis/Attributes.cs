@@ -1,4 +1,4 @@
-﻿#if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP)
+﻿#if !(NETSTANDARD2_1_OR_GREATER || NET)
 // ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis
 {

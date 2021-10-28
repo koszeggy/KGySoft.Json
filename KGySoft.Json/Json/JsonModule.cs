@@ -15,6 +15,9 @@
 
 #region Usings
 
+#if NET6_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Runtime.CompilerServices;
 
 #endregion
@@ -42,6 +45,10 @@ namespace KGySoft.Json
         /// the <c>KGySoft.Json.dll</c> are also affected by the settings.</note>
         /// </remarks>
         [ModuleInitializer]
+#if NET6_0_OR_GREATER
+        [SuppressMessage("Usage", "CA2255:The 'ModuleInitializer' attribute should not be used in libraries",
+            Justification = "See the description, it is intended and required, and besides it's public so can be explicitly called from an application startup.")] 
+#endif
         public static void Initialize()
         {
             // Just referencing Res in order to trigger its static constructor and initialize the project resources.

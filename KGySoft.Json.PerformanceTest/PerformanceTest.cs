@@ -13,6 +13,10 @@
 
 #endregion
 
+#if DEBUG
+using NUnit.Framework;
+#endif
+
 namespace KGySoft.Json
 {
     internal class PerformanceTest : KGySoft.Diagnostics.PerformanceTest
