@@ -50,6 +50,8 @@ namespace KGySoft.Json
         private const long maxUnixSeconds = 253_402_300_799;
         private const long minTimeSpanMilliseconds = -922_337_203_685_477; // TimeSpan.MinValue.Ticks / TimeSpan.TicksPerMillisecond
         private const long maxTimeSpanMilliseconds = 922_337_203_685_477; // TimeSpan.MaxValue.Ticks / TimeSpan.TicksPerMillisecond
+        private const long maxTimeOnlyTicks = 863_999_999_999; // TimeOnly.MaxValue.Ticks
+        private const long maxTimeOnlyMilliseconds = 86_399_999; // TimeOnly.MaxValue.Ticks / TimeSpan.TicksPerMillisecond
 
         private const string iso8601FractionalSecondsFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'FFFFFFFK";
         private const string iso8601RoundtripFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK";
@@ -272,40 +274,41 @@ namespace KGySoft.Json
             return false;
         }
 
-        internal static bool TryParseTimeSpan(this string s, JsonTimeSpanFormat format, bool isNumber, out TimeSpan value)
+        internal static bool TryParseTimeSpan(this string s, JsonTimeFormat format, bool isNumber, out TimeSpan value, bool timeOfDayOnly = false)
         {
-            if (!isNumber || format <= JsonTimeSpanFormat.Ticks)
+            if (!isNumber || format <= JsonTimeFormat.Ticks)
             {
                 long longValue;
                 switch (format)
                 {
-                    case JsonTimeSpanFormat.Auto:
-                        return TryParseTimeSpanDetectFormat(s, isNumber, out value);
+                    case JsonTimeFormat.Auto:
+                        return TryParseTimeSpanDetectFormat(s, isNumber, out value, timeOfDayOnly);
 
-                    case JsonTimeSpanFormat.Milliseconds:
+                    case JsonTimeFormat.Milliseconds:
                         if (TryParseInt64(s, minTimeSpanMilliseconds, maxTimeSpanMilliseconds, out longValue))
                         {
                             value = new TimeSpan(longValue * TimeSpan.TicksPerMillisecond);
-                            return true;
+                            return !timeOfDayOnly || value.Ticks is >= 0L and <= maxTimeOnlyTicks;
                         }
 
                         break;
 
-                    case JsonTimeSpanFormat.Ticks:
+                    case JsonTimeFormat.Ticks:
                         if (TryParseInt64(s, Int64.MinValue, Int64.MaxValue, out longValue))
                         {
                             value = new TimeSpan(longValue);
-                            return true;
+                            return !timeOfDayOnly || value.Ticks is >= 0L and <= maxTimeOnlyTicks;
                         }
 
                         break;
 
-                    case JsonTimeSpanFormat.Text:
+                    case JsonTimeFormat.Text:
 #if NET35
-                        return TimeSpan.TryParse(s, out value);
+                        return TimeSpan.TryParse(s, out value)
 #else
-                        return TimeSpan.TryParseExact(s, "c", DateTimeFormatInfo.InvariantInfo, out value);
+                        return TimeSpan.TryParseExact(s, "c", DateTimeFormatInfo.InvariantInfo, out value)
 #endif
+                            && !timeOfDayOnly || value.Ticks is >= 0L and <= maxTimeOnlyTicks;
                 }
             }
 
@@ -398,7 +401,7 @@ namespace KGySoft.Json
             return false;
         }
 
-        private static bool TryParseTimeSpanDetectFormat(string s, bool isNumber, out TimeSpan value)
+        private static bool TryParseTimeSpanDetectFormat(string s, bool isNumber, out TimeSpan value, bool timeOfDayOnly)
         {
             if (!isNumber)
             {
@@ -407,16 +410,16 @@ namespace KGySoft.Json
 #else
                 if (TimeSpan.TryParseExact(s, "c", DateTimeFormatInfo.InvariantInfo, out value))
 #endif
-                    return true;
+                    return !timeOfDayOnly || value.Ticks is >= 0L and <= maxTimeOnlyTicks;
             }
 
             // integer: trying to detect a sensible range
             if (TryParseInt64(s, Int64.MinValue, Int64.MaxValue, out long longValue))
             {
-                value = longValue is >= minTimeSpanMilliseconds and <= maxTimeSpanMilliseconds
+                value = !timeOfDayOnly && longValue is >= minTimeSpanMilliseconds and <= maxTimeSpanMilliseconds || timeOfDayOnly && longValue is >= 0L and <= maxTimeOnlyMilliseconds
                     ? new TimeSpan(longValue * TimeSpan.TicksPerMillisecond)
                     : new TimeSpan(longValue);
-                return true;
+                return !timeOfDayOnly || value.Ticks is >= 0L and <= maxTimeOnlyTicks;
             }
 
             value = default;
@@ -430,7 +433,7 @@ namespace KGySoft.Json
                 // 13: prefix + postfix + sign + 4 digits
                 hasTimeZone = s.Length > 13 && s[s.Length - 7] is '+' or '-';
                 if (Int64.TryParse(
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                     s.AsSpan(6, s.Length - (hasTimeZone ? 13 : 8)),
 #else
                     s.Substring(6, s.Length - (hasTimeZone ? 13 : 8)),
@@ -443,7 +446,7 @@ namespace KGySoft.Json
                         return true;
 
                     if (Int32.TryParse(
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                         s.AsSpan(s.Length - 6, 4),
 #else
                         s.Substring(s.Length - 6, 4),

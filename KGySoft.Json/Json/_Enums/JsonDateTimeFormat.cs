@@ -19,15 +19,27 @@ using System;
 
 #endregion
 
+#region Suppressions
+
+#if !NET6_0_OR_GREATER
+#pragma warning disable CS1574 // Some types in the XML documentation are not available in every targeted platform
+#endif
+
+#endregion
+
 namespace KGySoft.Json
 {
     /// <summary>
-    /// Specifies how <see cref="DateTime"/> and <see cref="DateTimeOffset"/> instances are formatted and parsed by the <see cref="JsonValueExtensions"/> methods.
+    /// Specifies how <see cref="DateTime"/>, <see cref="DateTimeOffset"/> and <see cref="DateOnly"/> instances are formatted and parsed by the <see cref="JsonValueExtensions"/> methods.
     /// </summary>
     public enum JsonDateTimeFormat
     {
         /// <summary>
-        /// <para>When converting to JSON, it is equivalent to the <see cref="Iso8601JavaScript"/> format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.String"/>,
+        /// <para>When converting a <see cref="DateTime"/> or <see cref="DateTimeOffset"/> instance to JSON, it is equivalent to the <see cref="Iso8601JavaScript"/>
+        /// format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.String"/>,
+        /// or the <see cref="UnixMilliseconds"/> format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.Number"/>.</para>
+        /// <para>When converting a <see cref="DateOnly"/> instance to JSON, it is equivalent to the <see cref="Iso8601Date"/>
+        /// format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.String"/>,
         /// or the <see cref="UnixMilliseconds"/> format if the target <see cref="JsonValue.Type"/> is <see cref="JsonValueType.Number"/>.</para>
         /// <para>When parsing a <see cref="JsonValue"/>, it represents any defined <see cref="JsonDateTimeFormat"/>, including some ISO 8601 formats,
         /// which are not covered by the other values in the <see cref="JsonDateTimeFormat"/> enumeration.</para>
@@ -87,11 +99,13 @@ namespace KGySoft.Json
         /// is also reflected in the result, which is restored on parsing.</para>
         /// <para>A <see cref="DateTimeOffset"/> is always treated as a local time of the time zone specified by its offset.
         /// You can obtain its <see cref="DateTimeOffset.UtcDateTime"/> property to encode it as a UTC time.</para>
+        /// <para>A <see cref="DateOnly"/> instance is always formatted without time and zone information.</para>
         /// <para><strong>Examples:</strong>
         /// <list type="bullet">
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/>: <c>2020-01-01T00:00:00.0000000</c> (JavaScript interprets it as a local time)</item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/>: <c>2020-01-01T00:00:00.0000000Z</c></item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Local"/> or <see cref="DateTimeOffset"/> instances: <c>2020-01-01T00:00:00.0000000+01:00</c></item>
+        /// <item><see cref="DateOnly"/> instances: <c>2020-01-01</c>, just like when using the <see cref="Iso8601Date"/> format.</item>
         /// </list></para>
         /// </summary>
         Iso8601Roundtrip,
@@ -129,9 +143,10 @@ namespace KGySoft.Json
         /// is also reflected in the result, which is restored on parsing.</para>
         /// <para>A <see cref="DateTimeOffset"/> is always treated as a local time of the time zone specified by its offset.
         /// You can obtain its <see cref="DateTimeOffset.UtcDateTime"/> property to encode it as a UTC time.</para>
+        /// <para>A <see cref="DateOnly"/> instance is always formatted with zero time and without time zone information.</para>
         /// <para><strong>Examples:</strong>
         /// <list type="bullet">
-        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/>: <c>2020-01-01T00:00</c> (JavaScript interprets it as a local time)</item>
+        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/> or <see cref="DateOnly"/> instances: <c>2020-01-01T00:00</c> (JavaScript interprets it as a local time)</item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/>: <c>2020-01-01T00:00Z</c></item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Local"/> or <see cref="DateTimeOffset"/> instances: <c>2020-01-01T00:00+01:00</c></item>
         /// </list></para>
@@ -144,9 +159,10 @@ namespace KGySoft.Json
         /// is also reflected in the result, which is restored on parsing.</para>
         /// <para>A <see cref="DateTimeOffset"/> is always treated as a local time of the time zone specified by its offset.
         /// You can obtain its <see cref="DateTimeOffset.UtcDateTime"/> property to encode it as a UTC time.</para>
+        /// <para>A <see cref="DateOnly"/> instance is always formatted with zero time and without time zone information.</para>
         /// <para><strong>Examples:</strong>
         /// <list type="bullet">
-        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/>: <c>2020-01-01T00:00:00</c> (JavaScript interprets it as a local time)</item>
+        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/> or <see cref="DateOnly"/> instances: <c>2020-01-01T00:00:00</c> (JavaScript interprets it as a local time)</item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/>: <c>2020-01-01T00:00:00Z</c></item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Local"/> or <see cref="DateTimeOffset"/> instances: <c>2020-01-01T00:00:00+01:00</c></item>
         /// </list></para>
@@ -160,9 +176,10 @@ namespace KGySoft.Json
         /// is also reflected in the result, which is restored on parsing.</para>
         /// <para>A <see cref="DateTimeOffset"/> is always treated as a local time of the time zone specified by its offset.
         /// You can obtain its <see cref="DateTimeOffset.UtcDateTime"/> property to encode it as a UTC time.</para>
+        /// <para>A <see cref="DateOnly"/> instance is always formatted with zero time and without time zone information.</para>
         /// <para><strong>Examples:</strong>
         /// <list type="bullet">
-        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/>: <c>2020-01-01T00:00:00.000</c> (JavaScript interprets it as a local time)</item>
+        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Unspecified"/> or <see cref="DateOnly"/> instances: <c>2020-01-01T00:00:00.000</c> (JavaScript interprets it as a local time)</item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/>: <c>2020-01-01T00:00:00.000Z</c></item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Local"/> or <see cref="DateTimeOffset"/> instances: <c>2020-01-01T00:00:00.000+01:00</c></item>
         /// </list></para>
@@ -174,7 +191,7 @@ namespace KGySoft.Json
         /// based elapsed milliseconds since Unix Epic time but has a specific string format and can also encode time offset.</para>
         /// <para><strong>Examples:</strong>
         /// <list type="bullet">
-        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/> or <see cref="DateTimeKind.Unspecified"/>: <c>/Date(1577833200000)/</c></item>
+        /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/> or <see cref="DateTimeKind.Unspecified"/>, or <see cref="DateOnly"/> instances: <c>/Date(1578873600000)/</c></item>
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Local"/> or <see cref="DateTimeOffset"/> instances: <c>/Date(1577833200000+0100)/</c></item>
         /// </list></para>
         /// </summary>

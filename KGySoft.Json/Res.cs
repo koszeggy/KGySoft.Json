@@ -107,7 +107,7 @@ namespace KGySoft
         internal static string DateTimeFormatIsStringOnly(JsonDateTimeFormat format) => Get("DateTimeFormatIsStringOnly_Format", format);
 
         /// <summary>Time span format '{0}' cannot be encoded as a JSON number.</summary>
-        internal static string TimeSpanFormatIsStringOnly(JsonTimeSpanFormat format) => Get("TimeSpanFormatIsStringOnly_Format", format);
+        internal static string TimeSpanFormatIsStringOnly(JsonTimeFormat format) => Get("TimeSpanFormatIsStringOnly_Format", format);
 
         /// <summary>A JsonValue with Type '{0}' cannot be cast to '{1}'.</summary>
         internal static string JsonValueInvalidCast<T>(JsonValueType actualType) => Get("JsonValueInvalidCast_Format", actualType, typeof(T).GetName(TypeNameKind.ShortName));

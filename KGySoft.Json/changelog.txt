@@ -6,15 +6,16 @@
 ===============================================================================
 
 ~~~~~~~~~
-* v2.0.0:
+! v2.0.0:
 ~~~~~~~~~
 
 + Assembly changes:
 ===================
 + Specifically targeting also .NET [Core] platforms.
 
-* KGySoft.Json namespace:
+! KGySoft.Json namespace:
 =========================
+! The JsonTimeSpanFormat enum has been renamed to JsonTimeFormat.
 * JsonObject class:
   * Security: Using randomized hash calculation even on platforms where this is not the default behavior.
 + JsonValueExtensions class:
@@ -23,7 +24,9 @@
     the requested type (bitwise zero or null reference) is returned as the fallback value.
   + New TryGetBigInteger, AsBigInteger, GetBigIntegerOrDefault methods (.NET Framework 4.0 and above)
   + New TryGetHalf, AsHalf, GetHalfOrDefault methods (.NET 5.0 and above)
-  + New ToJson overloads for BigInteger and Half types (on platforms where they are available)
+  + New TryGetDateOnly, AsDateOnly, GetDateOnlyOrDefault methods (.NET 6.0 and above)
+  + New TryGetTimeOnly, AsTimeOnly, GetTimeOnlyOrDefault methods (.NET 6.0 and above)
+  + New ToJson overloads for BigInteger, Half, DateOnly and TimeOnly types (on platforms where they are available)
 + New JsonModule class: To be able to trigger module initialization without calling any specific feature.
 
 

@@ -523,13 +523,13 @@ namespace KGySoft.Json.UnitTests
             Assert.AreEqual(dateTimeOffset, value.GetDateTimeOffsetOrDefault(format));
         }
 
-        [TestCase("86400000", JsonTimeSpanFormat.Milliseconds)]
-        [TestCase("\"86400000\"", JsonTimeSpanFormat.Milliseconds)]
-        [TestCase("637144668000000000", JsonTimeSpanFormat.Ticks)]
-        [TestCase("\"637144668000000000\"", JsonTimeSpanFormat.Ticks)]
-        [TestCase("\"01:02:03\"", JsonTimeSpanFormat.Text)]
-        [TestCase("\"00:00:00.1234567\"", JsonTimeSpanFormat.Text)]
-        public void TimeSpanTest(string json, JsonTimeSpanFormat format)
+        [TestCase("86400000", JsonTimeFormat.Milliseconds)]
+        [TestCase("\"86400000\"", JsonTimeFormat.Milliseconds)]
+        [TestCase("637144668000000000", JsonTimeFormat.Ticks)]
+        [TestCase("\"637144668000000000\"", JsonTimeFormat.Ticks)]
+        [TestCase("\"01:02:03\"", JsonTimeFormat.Text)]
+        [TestCase("\"00:00:00.1234567\"", JsonTimeFormat.Text)]
+        public void TimeSpanTest(string json, JsonTimeFormat format)
         {
             JsonValue value = JsonValue.Parse(json);
             Assert.IsTrue(value.TryGetTimeSpan(format, out TimeSpan timeSpan));
@@ -549,6 +549,62 @@ namespace KGySoft.Json.UnitTests
             Assert.AreEqual(guid, value.AsGuid());
             Assert.AreEqual(guid, value.GetGuidOrDefault());
         }
+
+#if NET6_0_OR_GREATER
+        [TestCase("\"1578873600000\"", JsonDateTimeFormat.UnixMilliseconds)]
+        [TestCase("1578873600", JsonDateTimeFormat.UnixSeconds)]
+        [TestCase("\"1578873600\"", JsonDateTimeFormat.UnixSeconds)]
+        [TestCase("1578873600.000", JsonDateTimeFormat.UnixSecondsFloat)]
+        [TestCase("\"1578873600.000\"", JsonDateTimeFormat.UnixSecondsFloat)]
+        [TestCase("624521664000000000", JsonDateTimeFormat.Ticks)]
+        [TestCase("\"624521664000000000\"", JsonDateTimeFormat.Ticks)]
+        [TestCase("\"2020-01-13T00:00:00.000Z\"", JsonDateTimeFormat.Iso8601JavaScript)]
+        [TestCase("\"2020-01-13T00:00:00.0000000Z\"", JsonDateTimeFormat.Iso8601Utc)]
+        [TestCase("\"2020-01-13\"", JsonDateTimeFormat.Iso8601Roundtrip)]
+        [TestCase("\"2020-01-13\"", JsonDateTimeFormat.Iso8601Date)]
+        [TestCase("\"2020-01-13T00:00\"", JsonDateTimeFormat.Iso8601Minutes)]
+        [TestCase("\"2020-01-13T00:00:00\"", JsonDateTimeFormat.Iso8601Seconds)]
+        [TestCase("\"2020-01-13T00:00:00.000\"", JsonDateTimeFormat.Iso8601Milliseconds)]
+        [TestCase("\"/Date(1578873600000)/\"", JsonDateTimeFormat.MicrosoftLegacy)]
+        public void DateOnlyPredefinedFormatsTest(string json, JsonDateTimeFormat format)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetDateOnly(format, out DateOnly date));
+            Assert.AreEqual(value, date.ToJson(format, value.Type == JsonValueType.String));
+            Assert.AreEqual(date, value.AsDateOnly(format));
+            Assert.AreEqual(date, value.AsDateOnly());
+            Assert.AreEqual(date, value.GetDateOnlyOrDefault(format));
+            Assert.AreEqual(date, value.GetDateOnlyOrDefault());
+        }
+
+        [TestCase("\"20200101\"", "yyyyMMdd")]
+        [TestCase("\"20200101|000000\"", "yyyyMMdd'|'HHmmss")]
+        public void DateOnlyExactFormatTest(string json, string format)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetDateOnly(format, out DateOnly date));
+            Assert.AreEqual(value, date.ToJson(format));
+            Assert.AreEqual(date, value.AsDateOnly(format));
+            Assert.AreEqual(date, value.GetDateOnlyOrDefault(format));
+        }
+
+        [TestCase("46800000", JsonTimeFormat.Milliseconds)]
+        [TestCase("\"46800000\"", JsonTimeFormat.Milliseconds)]
+        [TestCase("468000000000", JsonTimeFormat.Ticks)]
+        [TestCase("\"468000000000\"", JsonTimeFormat.Ticks)]
+        [TestCase("\"01:02:03\"", JsonTimeFormat.Text)]
+        [TestCase("\"00:00:00.1234567\"", JsonTimeFormat.Text)]
+        public void TimeOnlyTest(string json, JsonTimeFormat format)
+        {
+            JsonValue value = JsonValue.Parse(json);
+            Assert.IsTrue(value.TryGetTimeOnly(format, out TimeOnly time));
+            Assert.AreEqual(value, time.ToJson(format, value.Type == JsonValueType.String));
+            Assert.AreEqual(time, value.AsTimeOnly(format));
+            Assert.AreEqual(time, value.AsTimeOnly());
+            Assert.AreEqual(time, value.GetTimeOnlyOrDefault(format));
+            Assert.AreEqual(time, value.GetTimeOnlyOrDefault());
+        }
+#endif
 
         #endregion
     }

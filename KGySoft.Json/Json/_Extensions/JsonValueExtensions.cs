@@ -1305,7 +1305,7 @@ namespace KGySoft.Json
         /// but the actual <see cref="JsonValue.Type"/> is <see cref="JsonValueType.Null"/>; otherwise, <see langword="false"/>. This parameter is optional.
         /// <br/>Default value: <see langword="false"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetString(this in JsonValue json, [MaybeNullWhen(false)]out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
+        public static bool TryGetString(this in JsonValue json, out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
             {
@@ -2289,7 +2289,7 @@ namespace KGySoft.Json
         /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="TryGetTimeSpan(in JsonValue, JsonTimeSpanFormat, out TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="TryGetTimeSpan(in JsonValue, JsonTimeFormat, out TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
@@ -2299,23 +2299,23 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         public static bool TryGetTimeSpan(this in JsonValue json, out TimeSpan value, JsonValueType expectedType = default)
-            => json.TryGetTimeSpan(JsonTimeSpanFormat.Auto, out value, expectedType);
+            => json.TryGetTimeSpan(JsonTimeFormat.Auto, out value, expectedType);
 
         /// <summary>
         /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value using the specified <paramref name="format"/>
         /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
-        /// <param name="format">A <see cref="JsonTimeSpanFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="TimeSpan.Zero"/>. This parameter is passed uninitialized.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetTimeSpan(this in JsonValue json, JsonTimeSpanFormat format, out TimeSpan value, JsonValueType expectedType = default)
+        public static bool TryGetTimeSpan(this in JsonValue json, JsonTimeFormat format, out TimeSpan value, JsonValueType expectedType = default)
         {
-            if ((uint)format > (uint)JsonTimeSpanFormat.Text)
+            if ((uint)format > (uint)JsonTimeFormat.Text)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return s.TryParseTimeSpan(format, json.Type == JsonValueType.Number, out value);
@@ -2330,20 +2330,20 @@ namespace KGySoft.Json
         /// property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeSpan"/>; otherwise, returns <see langword="null"/>.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
-        /// <param name="format">A <see cref="JsonTimeSpanFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>. This parameter is optional.
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>. This parameter is optional.
         /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which attempts to auto detect the format.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TimeSpan? AsTimeSpan(this in JsonValue json, JsonTimeSpanFormat format = JsonTimeSpanFormat.Auto, JsonValueType expectedType = default)
+        public static TimeSpan? AsTimeSpan(this in JsonValue json, JsonTimeFormat format = JsonTimeFormat.Auto, JsonValueType expectedType = default)
             => json.TryGetTimeSpan(format, out TimeSpan result, expectedType) ? result : null;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
-        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTime"/>;
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeSpan"/>;
         /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeSpanFormat, TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeFormat, TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -2353,51 +2353,51 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
         public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, TimeSpan defaultValue = default, JsonValueType expectedType = default)
-            => json.TryGetTimeSpan(JsonTimeSpanFormat.Auto, out TimeSpan result, expectedType) ? result : defaultValue;
+            => json.TryGetTimeSpan(JsonTimeFormat.Auto, out TimeSpan result, expectedType) ? result : defaultValue;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
-        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateTime"/>;
-        /// otherwise, returns <see cref="TimeSpan.MinValue">TimeSpan.MinValue</see>, which is the default value of <see cref="TimeSpan"/>.
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeSpan"/>;
+        /// otherwise, returns <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeSpanFormat, TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeFormat, TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted;
-        /// otherwise, <see cref="TimeSpan.MinValue">TimeSpan.MinValue</see>, which is the default value of <see cref="TimeSpan"/>.</returns>
+        /// otherwise, <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.</returns>
         public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonValueType expectedType)
-            => json.TryGetTimeSpan(JsonTimeSpanFormat.Auto, out TimeSpan result, expectedType) ? result : default;
+            => json.TryGetTimeSpan(JsonTimeFormat.Auto, out TimeSpan result, expectedType) ? result : default;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
         /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
-        /// converted to <see cref="DateTime"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// converted to <see cref="TimeSpan"/>; otherwise, returns <paramref name="defaultValue"/>.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
-        /// <param name="format">A <see cref="JsonTimeSpanFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see cref="TimeSpan.Zero"/>.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonTimeSpanFormat format, TimeSpan defaultValue = default, JsonValueType expectedType = default)
+        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonTimeFormat format, TimeSpan defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetTimeSpan(format, out TimeSpan result, expectedType) ? result : defaultValue;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
         /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
-        /// converted to <see cref="DateTime"/>; otherwise, returns <see cref="TimeSpan.MinValue">TimeSpan.MinValue</see>, which is the default value of <see cref="TimeSpan"/>.
+        /// converted to <see cref="TimeSpan"/>; otherwise, returns <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
-        /// <param name="format">A <see cref="JsonTimeSpanFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeSpan"/> value in the <see cref="JsonValue"/>.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted;
-        /// otherwise, <see cref="TimeSpan.MinValue">TimeSpan.MinValue</see>, which is the default value of <see cref="TimeSpan"/>.</returns>
-        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonTimeSpanFormat format, JsonValueType expectedType)
+        /// otherwise, <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.</returns>
+        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonTimeFormat format, JsonValueType expectedType)
             => json.TryGetTimeSpan(format, out TimeSpan result, expectedType) ? result : default;
 
         /// <summary>
@@ -2405,8 +2405,8 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
-        /// <br/>Default value: <see cref="JsonTimeSpanFormat.Auto"/>, which applies <see cref="JsonTimeSpanFormat.Text"/> if <paramref name="asString"/> is <see langword="true"/>,
-        /// or <see cref="JsonTimeSpanFormat.Milliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <br/>Default value: <see cref="JsonTimeFormat.Auto"/>, which applies <see cref="JsonTimeFormat.Text"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonTimeFormat.Milliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
         /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
         /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
         /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
@@ -2414,21 +2414,21 @@ namespace KGySoft.Json
         /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
         /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
-        public static JsonValue ToJson(this TimeSpan value, JsonTimeSpanFormat format = JsonTimeSpanFormat.Auto, bool asString = true)
+        public static JsonValue ToJson(this TimeSpan value, JsonTimeFormat format = JsonTimeFormat.Auto, bool asString = true)
         {
-            if ((uint)format > (uint)JsonTimeSpanFormat.Text)
+            if ((uint)format > (uint)JsonTimeFormat.Text)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
-            if (!asString && format > JsonTimeSpanFormat.Ticks)
+            if (!asString && format > JsonTimeFormat.Ticks)
                 Throw.ArgumentException(Res.TimeSpanFormatIsStringOnly(format), nameof(format));
 
-            if (format == JsonTimeSpanFormat.Auto)
-                format = asString ? JsonTimeSpanFormat.Text : JsonTimeSpanFormat.Milliseconds;
+            if (format == JsonTimeFormat.Auto)
+                format = asString ? JsonTimeFormat.Text : JsonTimeFormat.Milliseconds;
 
             string formattedValue = format switch
             {
-                JsonTimeSpanFormat.Milliseconds => (value.Ticks / TimeSpan.TicksPerMillisecond).ToString(NumberFormatInfo.InvariantInfo),
-                JsonTimeSpanFormat.Ticks => value.Ticks.ToString(NumberFormatInfo.InvariantInfo),
-                _ /*JsonTimeSpanFormat.Text*/ =>
+                JsonTimeFormat.Milliseconds => (value.Ticks / TimeSpan.TicksPerMillisecond).ToString(NumberFormatInfo.InvariantInfo),
+                JsonTimeFormat.Ticks => value.Ticks.ToString(NumberFormatInfo.InvariantInfo),
+                _ /*JsonTimeFormat.Text*/ =>
 #if NET35
                     value.ToString(),
 #else
@@ -2444,8 +2444,8 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
-        /// <br/>Default value: <see cref="JsonTimeSpanFormat.Auto"/>, which applies <see cref="JsonTimeSpanFormat.Text"/> if <paramref name="asString"/> is <see langword="true"/>,
-        /// or <see cref="JsonTimeSpanFormat.Milliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <br/>Default value: <see cref="JsonTimeFormat.Auto"/>, which applies <see cref="JsonTimeFormat.Text"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonTimeFormat.Milliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
         /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
         /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
         /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
@@ -2453,9 +2453,418 @@ namespace KGySoft.Json
         /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
         /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
-        public static JsonValue ToJson(this TimeSpan? value, JsonTimeSpanFormat format = JsonTimeSpanFormat.Auto, bool asString = true)
+        public static JsonValue ToJson(this TimeSpan? value, JsonTimeFormat format = JsonTimeFormat.Auto, bool asString = true)
             => value?.ToJson(format, asString) ?? JsonValue.Null;
 
+        #endregion
+
+        #region DateOnly
+#if NET6_0_OR_GREATER
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// The actual format is attempted to be auto detected. If you know exact format use the
+        /// other <see cref="O:KGySoft.Json.JsonValueExtensions.TryGetDateOnly">TryGetDateOnly</see> overloads.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="DateOnly.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetDateOnly(this in JsonValue json, out DateOnly value, JsonValueType expectedType = default)
+            => json.TryGetDateOnly(JsonDateTimeFormat.Auto, out value, expectedType);
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/>
+        /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date in the <see cref="JsonValue"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="DateOnly.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetDateOnly(this in JsonValue json, JsonDateTimeFormat format, out DateOnly value, JsonValueType expectedType = default)
+        {
+            if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
+            if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.AsStringInternal is not string s)
+            {
+                value = default;
+                return false;
+            }
+
+            if (format == JsonDateTimeFormat.Iso8601Roundtrip)
+                format = JsonDateTimeFormat.Iso8601Date;
+
+            // Parsing as DateTime so allowing possible timezone information, too
+            if (s.TryParseDateTime(format, expectedType == JsonValueType.Number, out DateTime dateTime))
+            {
+                value = DateOnly.FromDateTime(dateTime);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/>
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">Specifies the exact format of the date in the <see cref="JsonValue"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="DateOnly.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetDateOnly(this in JsonValue json, string format, out DateOnly value)
+        {
+            if (format == null!)
+                Throw.ArgumentNullException(nameof(format));
+            if (json.AsString is not string s)
+            {
+                value = default;
+                return false;
+            }
+
+            // Parsing as DateTime so allowing possible timezone information, too
+            if (DateTime.TryParseExact(s, format, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.RoundtripKind, out DateTime dateTime))
+            {
+                value = DateOnly.FromDateTime(dateTime);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/>
+        /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/>
+        /// property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateOnly"/>; otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date-time value in the <see cref="JsonValue"/>. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which attempts to auto detect the format.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static DateOnly? AsDateOnly(this in JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, JsonValueType expectedType = default)
+            => json.TryGetDateOnly(format, out DateOnly result, expectedType) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/>
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/>
+        /// and it can be converted to <see cref="DateOnly"/>; otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">Specifies the exact format of the date-time value in the <see cref="JsonValue"/>.</param>
+        /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static DateOnly? AsDateOnly(this in JsonValue json, string format)
+            => json.TryGetDateOnly(format, out DateOnly result) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateOnly"/>;
+        /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
+        /// other <see cref="O:KGySoft.Json.JsonValueExtensions.GetDateOnlyOrDefault">GetDateOnlyOrDefault</see> overloads.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="DateOnly.MinValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, DateOnly defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetDateOnly(JsonDateTimeFormat.Auto, out DateOnly result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="DateOnly"/>;
+        /// otherwise, returns <see cref="DateOnly.MinValue">DateOnly.MinValue</see>, which is the default value of <see cref="DateOnly"/>.
+        /// The actual format is attempted to be auto detected. If you know exact format use the
+        /// other <see cref="O:KGySoft.Json.JsonValueExtensions.GetDateOnlyOrDefault">GetDateOnlyOrDefault</see> overloads.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
+        /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>,
+        /// which is the default value of <see cref="DateOnly"/>.</returns>
+        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, JsonValueType expectedType)
+            => json.TryGetDateOnly(JsonDateTimeFormat.Auto, out DateOnly result, expectedType) ? result : default;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
+        /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
+        /// converted to <see cref="DateOnly"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date in the <see cref="JsonValue"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="DateOnly.MinValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateOnly defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetDateOnly(format, out DateOnly result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
+        /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
+        /// converted to <see cref="DateOnly"/>; otherwise, returns <see cref="DateOnly.MinValue">DateOnly.MinValue</see>, which is the default value of <see cref="DateOnly"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonDateTimeFormat"/> value that specifies the format of the date in the <see cref="JsonValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
+        /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateOnly.MinValue">DateOnly.MinValue</see>,
+        /// which is the default value of <see cref="DateOnly"/>.</returns>
+        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
+            => json.TryGetDateOnly(format, out DateOnly result, expectedType) ? result : default;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="DateOnly"/> value using the specified <paramref name="format"/>
+        /// if <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter is <see cref="JsonValueType.String"/> and it can be
+        /// converted to <see cref="DateOnly"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
+        /// <param name="format">Specifies the exact format of the date in the <see cref="JsonValue"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="DateOnly.MinValue"/>.</param>
+        /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, string format, DateOnly defaultValue = default)
+            => json.TryGetDateOnly(format, out DateOnly result) ? result : defaultValue;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which applies <see cref="JsonDateTimeFormat.Iso8601Date"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonDateTimeFormat.UnixMilliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
+        /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
+        public static JsonValue ToJson(this DateOnly value, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, bool asString = true)
+        {
+            if (format == JsonDateTimeFormat.Auto)
+                format = asString ? JsonDateTimeFormat.Iso8601Date : JsonDateTimeFormat.Iso8601Milliseconds;
+            else if (format == JsonDateTimeFormat.Iso8601Roundtrip)
+                format = JsonDateTimeFormat.Iso8601Date;
+            return value.ToDateTime(default).ToJson(format, asString);
+        }
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which applies <see cref="JsonDateTimeFormat.Iso8601JavaScript"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonDateTimeFormat.UnixMilliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
+        /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
+        public static JsonValue ToJson(this DateOnly? value, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, bool asString = true)
+            => value?.ToJson(format, asString) ?? JsonValue.Null;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the exact format of the <paramref name="value"/> as a JSON value.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
+        public static JsonValue ToJson(this DateOnly value, string format)
+            // Formatting as DateTime to be compatible with parsing that allows also zero time parts
+            => value.ToDateTime(default).ToJson(format);
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the exact format of the <paramref name="value"/> as a JSON value.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
+        public static JsonValue ToJson(this DateOnly? value, string format) => value?.ToJson(format) ?? JsonValue.Null;
+
+#endif
+        #endregion
+
+        #region TimeOnly
+#if NET6_0_OR_GREATER
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// The actual format is attempted to be auto detected. If you know exact format use the
+        /// <see cref="TryGetTimeOnly(in JsonValue, JsonTimeFormat, out TimeOnly, JsonValueType)"/> overload instead.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="TimeOnly.MinValue"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetTimeOnly(this in JsonValue json, out TimeOnly value, JsonValueType expectedType = default)
+            => json.TryGetTimeOnly(JsonTimeFormat.Auto, out value, expectedType);
+
+        /// <summary>
+        /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value using the specified <paramref name="format"/>
+        /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeOnly"/> value in the <see cref="JsonValue"/>.</param>
+        /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="TimeSpan.Zero"/>. This parameter is passed uninitialized.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
+        public static bool TryGetTimeOnly(this in JsonValue json, JsonTimeFormat format, out TimeOnly value, JsonValueType expectedType = default)
+        {
+            if ((uint)format > (uint)JsonTimeFormat.Text)
+                Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
+            if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
+            {
+                if (s.TryParseTimeSpan(format, json.Type == JsonValueType.Number, out TimeSpan timeSpan, true))
+                {
+                    value = TimeOnly.FromTimeSpan(timeSpan);
+                    return true;
+                }
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value using the specified <paramref name="format"/>
+        /// if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/>
+        /// property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeOnly"/>; otherwise, returns <see langword="null"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeOnly"/> value in the <see cref="JsonValue"/>. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonDateTimeFormat.Auto"/>, which attempts to auto detect the format.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
+        public static TimeOnly? AsTimeOnly(this in JsonValue json, JsonTimeFormat format = JsonTimeFormat.Auto, JsonValueType expectedType = default)
+            => json.TryGetTimeOnly(format, out TimeOnly result, expectedType) ? result : null;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeOnly"/>;
+        /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
+        /// <see cref="GetTimeOnlyOrDefault(in JsonValue, JsonTimeFormat, TimeOnly, JsonValueType)"/> overload instead.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="TimeOnly.MinValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, TimeOnly defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetTimeOnly(JsonTimeFormat.Auto, out TimeOnly result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
+        /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeOnly"/>;
+        /// otherwise, returns <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.
+        /// The actual format is attempted to be auto detected. If you know exact format use the
+        /// <see cref="GetTimeOnlyOrDefault(in JsonValue, JsonTimeFormat, TimeOnly, JsonValueType)"/> overload instead.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
+        /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.</returns>
+        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, JsonValueType expectedType)
+            => json.TryGetTimeOnly(JsonTimeFormat.Auto, out TimeOnly result, expectedType) ? result : default;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
+        /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
+        /// converted to <see cref="TimeOnly"/>; otherwise, returns <paramref name="defaultValue"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeOnly"/> value in the <see cref="JsonValue"/>.</param>
+        /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
+        /// <br/>Default value: <see cref="TimeOnly.MinValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
+        /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
+        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, JsonTimeFormat format, TimeOnly defaultValue = default, JsonValueType expectedType = default)
+            => json.TryGetTimeOnly(format, out TimeOnly result, expectedType) ? result : defaultValue;
+
+        /// <summary>
+        /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value using the specified <paramref name="format"/> if <paramref name="expectedType"/>
+        /// is <see cref="JsonValueType.Undefined"/> or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be
+        /// converted to <see cref="TimeOnly"/>; otherwise, returns <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.
+        /// </summary>
+        /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
+        /// <param name="format">A <see cref="JsonTimeFormat"/> value that specifies the format of the <see cref="TimeOnly"/> value in the <see cref="JsonValue"/>.</param>
+        /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
+        /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
+        /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted;
+        /// otherwise, <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.</returns>
+        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, JsonTimeFormat format, JsonValueType expectedType)
+            => json.TryGetTimeOnly(format, out TimeOnly result, expectedType) ? result : default;
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonTimeFormat.Auto"/>, which applies <see cref="JsonTimeFormat.Text"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonTimeFormat.Milliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
+        /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
+        public static JsonValue ToJson(this TimeOnly value, JsonTimeFormat format = JsonTimeFormat.Auto, bool asString = true)
+            => value.ToTimeSpan().ToJson(format, asString);
+
+        /// <summary>
+        /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="format">Specifies the format of the <paramref name="value"/> as a JSON value. This parameter is optional.
+        /// <br/>Default value: <see cref="JsonTimeFormat.Auto"/>, which applies <see cref="JsonTimeFormat.Text"/> if <paramref name="asString"/> is <see langword="true"/>,
+        /// or <see cref="JsonTimeFormat.Milliseconds"/> if <paramref name="asString"/> is <see langword="false"/>.</param>
+        /// <param name="asString"><see langword="true"/> to convert the <paramref name="value"/> to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.String"/>&#160;<see cref="JsonValue.Type"/>; or <see langword="false"/> to convert it to a <see cref="JsonValue"/>
+        /// with <see cref="JsonValueType.Number"/>&#160;<see cref="JsonValue.Type"/>, which is not applicable for all <paramref name="format"/>s. This parameter is optional.
+        /// <br/>Default value: <see langword="true"/>.</param>
+        /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="format"/> is not one of the defined values.</exception>
+        /// <exception cref="ArgumentException"><paramref name="asString"/> is <see langword="false"/> but <paramref name="format"/> represents a string-only format.</exception>
+        public static JsonValue ToJson(this TimeOnly? value, JsonTimeFormat format = JsonTimeFormat.Auto, bool asString = true)
+            => value?.ToJson(format, asString) ?? JsonValue.Null;
+
+#endif
         #endregion
 
         #region Guid
