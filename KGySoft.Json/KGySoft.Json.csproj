@@ -25,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include=".nuspec\KGySoft.Json.nuspec" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="KGySoft.CoreLibraries" Version="6.0.0-rc.3" />
   </ItemGroup>
 
