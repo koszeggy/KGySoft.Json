@@ -15,7 +15,7 @@
 
 #region Usings
 
-#if NET6_0_OR_GREATER
+#if !NET5_0
 using System.Diagnostics.CodeAnalysis;
 #endif
 using System.Runtime.CompilerServices;
@@ -45,7 +45,7 @@ namespace KGySoft.Json
         /// the <c>KGySoft.Json.dll</c> are also affected by the settings.</note>
         /// </remarks>
         [ModuleInitializer]
-#if NET6_0_OR_GREATER
+#if !NET5_0
         [SuppressMessage("Usage", "CA2255:The 'ModuleInitializer' attribute should not be used in libraries",
             Justification = "See the description, it is intended and required, and besides it's public so can be explicitly called from an application startup.")] 
 #endif
