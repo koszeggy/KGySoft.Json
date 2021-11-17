@@ -11,7 +11,7 @@
 
 + Assembly changes:
 ===================
-+ Specifically targeting also .NET [Core] platforms.
++ Specifically targeting also some .NET [Core] platforms.
 
 ! KGySoft.Json namespace:
 =========================
