@@ -41,6 +41,8 @@ Nothing. It knows everything (and more). It was just too heavy-weight for my nee
 
 Well, it's a bit different thing. As an in-memory JSON tool, it is read-only (`JsonDocument`/`JsonElement`) so you cannot build in-memory JSON content with it. It was introduced with .NET Core 3.0, so below that you have to use NuGet packages, which may lead to the same issue as above (but even with NuGet, it's not supported below .NET Framework 4.6.1). Apart from those issues, it's really fast, and mostly allocation free (well, as long as your source is already in UTF8 and you don't access string elements).
 
+> _.NET 6 Update:_ Starting with .NET 6, a new `System.Text.Json.Nodes` namespace has been introduced that supports JSON DOM manipulation as well, and uses a very similar approach to this library. Even the member names are very similar. There are some important differences, though: the System version does not tolerate getting lost in the domain, eg. `json["someProperty"][42]["WhereAmI"]` will throw exceptions instead of returning `undefined`. Similarly, the System `AsObject`/`AsArray` members may throw exceptions, whereas in the KGy SOFT version these return nullable results. If you can target at least .NET 6, then the choice can be a matter of taste. See also the [performance comparisons](#performance-comparisons) below.
+
 ## Examples
 
 > _Tip:_ See also the examples at the **Remarks** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type.
@@ -149,7 +151,7 @@ Console.WriteLine(obj["UnknownProperty"]); // undefined
 
 #### Interop with common .NET types
 
-Though the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type has a JavaScript-like approach (eg. it has a single `AsNumber` property with nullable `double` return type for any numbers) the [`JsonValueExtensions`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueExtensions.htm) class provides .NET type specific conversions for most .NET numeric types, including `Int64`, `Decimal` and more. Additionally, it offers conversions for `Enum`, `DateTime`, `DateTimeOffset`, `TimeSpan` and `Guid` types as well.
+Though the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type has a JavaScript-like approach (eg. it has a single `AsNumber` property with nullable `double` return type for any numbers) the [`JsonValueExtensions`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueExtensions.htm) class provides .NET type specific conversions for most .NET numeric types, including `Int64`, `Decimal`, `BigInteger` and more. Additionally, it offers conversions for `Enum`, `DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly` and `Guid` types as well.
 
 ```cs
 // Use the ToJson extension methods to convert common .NET types to JsonValue
@@ -174,7 +176,7 @@ decimal? valueOrNull = obj["Balance"].AsDecimal(); // or: AsDecimal(JsonValueTyp
 decimal balance = obj["Balance"].GetDecimalOrDefault(); // or: GetDecimalOrDefault(-1m) to specify a default value
 ```
 
-> _Tip:_ There are several predefined formats for enums (see [`JsonEnumFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonEnumFormat.htm)), `DateTime` and `DateTimeOffset` types (see [`JsonDateTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonDateTimeFormat.htm)) and `TimeSpan` values (see [`JsonTimeSpanFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonTimeSpanFormat.htm)).
+> _Tip:_ There are several predefined formats for enums (see [`JsonEnumFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonEnumFormat.htm)), `DateTime`, `DateTimeOffset` and `DateOnly` types (see [`JsonDateTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonDateTimeFormat.htm)) and `TimeSpan`/`TimeOnly` values (see [`JsonTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonTimeFormat.htm)).
 
 ### Writing JSON
 
@@ -223,7 +225,7 @@ As you could see [above](#object) navigation in a parsed object graph is pretty 
 var json = JsonValue.Parse(someStream);
 
 // a possible way of validation
-var value = json["data"][0]["id"];
+JsonValue value = json["data"][0]["id"];
 if (value.IsUndefined)
     throw new ArgumentException("Unexpected content");
 // ... do something with value
@@ -254,7 +256,7 @@ Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 
 **Notes:**
 * The tests compare JSON.NET (aka. Newtonsoft.Json), System.Text.Json and KGy SOFT JSON Libraries in .NET 6.
-* Starting with .NET 6 a read-write JSON DOM is also available, this is referred as System.Text.Json.Nodes in the test results
+* Starting with .NET 6 the new System.Text.Json.Nodes is also available with read-write capabilities, this is now included in the test results
 * The test cases were executed for 500ms after a warm-up period.
 * The test cases below all used the same formatted JSON [test data](https://github.com/koszeggy/KGySoft.Json/blob/Development/KGySoft.Json.PerformanceTest/TestData.cs#L24) as an input
 
@@ -262,7 +264,7 @@ Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 
 ### Parse test
 
-Parsing a test JSON from an UTF8 stream, without accessing any content. This is where System.Text.Json has the best performance, in which case it is completely allocation free. It is reflected in the results, too:
+Parsing a test JSON from a UTF8 stream, without accessing any content. This is where System.Text.Json has the best performance, in which case it is completely allocation free. It is reflected in the results, too:
 
 ```
 1. System.Text.Json: 60,769 iterations in 500.01 ms. Adjusted for 500 ms: 60,768.36
