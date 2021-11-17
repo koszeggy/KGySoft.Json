@@ -19,6 +19,9 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+#if NET6_0_OR_GREATER
+using System.Text.Json.Nodes;
+#endif
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -40,11 +43,14 @@ namespace KGySoft.Json.PerformanceTests
         public void FromString(string name, string json) => new PerformanceTest
             {
                 TestName = name,
-                TestTime = 500
+                TestTime = 500,
             }
             .AddCase(() => { JToken.Parse(json); }, "Newtonsoft.Json")
             .AddCase(() => { JsonDocument.Parse(json); }, "System.Text.Json")
             .AddCase(() => { JsonValue.Parse(json); }, "KGySoft.Json")
+#if NET6_0_OR_GREATER
+            .AddCase(() => { JsonNode.Parse(json); }, "System.Text.Json.Nodes")
+#endif
             .DoTest()
             .DumpResults(Console.Out);
 
@@ -75,6 +81,13 @@ namespace KGySoft.Json.PerformanceTests
                     utf8.Position = 0L;
                     JsonValue.Parse(utf8);
                 }, "KGySoft.Json")
+#if NET6_0_OR_GREATER
+                        .AddCase(() =>
+                {
+                    utf8.Position = 0L;
+                    JsonNode.Parse(utf8);
+                }, "System.Text.Json.Nodes")
+#endif
                 .DoTest()
                 .DumpResults(Console.Out);
         }

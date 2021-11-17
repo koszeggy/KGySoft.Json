@@ -17,6 +17,9 @@
 
 using System;
 using System.Text.Json;
+#if NET6_0_OR_GREATER
+using System.Text.Json.Nodes;
+#endif
 
 using Newtonsoft.Json.Linq;
 
@@ -37,6 +40,9 @@ namespace KGySoft.Json.PerformanceTests
             JObject newtonsoft = JObject.Parse(TestData.SmallObject);
             JsonDocument system = JsonDocument.Parse(TestData.SmallObject);
             JsonObject kgySoft = JsonObject.Parse(TestData.SmallObject);
+#if NET6_0_OR_GREATER
+            JsonNode systemNodes = JsonNode.Parse(TestData.SmallObject)!;
+#endif
 
             new PerformanceTest<string>
                 {
@@ -46,6 +52,9 @@ namespace KGySoft.Json.PerformanceTests
                 .AddCase(() => (string)((JValue)newtonsoft["StrProp"]!).Value!, "Newtonsoft.Json")
                 .AddCase(() => system.RootElement.GetProperty("StrProp").GetString()!, "System.Text.Json")
                 .AddCase(() => kgySoft["StrProp"].AsString!, "KGySoft.Json")
+#if NET6_0_OR_GREATER
+                .AddCase(() => systemNodes["StrProp"]!.GetValue<string>()!, "System.Text.Json.Nodes")
+#endif
                 .DoTest()
                 .DumpResults(Console.Out);
         }
@@ -56,6 +65,9 @@ namespace KGySoft.Json.PerformanceTests
             JObject newtonsoft = JObject.Parse(TestData.LargeObject);
             JsonDocument system = JsonDocument.Parse(TestData.LargeObject);
             JsonObject kgySoft = JsonObject.Parse(TestData.LargeObject);
+#if NET6_0_OR_GREATER
+            JsonNode systemNodes = JsonNode.Parse(TestData.LargeObject)!;
+#endif
 
             new PerformanceTest<string>
                 {
@@ -65,6 +77,9 @@ namespace KGySoft.Json.PerformanceTests
                 .AddCase(() => (string)((JValue)newtonsoft["data"]![0]!["details"]![1]!["uTime"]!).Value!, "Newtonsoft.Json")
                 .AddCase(() => system.RootElement.GetProperty("data")[0].GetProperty("details")[1].GetProperty("uTime").GetString()!, "System.Text.Json")
                 .AddCase(() => kgySoft["data"][0]["details"][1]["uTime"].AsString!, "KGySoft.Json")
+#if NET6_0_OR_GREATER
+                .AddCase(() => systemNodes["data"]![0]!["details"]![1]!["uTime"]!.GetValue<string>(), "System.Text.Json.Nodes")
+#endif
                 .DoTest()
                 .DumpResults(Console.Out);
         }

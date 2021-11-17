@@ -253,35 +253,38 @@ Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 ## Performance Comparisons
 
 **Notes:**
-* The tests compare JSON.NET (aka. Newtonsoft.Json), System.Text.Json and KGy SOFT JSON Libraries.
-* The test cases were executed for 500ms after a warp-up period.
+* The tests compare JSON.NET (aka. Newtonsoft.Json), System.Text.Json and KGy SOFT JSON Libraries in .NET 6.
+* Starting with .NET 6 a read-write JSON DOM is also available, this is referred as System.Text.Json.Nodes in the test results
+* The test cases were executed for 500ms after a warm-up period.
 * The test cases below all used the same formatted JSON [test data](https://github.com/koszeggy/KGySoft.Json/blob/Development/KGySoft.Json.PerformanceTest/TestData.cs#L24) as an input
 
 > _Tip:_ See the source code of the tests along with more test cases in the `KGySoft.Json.PerformanceTest` project.
 
 ### Parse test
 
-Parsing a test JSON from an UTF8 stream. For System.Text.Json this provides the best performance, in which case it is completely allocation free. It is reflected in the results, too:
+Parsing a test JSON from an UTF8 stream, without accessing any content. This is where System.Text.Json has the best performance, in which case it is completely allocation free. It is reflected in the results, too:
 
 ```
-1. System.Text.Json: 44,536 iterations in 500.00 ms. Adjusted for 500 ms: 44,535.63
-2. KGySoft.Json: 22,522 iterations in 500.00 ms. Adjusted for 500 ms: 22,521.92 (-22,013.72 / 50.57%)
-3. Newtonsoft.Json: 14,664 iterations in 500.03 ms. Adjusted for 500 ms: 14,663.18 (-29,872.45 / 32.92%
+1. System.Text.Json: 60,769 iterations in 500.01 ms. Adjusted for 500 ms: 60,768.36
+2. System.Text.Json.Nodes: 60,329 iterations in 500.00 ms. Adjusted for 500 ms: 60,328.86 (-439.50 / 99.28%)
+3. KGySoft.Json: 24,539 iterations in 500.01 ms. Adjusted for 500 ms: 24,538.49 (-36,229.87 / 40.38%)
+4. Newtonsoft.Json: 14,577 iterations in 500.03 ms. Adjusted for 500 ms: 14,576.09 (-46,192.27 / 23.99%)
 ```
 
-As you can see, if we don't do anything with the parsed data, System.Text.Json is the fastest one, and it is twice as fast as KGy SOFT, and 3x faster than the slowest JSON.NET (Newtonsoft.Json).
+As you can see, if we don't do anything with the parsed data, System.Text.Json[.Nodes] is the fastest one, KGy SOFT comes next, whereas JSON.NET (Newtonsoft.Json) is the slowest one, which is 4x slower than System.Text.Json.
 
 ### Access element test
 
 Using the same JSON as above, this test reads a deeply embedded string element. When retrieving DOM elements, KGySoft.Json becomes the fastest one and System.Text.Json is the slowest one:
 
 ```
-1. KGySoft.Json: 5,049,092 iterations in 500.00 ms. Adjusted for 500 ms: 5,049,082.91
-2. Newtonsoft.Json: 4,007,249 iterations in 500.30 ms. Adjusted for 500 ms: 4,004,834.89 (-1,044,248.03 / 79.32%)
-3. System.Text.Json: 2,080,977 iterations in 500.00 ms. Adjusted for 500 ms: 2,080,973.67 (-2,968,109.24 / 41.21%)
+1. KGySoft.Json: 5,758,040 iterations in 500.00 ms. Adjusted for 500 ms: 5,758,030.79
+2. Newtonsoft.Json: 4,749,643 iterations in 500.01 ms. Adjusted for 500 ms: 4,749,529.96 (-1,008,500.83 / 82.49%)
+3. System.Text.Json.Nodes: 2,608,747 iterations in 500.00 ms. Adjusted for 500 ms: 2,608,744.39 (-3,149,286.40 / 45.31%)
+4. System.Text.Json: 2,352,065 iterations in 500.00 ms. Adjusted for 500 ms: 2,352,059.36 (-3,405,971.43 / 40.85%)
 ```
 
-Please also note that KGySoft.Json has the most [compact](https://github.com/koszeggy/KGySoft.Json/blob/Development/KGySoft.Json.PerformanceTest/PerformanceTests/ReadDomTest.cs#L54) syntax. The syntax of the other two libraries would be even more verbose if we couldn't be sure that the accessed element exists.
+Please also note that KGySoft.Json has the most [compact](https://github.com/koszeggy/KGySoft.Json/blob/master/KGySoft.Json.PerformanceTest/PerformanceTests/ReadDomTest.cs#L63) syntax. The syntax of the other two libraries would be even more verbose if we couldn't be sure that the accessed element exists.
 
 ### Write minimized JSON test
 
@@ -290,9 +293,10 @@ Creating a minimized JSON string of the input stream.
 > _Note:_ System.Text.Json doesn't really count here as its `JsonDocument`/`JsonElement` types are read-only anyway. Still, it can be used to reformat the original JSON stream either with or without indenting.
 
 ```
-1. KGySoft.Json: 130,882 iterations in 500.00 ms. Adjusted for 500 ms: 130,881.16
-2. System.Text.Json: 87,155 iterations in 500.01 ms. Adjusted for 500 ms: 87,152.63 (-43,728.53 / 66.59%)
-3. Newtonsoft.Json: 60,317 iterations in 500.01 ms. Adjusted for 500 ms: 60,315.94 (-70,565.22 / 46.08%)
+1. KGySoft.Json: 160,980 iterations in 500.02 ms. Adjusted for 500 ms: 160,974.49
+2. System.Text.Json.Nodes: 109,297 iterations in 500.00 ms. Adjusted for 500 ms: 109,296.50 (-51,678.00 / 67.90%)
+3. System.Text.Json: 107,749 iterations in 500.12 ms. Adjusted for 500 ms: 107,722.28 (-53,252.21 / 66.92%)
+4. Newtonsoft.Json: 91,016 iterations in 500.00 ms. Adjusted for 500 ms: 91,015.85 (-69,958.64 / 56.54%)
 ```
 
 ## Download:
