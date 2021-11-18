@@ -157,7 +157,7 @@ Though the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Jso
 // Use the ToJson extension methods to convert common .NET types to JsonValue
 var obj = new JsonObject
 {
-    ("Id", Guid.NewGuid.ToJson()),
+    ("Id", Guid.NewGuid().ToJson()),
     ("Timestamp", DateTime.UtcNow.ToJson(JsonDateTimeFormat.UnixMilliseconds)),
     ("Status", someEnumValue.ToJson(JsonEnumFormat.LowerCaseWithHyphens)),
     ("Balance", someDecimalValue.ToJson(asString: true))
