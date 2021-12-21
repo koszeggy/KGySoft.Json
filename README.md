@@ -1,4 +1,4 @@
-[![KGy SOFT .net](https://user-images.githubusercontent.com/27336165/124292367-c93f3d00-db55-11eb-8003-6d943ee7d7fa.png)](https://kgysoft.net)
+﻿[![KGy SOFT .net](https://user-images.githubusercontent.com/27336165/124292367-c93f3d00-db55-11eb-8003-6d943ee7d7fa.png)](https://kgysoft.net)
 
 # KGy SOFT JSON Libraries
 
@@ -41,11 +41,11 @@ Nothing. It knows everything (and more). It was just too heavy-weight for my nee
 
 Well, it's a bit different thing. As an in-memory JSON tool, it is read-only (`JsonDocument`/`JsonElement`) so you cannot build in-memory JSON content with it. It was introduced with .NET Core 3.0, so below that you have to use NuGet packages, which may lead to the same issue as above (but even with NuGet, it's not supported below .NET Framework 4.6.1). Apart from those issues, it's really fast, and mostly allocation free (well, as long as your source is already in UTF8 and you don't access string elements).
 
-> _.NET 6 Update:_ Starting with .NET 6, a new `System.Text.Json.Nodes` namespace has been introduced that supports JSON DOM manipulation as well, and uses a very similar approach to this library. Even the member names are very similar. There are some important differences, though: the System version does not tolerate getting lost in the domain, eg. `json["someProperty"][42]["WhereAmI"]` will throw exceptions instead of returning `undefined`. Similarly, the System `AsObject`/`AsArray` members may throw exceptions, whereas in the KGy SOFT version these return nullable results. If you can target at least .NET 6, then the choice can be a matter of taste. See also the [performance comparisons](#performance-comparisons) below.
+> ℹ️ _.NET 6 Update:_ Starting with .NET 6, a new `System.Text.Json.Nodes` namespace has been introduced that supports JSON DOM manipulation as well, and uses a very similar approach to this library. Even the member names are very similar. There are some important differences, though: the System version does not tolerate getting lost in the domain, eg. `json["someProperty"][42]["WhereAmI"]` will throw exceptions instead of returning `undefined`. Similarly, the System `AsObject`/`AsArray` members may throw exceptions, whereas in the KGy SOFT version these return nullable results. If you can target at least .NET 6, then the choice can be a matter of taste. See also the [performance comparisons](#performance-comparisons) below.
 
 ## Examples
 
-> _Tip:_ See also the examples at the **Remarks** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type.
+> 💡 _Tip:_ See also the examples at the **Remarks** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type.
 
 ### Simple Syntax
 
@@ -91,7 +91,7 @@ Console.WriteLine(value.Type); // Number
 Console.WriteLine(value.AsNumber); // 1.23
 ```
 
-> _Note:_  A JavaScript number is always a [double-precision 64-bit binary format IEEE 754 value](https://en.wikipedia.org/wiki/Double-precision_floating-point_format), which has the same precision as the .NET `Double` type. Though supported, it is **not recommended** to encode any numeric .NET type as a JSON Number (eg. `Int64` or `Decimal`) because when such a JSON content is processed by JavaScript the precision might be silently lost.
+> ⚠️ _Note:_  A JavaScript number is always a [double-precision 64-bit binary format IEEE 754 value](https://en.wikipedia.org/wiki/Double-precision_floating-point_format), which has the same precision as the .NET `Double` type. Though supported, it is **not recommended** to encode any numeric .NET type as a JSON Number (eg. `Int64` or `Decimal`) because when such a JSON content is processed by JavaScript the precision might be silently lost.
 
 ```cs
 // Using a long value beyond double precision
@@ -176,7 +176,7 @@ decimal? valueOrNull = obj["Balance"].AsDecimal(); // or: AsDecimal(JsonValueTyp
 decimal balance = obj["Balance"].GetDecimalOrDefault(); // or: GetDecimalOrDefault(-1m) to specify a default value
 ```
 
-> _Tip:_ There are several predefined formats for enums (see [`JsonEnumFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonEnumFormat.htm)), `DateTime`, `DateTimeOffset` and `DateOnly` types (see [`JsonDateTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonDateTimeFormat.htm)) and `TimeSpan`/`TimeOnly` values (see [`JsonTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonTimeFormat.htm)).
+> 💡 _Tip:_ There are several predefined formats for enums (see [`JsonEnumFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonEnumFormat.htm)), `DateTime`, `DateTimeOffset` and `DateOnly` types (see [`JsonDateTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonDateTimeFormat.htm)) and `TimeSpan`/`TimeOnly` values (see [`JsonTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonTimeFormat.htm)).
 
 ### Writing JSON
 
@@ -250,7 +250,7 @@ toBeChanged["newProp"] = 123; // or: toBeChanged.Add("newProp", 123);
 Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 ```
 
-> _Tip:_ [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) implements both `IList<JsonProperty>` and `IDictionary<string, JsonValue>` so without casting or specifying some type arguments many LINQ methods might be ambiguous on a `JsonObject` instance. To avoid ambiguity and to keep also the syntax simple you can perform the LINQ operations on its `Entries` property.
+> 💡 _Tip:_ [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) implements both `IList<JsonProperty>` and `IDictionary<string, JsonValue>` so without casting or specifying some type arguments many LINQ methods might be ambiguous on a `JsonObject` instance. To avoid ambiguity and to keep also the syntax simple you can perform the LINQ operations on its `Entries` property.
 
 ## Performance Comparisons
 
@@ -260,7 +260,7 @@ Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 * The test cases were executed for 500ms after a warm-up period.
 * The test cases below all used the same formatted JSON [test data](https://github.com/koszeggy/KGySoft.Json/blob/Development/KGySoft.Json.PerformanceTest/TestData.cs#L24) as an input
 
-> _Tip:_ See the source code of the tests along with more test cases in the `KGySoft.Json.PerformanceTest` project.
+> 💡 _Tip:_ See the source code of the tests along with more test cases in the `KGySoft.Json.PerformanceTest` project.
 
 ### Parse test
 
@@ -292,7 +292,7 @@ Please also note that KGySoft.Json has the most [compact](https://github.com/kos
 
 Creating a minimized JSON string of the input stream.
 
-> _Note:_ System.Text.Json doesn't really count here as its `JsonDocument`/`JsonElement` types are read-only anyway. Still, it can be used to reformat the original JSON stream either with or without indenting.
+> 📝 _Note:_ System.Text.Json doesn't really count here as its `JsonDocument`/`JsonElement` types are read-only anyway. Still, it can be used to reformat the original JSON stream either with or without indenting.
 
 ```
 1. KGySoft.Json: 160,980 iterations in 500.02 ms. Adjusted for 500 ms: 160,974.49
