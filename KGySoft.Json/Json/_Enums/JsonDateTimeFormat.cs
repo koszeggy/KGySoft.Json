@@ -188,7 +188,7 @@ namespace KGySoft.Json
 
         /// <summary>
         /// <para>Represents Microsoft's legacy AJAX and WCF REST date-time format. Similarly to <see cref="UnixMilliseconds"/>, it is also
-        /// based elapsed milliseconds since Unix Epic time but has a specific string format and can also encode time offset.</para>
+        /// based on elapsed milliseconds since Unix Epic time but has a specific string format and can also encode a time offset.</para>
         /// <para><strong>Examples:</strong>
         /// <list type="bullet">
         /// <item><see cref="DateTime.Kind">DateTime.Kind</see> is <see cref="DateTimeKind.Utc"/> or <see cref="DateTimeKind.Unspecified"/>, or <see cref="DateOnly"/> instances: <c>/Date(1578873600000)/</c></item>
