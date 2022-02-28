@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>KGySoft.Json</id>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <title>KGy SOFT JSON Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
@@ -19,7 +19,7 @@ Main highlights:
 - Easy DOM navigation with compact and intuitive syntax
 - Just call ToString to get the JSON content (compact or indented)
 - Simple serialization into StringBuilder, Stream or any TextWriter
-- A lot of extensions for converting to and from .NET types including enums, DateTime or TimeSpan
+- A lot of extensions for converting to and from .NET types including enums, BigInteger, DateTime, TimeSpan, etc.
 
 Documentation: https://docs.kgysoft.net/json</description>
     <releaseNotes>See the detailed release notes here: https://github.com/koszeggy/KGySoft.Json/blob/master/KGySoft.Json/changelog.txt</releaseNotes>
@@ -29,34 +29,34 @@ Documentation: https://docs.kgysoft.net/json</description>
     <repository type="git" url="https://github.com/koszeggy/KGySoft.Json" />
     <dependencies>
       <group targetFramework="net35">
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="net40">
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="net45">
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="net472">
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="netstandard2.0" >
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="netstandard2.1" >
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="netcoreapp2.0" >
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="netcoreapp2.1" >
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="net5.0" >
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
       <group targetFramework="net6.0" >
-        <dependency id="KGySoft.CoreLibraries" version="6.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="6.0.2" />
       </group>
     </dependencies>
   </metadata>
