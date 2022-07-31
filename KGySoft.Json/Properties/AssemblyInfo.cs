@@ -21,9 +21,9 @@ using System.Security;
 
 [assembly: CLSCompliant(true)]
 
-[assembly: AssemblyVersion("2.0.1.0")]
-[assembly: AssemblyFileVersion("2.0.1.0")]
-[assembly: AssemblyInformationalVersion("2.0.1")]
+[assembly: AssemblyVersion("2.1.0.0")]
+[assembly: AssemblyFileVersion("2.1.0.0")]
+[assembly: AssemblyInformationalVersion("2.1.0-preview.1")]
 
 [assembly: AllowPartiallyTrustedCallers]
 

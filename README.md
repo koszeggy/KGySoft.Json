@@ -151,7 +151,7 @@ Console.WriteLine(obj["UnknownProperty"]); // undefined
 
 #### Interop with common .NET types
 
-Though the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type has a JavaScript-like approach (eg. it has a single `AsNumber` property with nullable `double` return type for any numbers) the [`JsonValueExtensions`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueExtensions.htm) class provides .NET type specific conversions for most .NET numeric types, including `Int64`, `Decimal`, `BigInteger` and more. Additionally, it offers conversions for `Enum`, `DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly` and `Guid` types as well.
+Though the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type has a JavaScript-like approach (eg. it has a single `AsNumber` property with nullable `double` return type for any numbers) the [`JsonValueExtensions`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueExtensions.htm) class provides .NET type specific conversions for most .NET numeric types, including `Int64`, `Decimal`, `BigInteger`, `Int128` and more. Additionally, it offers conversions for `Enum`, `DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly` and `Guid` types as well.
 
 ```cs
 // Use the ToJson extension methods to convert common .NET types to JsonValue
