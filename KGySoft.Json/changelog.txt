@@ -6,6 +6,34 @@
 ===============================================================================
 
 ~~~~~~~~~
+! v3.0.0:
+~~~~~~~~~
+
+! Assembly changes:
+===================
+! Upgrading the KGySoft.CoreLibraries reference to version 7.0.0, which contains some breaking changes.
+  They are not relevant if you use KGySoft.Json features only. See the change log of KGySoft.CoreLibraries here:
+  https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/KGySoft.CoreLibraries/changelog.txt
+* Targeting also .NET 7.0
+
+* KGySoft.Json namespace:
+=========================
+* JsonValueExtensions class:
+  + New TryGetInt128, AsInt128, GetInt128OrDefault methods (.NET 7.0 and above)
+  + New TryGetUInt128, AsUInt128, GetUInt128OrDefault methods (.NET 7.0 and above)
+  + New ToJson overloads for Int128 and UInt128 types (.NET 7.0 and above)
+  - ToJson<TEnum> methods:
+    - Fixing formatting of [Flags] enums: applying the rules for all flags.
+      Example: (FlagsEnum.FlagA | FlagsEnum.FlagB).ToJson(JsonEnumFormat.CamelCase, ";")
+      Old result: "flagA;FlagB"
+      New result: "flagA;flagB"
+    - Fixing formatting enum values with hyphens or underscores when they contain non-letter characters.
+      Example: PixelFormat.Format16bppRgb565.ToJson(JsonEnumFormat.LowerCaseWithHyphens)
+      Old result: "format-1-6bpp-rgb-5-6-5"
+      New result: "format16bpp-rgb565"
+
+
+~~~~~~~~~
 * v2.0.1:
 ~~~~~~~~~
 

@@ -21,6 +21,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Text;
+
+using KGySoft.Collections;
 #if !NET35
 using System.Numerics;
 #endif
@@ -1598,13 +1601,19 @@ namespace KGySoft.Json
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
             {
-                if (ignoreFormat && s.IndexOfAny(new[] { '_', '-' }) >= 0)
+                // First trying to parse without removing characters. Will not work if the value contains hyphens, which is not valid in C# identifiers
+                // but will work if the original identifier also contains underscores.
+                if (!s.Contains('-') && Enum<TEnum>.TryParse(s, flagsSeparator, ignoreFormat, out value))
+                    return true;
+
+                // Trying to remove underscores and hyphens. Will not work if the original identifier contains underscores, which was formatted
+                // with adding underscores or hyphens. This could also work by replacing "__" to "_" first but such formatting is intentionally considered invalid.
+                if (ignoreFormat && s.IndexOfAny(new[] { '_', '-' }) > 0)
                 {
                     s = s.Replace("_", String.Empty);
                     s = s.Replace("-", String.Empty);
+                    return Enum<TEnum>.TryParse(s, flagsSeparator, true, out value);
                 }
-
-                return Enum<TEnum>.TryParse(s, flagsSeparator, ignoreFormat, out value);
             }
 
             value = default;
@@ -1778,29 +1787,87 @@ namespace KGySoft.Json
         public static JsonValue ToJson<TEnum>(this TEnum value, JsonEnumFormat format = JsonEnumFormat.PascalCase, string? flagsSeparator = null)
             where TEnum : struct, Enum
         {
+            const string defaultSeparator = ", ";
+
             #region Local Methods
 
-            static string AdjustString(string value, bool upperCase, char separator)
+            static string AdjustFirstCharsCasing(string value, bool upperCase, string? flagsSeparator)
             {
-                List<char> chars = value.ToList();
-
-                chars[0] = upperCase ? Char.ToUpperInvariant(chars[0]) : Char.ToLowerInvariant(chars[0]);
-                for (int i = chars.Count - 1; i > 0; i--)
+                flagsSeparator ??= defaultSeparator;
+                Func<char, bool> needsTransform;
+                Func<char, char> transform;
+                if (upperCase)
                 {
-                    // Assuming that the original value was in PascalCase so inserting separators before upper case letters
-                    if (Char.IsLower(chars[i]))
-                    {
-                        if (upperCase)
-                            chars[i] = Char.ToUpperInvariant(chars[i]);
-                        continue;
-                    }
+                    if (!Char.IsLower(value[0]) && !value.Contains(flagsSeparator))
+                        return value;
 
-                    if (!upperCase)
-                        chars[i] = Char.ToLowerInvariant(chars[i]);
-                    chars.Insert(i, separator);
+                    needsTransform = Char.IsLower;
+                    transform = Char.ToUpperInvariant;
+                }
+                else
+                {
+                    if (!Char.IsUpper(value[0]) && !value.Contains(flagsSeparator))
+                        return value;
+
+                    needsTransform = Char.IsUpper;
+                    transform = Char.ToLowerInvariant;
                 }
 
-                return new String(chars.ToArray());
+                // using a StringBuilder would be an overkill because we don't change the length
+                char[] result = value.ToCharArray();
+
+                // first char
+                if (needsTransform.Invoke(result[0]))
+                    result[0] = transform.Invoke(result[0]);
+
+                // first char of further flags
+                int separatorLength = flagsSeparator.Length;
+                for (int pos, start = 0; (pos = value.IndexOf(flagsSeparator, start, StringComparison.Ordinal)) >= 0; start = pos)
+                {
+                    pos += separatorLength;
+                    if (pos == value.Length)
+                        break;
+
+                    if (needsTransform.Invoke(result[pos]))
+                        result[pos] = transform.Invoke(result[pos]);
+                }
+
+                return new String(result);
+            }
+
+            static string AdjustCasingWithInsertions(string value, bool upperCase, char wordsSeparator, string? flagsSeparator)
+            {
+                flagsSeparator ??= defaultSeparator;
+
+                // Using a list instead of StringBuilder because it is usually faster in our case. Initializing with fewest possible allocations.
+                //var result = new CircularList<char>(value.Length * 2);
+                //result.AddRange(value);
+                var result = new StringBuilder(value, value.Length * 2);
+
+                // Processing from the end so length change will not be a problem
+                int nextFlagPos = value.LastIndexOf(flagsSeparator, StringComparison.Ordinal);
+                nextFlagPos = nextFlagPos < 0 ? 0 : nextFlagPos + flagsSeparator.Length;
+                for (int i = value.Length - 1; i >= 0; i--)
+                {
+                    // Assuming that the original value was in PascalCase so inserting separators before upper case letters, except the first letters
+                    if (Char.IsUpper(value[i]))
+                    {
+                        if (!upperCase)
+                            result[i] = Char.ToLowerInvariant(value[i]);
+                        if (i != nextFlagPos)
+                            result.Insert(i, wordsSeparator);
+                    }
+                    else if (upperCase && Char.IsLower(value[i]))
+                        result[i] = Char.ToUpperInvariant(value[i]);
+
+                    if (i == nextFlagPos && i > 0)
+                    {
+                        nextFlagPos = value.LastIndexOf(flagsSeparator, nextFlagPos - flagsSeparator.Length - 1, StringComparison.Ordinal);
+                        nextFlagPos = nextFlagPos < 0 ? 0 : nextFlagPos + flagsSeparator.Length;
+                    }
+                }
+
+                return result.ToString();
             }
 
             #endregion
@@ -1815,10 +1882,10 @@ namespace KGySoft.Json
             switch (format)
             {
                 case JsonEnumFormat.PascalCase:
-                    return Char.IsLower(enumValue[0]) ? Char.ToUpperInvariant(enumValue[0]) + enumValue.Substring(1) : enumValue;
+                    return AdjustFirstCharsCasing(enumValue, true, flagsSeparator);
 
                 case JsonEnumFormat.CamelCase:
-                    return Char.IsUpper(enumValue[0]) ? Char.ToLowerInvariant(enumValue[0]) + enumValue.Substring(1) : enumValue;
+                    return AdjustFirstCharsCasing(enumValue, false, flagsSeparator);
 
                 case JsonEnumFormat.LowerCase:
                     return enumValue.ToLowerInvariant();
@@ -1827,16 +1894,16 @@ namespace KGySoft.Json
                     return enumValue.ToUpperInvariant();
 
                 case JsonEnumFormat.LowerCaseWithUnderscores:
-                    return AdjustString(enumValue, false, '_');
+                    return AdjustCasingWithInsertions(enumValue, false, '_', flagsSeparator);
 
                 case JsonEnumFormat.UpperCaseWithUnderscores:
-                    return AdjustString(enumValue, true, '_');
+                    return AdjustCasingWithInsertions(enumValue, true, '_', flagsSeparator);
 
                 case JsonEnumFormat.LowerCaseWithHyphens:
-                    return AdjustString(enumValue, false, '-');
+                    return AdjustCasingWithInsertions(enumValue, false, '-', flagsSeparator);
 
                 case JsonEnumFormat.UpperCaseWithHyphens:
-                    return AdjustString(enumValue, true, '-');
+                    return AdjustCasingWithInsertions(enumValue, true, '-', flagsSeparator);
             }
 
             Debug.Fail("This point should not be reached");

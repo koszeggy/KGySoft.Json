@@ -29,6 +29,28 @@ namespace KGySoft.Json.UnitTests
     [TestFixture]
     public class JsonValueExtensionsTest
     {
+        #region Enumerations
+
+        public enum TestEnum
+        {
+            TestEnumValue,
+            Value1WithNumbers2,
+            // ReSharper disable InconsistentNaming
+            camelCaseValue,
+            Value_With_Underscores
+            // ReSharper restore InconsistentNaming
+        }
+
+        [Flags]
+        public enum TestFlagsEnum
+        {
+            None,
+            FlagValue1,
+            FlagValue2
+        }
+
+        #endregion
+
         #region Methods
 
         [TestCase("true", JsonValueType.Undefined, true)]
@@ -447,32 +469,47 @@ namespace KGySoft.Json.UnitTests
             Assert.IsNull(value);
         }
 
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.PascalCase, "\"DarkBlue\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.CamelCase, "\"darkBlue\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.LowerCase, "\"darkblue\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.LowerCaseWithUnderscores, "\"dark_blue\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.LowerCaseWithHyphens, "\"dark-blue\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCase, "\"DARKBLUE\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCaseWithUnderscores, "\"DARK_BLUE\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.UpperCaseWithHyphens, "\"DARK-BLUE\"")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.Number, "1")]
-        [TestCase(ConsoleColor.DarkBlue, JsonEnumFormat.NumberAsString, "\"1\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.PascalCase, "\"TestEnumValue\"")]
+        [TestCase(TestEnum.camelCaseValue, JsonEnumFormat.PascalCase, "\"CamelCaseValue\"")]
+        [TestCase(TestEnum.Value_With_Underscores, JsonEnumFormat.PascalCase, "\"Value_With_Underscores\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.CamelCase, "\"testEnumValue\"")]
+        [TestCase(TestEnum.camelCaseValue, JsonEnumFormat.CamelCase, "\"camelCaseValue\"")]
+        [TestCase(TestEnum.Value_With_Underscores, JsonEnumFormat.CamelCase, "\"value_With_Underscores\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.LowerCase, "\"testenumvalue\"")]
+        [TestCase(TestEnum.Value_With_Underscores, JsonEnumFormat.LowerCase, "\"value_with_underscores\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.LowerCaseWithUnderscores, "\"test_enum_value\"")]
+        [TestCase(TestEnum.Value1WithNumbers2, JsonEnumFormat.LowerCaseWithUnderscores, "\"value1_with_numbers2\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.LowerCaseWithHyphens, "\"test-enum-value\"")]
+        [TestCase(TestEnum.Value1WithNumbers2, JsonEnumFormat.LowerCaseWithHyphens, "\"value1-with-numbers2\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.UpperCase, "\"TESTENUMVALUE\"")]
+        [TestCase(TestEnum.Value_With_Underscores, JsonEnumFormat.UpperCase, "\"VALUE_WITH_UNDERSCORES\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.UpperCaseWithUnderscores, "\"TEST_ENUM_VALUE\"")]
+        [TestCase(TestEnum.Value1WithNumbers2, JsonEnumFormat.UpperCaseWithUnderscores, "\"VALUE1_WITH_NUMBERS2\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.UpperCaseWithHyphens, "\"TEST-ENUM-VALUE\"")]
+        [TestCase(TestEnum.Value1WithNumbers2, JsonEnumFormat.UpperCaseWithHyphens, "\"VALUE1-WITH-NUMBERS2\"")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.Number, "0")]
+        [TestCase(TestEnum.TestEnumValue, JsonEnumFormat.NumberAsString, "\"0\"")]
         [TestCase(null, JsonEnumFormat.PascalCase, "null")]
-        public void FormatEnumTest(ConsoleColor? value, JsonEnumFormat format, string expectedResult)
+        public void FormatEnumTest(TestEnum? value, JsonEnumFormat format, string expectedResult)
         {
             JsonValue json = value.ToJson(format);
             Assert.AreEqual(expectedResult, json.ToString());
-            Assert.AreEqual(value.HasValue, json.TryGetEnum(true, out ConsoleColor result));
+            Assert.AreEqual(value.HasValue, json.TryGetEnum(true, out TestEnum result));
             Assert.AreEqual(value ?? default, result);
         }
 
-        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.PascalCase, ",", "\"Alt,Control\"")]
-        [TestCase(ConsoleModifiers.Alt | ConsoleModifiers.Control, JsonEnumFormat.LowerCase, "|", "\"alt|control\"")]
-        public void FormatFlagsEnumTest(ConsoleModifiers value, JsonEnumFormat format, string separator, string expectedResult)
+        [TestCase(TestFlagsEnum.FlagValue1 | TestFlagsEnum.FlagValue2, JsonEnumFormat.PascalCase, null, "\"FlagValue1, FlagValue2\"")]
+        [TestCase(TestFlagsEnum.FlagValue1 | TestFlagsEnum.FlagValue2, JsonEnumFormat.CamelCase, ",", "\"flagValue1,flagValue2\"")]
+        [TestCase(TestFlagsEnum.FlagValue1 | TestFlagsEnum.FlagValue2, JsonEnumFormat.LowerCaseWithHyphens, ";", "\"flag-value1;flag-value2\"")]
+        [TestCase(TestFlagsEnum.FlagValue1 | TestFlagsEnum.FlagValue2, JsonEnumFormat.UpperCaseWithUnderscores, "|", "\"FLAG_VALUE1|FLAG_VALUE2\"")]
+        [TestCase(TestFlagsEnum.None, JsonEnumFormat.UpperCaseWithUnderscores, "|", "\"NONE\"")]
+        [TestCase(TestFlagsEnum.FlagValue1 | TestFlagsEnum.FlagValue2, JsonEnumFormat.Number, null, "3")]
+        [TestCase(TestFlagsEnum.FlagValue1 | TestFlagsEnum.FlagValue2, JsonEnumFormat.NumberAsString, null, "\"3\"")]
+        public void FormatFlagsEnumTest(TestFlagsEnum value, JsonEnumFormat format, string? separator, string expectedResult)
         {
             JsonValue json = value.ToJson(format, separator);
             Assert.AreEqual(expectedResult, json.ToString());
-            Assert.IsTrue(json.TryGetEnum(true, out ConsoleModifiers result, separator));
+            Assert.IsTrue(json.TryGetEnum(true, out TestFlagsEnum result, separator));
             Assert.AreEqual(value, result);
         }
 

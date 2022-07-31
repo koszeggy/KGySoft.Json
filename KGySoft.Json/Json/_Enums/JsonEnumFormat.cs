@@ -23,45 +23,57 @@ namespace KGySoft.Json
     {
         /// <summary>
         /// Represents Pascal casing, eg. <c>EnumValue</c>.
-        /// Assuming that enums already use Pascal casing as per .NET conventions this formatting preserves the original format.
+        /// <br/>Assuming that enums already use Pascal casing as per .NET conventions this formatting preserves the original format.
         /// When using the <see cref="JsonValueExtensions.ToJson{TEnum}(TEnum, JsonEnumFormat, string)"/> method it adjusts only the first character if that is not an upper case one.
         /// </summary>
         PascalCase,
 
         /// <summary>
         /// Represents camel casing, eg. <c>enumValue</c>.
-        /// Assuming that enums already use Pascal casing as per .NET conventions this formatting adjusts the first character only.
+        /// <br/>Assuming that enums use Pascal casing as per .NET conventions this formatting adjusts the first character only.
         /// When using the <see cref="JsonValueExtensions.ToJson{TEnum}(TEnum, JsonEnumFormat, string)"/> method it adjusts only the first character if that is not a lower case one.
         /// </summary>
         CamelCase,
 
         /// <summary>
-        /// Represents lower casing, eg. <c>enumvalue</c>.
+        /// Represents lower casing, eg. <c>enumvalue</c>. Possible underscores are not removed from the result.
         /// </summary>
         LowerCase,
 
         /// <summary>
-        /// Represents upper casing, eg. <c>ENUMVALUE</c>.
+        /// Represents upper casing, eg. <c>ENUMVALUE</c>. Possible underscores are not removed from the result.
         /// </summary>
         UpperCase,
 
         /// <summary>
         /// Represents lower casing with underscores, eg. <c>enum_value</c>.
+        /// <br/>Assuming that enums use Pascal casing as per .NET conventions this formatting just inserts underscores
+        /// before the originally upper case letters, except the first one. If the original value also contains underscores,
+        /// then they might be duplicated in the result. For such enums use the <see cref="LowerCase"/> formatting instead.
         /// </summary>
         LowerCaseWithUnderscores,
 
         /// <summary>
         /// Represents upper casing with underscores, eg. <c>ENUM_VALUE</c>.
+        /// <br/>Assuming that enums use Pascal casing as per .NET conventions this formatting just inserts underscores
+        /// before the originally upper case letters, except the first one. If the original value also contains underscores,
+        /// then they might be duplicated in the result. For such enums use the <see cref="UpperCase"/> formatting instead.
         /// </summary>
         UpperCaseWithUnderscores,
 
         /// <summary>
         /// Represents lower casing with hyphens, eg. <c>enum-value</c>.
+        /// <br/>Assuming that enums use Pascal casing as per .NET conventions this formatting just inserts hyphens
+        /// before the originally upper case letters, except the first one. If the original value contains underscores,
+        /// then they also will be preserved.
         /// </summary>
         LowerCaseWithHyphens,
 
         /// <summary>
         /// Represents upper casing with hyphens, eg. <c>ENUM-VALUE</c>.
+        /// <br/>Assuming that enums use Pascal casing as per .NET conventions this formatting just inserts hyphens
+        /// before the originally upper case letters, except the first one. If the original value contains underscores,
+        /// then they also will be preserved.
         /// </summary>
         UpperCaseWithHyphens,
 
