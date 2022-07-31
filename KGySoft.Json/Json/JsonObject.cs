@@ -73,7 +73,6 @@ namespace KGySoft.Json
         #region Fields
 
         private List<JsonProperty> properties;
-
         private StringKeyedDictionary<int>? nameToIndex;
 
         #endregion
@@ -198,6 +197,41 @@ namespace KGySoft.Json
             set => SetItem(new JsonProperty(propertyName, value));
         }
 
+        /// <summary>
+        /// Gets the value of a property by name. Using a nonexistent <paramref name="propertyName"/>
+        /// returns <see cref="JsonValue.Undefined"/>, just like in JavaScript.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to get or set.</param>
+        /// <returns>The value of the property with the specified <paramref name="propertyName"/>, or <see cref="JsonValue.Undefined"/> if no such property is found.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="propertyName"/> is <see cref="StringSegment.Null">StringSegment.Null</see>.</exception>
+        public JsonValue this[StringSegment propertyName]
+        {
+            get
+            {
+                if (propertyName.IsNull)
+                    Throw.ArgumentNullException(nameof(propertyName));
+                int index = TryGetIndex(propertyName);
+                return index >= 0 ? properties[index].Value : JsonValue.Undefined;
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Gets the value of a property by name. Using a nonexistent <paramref name="propertyName"/>
+        /// returns <see cref="JsonValue.Undefined"/>, just like in JavaScript.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to get or set.</param>
+        /// <returns>The value of the property with the specified <paramref name="propertyName"/>, or <see cref="JsonValue.Undefined"/> if no such property is found.</returns>
+        public JsonValue this[ReadOnlySpan<char> propertyName]
+        {
+            get
+            {
+                int index = TryGetIndex(propertyName);
+                return index >= 0 ? properties[index].Value : JsonValue.Undefined;
+            }
+        }
+#endif
+
         #endregion
 
         #endregion
@@ -284,7 +318,7 @@ namespace KGySoft.Json
         /// <param name="reader">A <see cref="TextReader"/> that will be read for the <see cref="JsonObject"/> content.</param>
         /// <returns>A <see cref="JsonObject"/> that contains the JSON object data that was read from the specified <see cref="TextReader"/>.</returns>
         public static JsonObject Parse(TextReader reader)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, reader CAN be null but MUST NOT be
             => JsonParser.ParseObject(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)));
 
         /// <summary>
@@ -296,7 +330,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>A <see cref="JsonObject"/> that contains the JSON object data that was read from the specified <paramref name="stream"/>.</returns>
         public static JsonObject Parse(Stream stream, Encoding? encoding = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
             => Parse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8));
 
         /// <summary>
@@ -305,7 +339,7 @@ namespace KGySoft.Json
         /// <param name="s">A string that will be read for the <see cref="JsonObject"/> content.</param>
         /// <returns>A <see cref="JsonObject"/> that contains the JSON object data that was read from the specified string.</returns>
         public static JsonObject Parse(string s)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, s CAN be null but MUST NOT be
             => Parse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))));
 
         /// <summary>
@@ -315,8 +349,8 @@ namespace KGySoft.Json
         /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
         /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
-        public static bool TryParse(TextReader reader, [MaybeNullWhen(false)] out JsonObject value)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+        public static bool TryParse(TextReader reader, [MaybeNullWhen(false)]out JsonObject value)
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, reader CAN be null but MUST NOT be
             => JsonParser.TryParseObject(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)), out value);
 
         /// <summary>
@@ -329,8 +363,8 @@ namespace KGySoft.Json
         /// If <see langword="null"/>, then <see cref="Encoding.UTF8"/> encoding will be used. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
-        public static bool TryParse(Stream stream, [MaybeNullWhen(false)] out JsonObject value, Encoding? encoding = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+        public static bool TryParse(Stream stream, [MaybeNullWhen(false)]out JsonObject value, Encoding? encoding = null)
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
             => TryParse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), out value);
 
         /// <summary>
@@ -340,8 +374,8 @@ namespace KGySoft.Json
         /// <param name="value">When this method returns <see langword="true"/>, the result of the parsing;
         /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
-        public static bool TryParse(string s, [MaybeNullWhen(false)] out JsonObject value)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+        public static bool TryParse(string s, [MaybeNullWhen(false)]out JsonObject value)
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, s CAN be null but MUST NOT be
             => TryParse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))), out value);
 
 
@@ -608,7 +642,7 @@ namespace KGySoft.Json
         /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         public void WriteTo(TextWriter writer, string? indent = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, writer CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, writer CAN be null but MUST NOT be
             => new JsonWriter(writer ?? Throw.ArgumentNullException<TextWriter>(nameof(writer)), indent).Write(this);
 
         /// <summary>
@@ -645,7 +679,7 @@ namespace KGySoft.Json
         /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         public void WriteTo(Stream stream, Encoding? encoding = null, string? indent = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
             => new JsonWriter(new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), indent).Write(this);
 
         #endregion
@@ -722,6 +756,46 @@ namespace KGySoft.Json
 
             return -1;
         }
+
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private int TryGetIndex(StringSegment name)
+        {
+            if (Count >= buildIndexMapThreshold)
+            {
+                EnsureMap();
+                return nameToIndex!.TryGetValue(name, out int index) ? index : -1;
+            }
+
+            // reverse traversal so finding the last occurrence of possible duplicates
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                if (properties[i].Name == name)
+                    return i;
+            }
+
+            return -1;
+        }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private int TryGetIndex(ReadOnlySpan<char> name)
+        {
+            if (Count >= buildIndexMapThreshold)
+            {
+                EnsureMap();
+                return nameToIndex!.TryGetValue(name, out int index) ? index : -1;
+            }
+
+            // reverse traversal so finding the last occurrence of possible duplicates
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                if (properties[i].Name == name)
+                    return i;
+            }
+
+            return -1;
+        }
+#endif
 
         [MethodImpl(MethodImpl.AggressiveInlining)]
         private void EnsureMap()

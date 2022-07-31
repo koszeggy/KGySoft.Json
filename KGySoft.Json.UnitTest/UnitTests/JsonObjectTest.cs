@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using KGySoft.CoreLibraries;
+
 using NUnit.Framework;
 
 #endregion
@@ -37,7 +39,7 @@ namespace KGySoft.Json.UnitTests
             {
                 new JsonProperty("name", "value"), // regular
                 { "string", "string value" }, // from name and value
-#if NET70_OR_GREATER || NET
+#if (NET47_OR_GREATER || NETSTANDARD || NETCOREAPP)
                 ("int", 1), // from tuple
 #else
                 new("int", 1),
@@ -165,6 +167,14 @@ namespace KGySoft.Json.UnitTests
             Assert.AreEqual(JsonValueType.Number, obj["int"].Type);
             Assert.AreEqual(1, obj["int"].AsNumber);
             Assert.IsTrue(obj["int"] == 1);
+            Assert.AreEqual(JsonValueType.Number, obj["int".AsSegment()].Type);
+            Assert.AreEqual(1, obj["int".AsSegment()].AsNumber);
+            Assert.IsTrue(obj["int".AsSegment()] == 1);
+#if NETCOREAPP2_1_OR_GREATER
+            Assert.AreEqual(JsonValueType.Number, obj["int".AsSpan()].Type);
+            Assert.AreEqual(1, obj["int".AsSpan()].AsNumber);
+            Assert.IsTrue(obj["int".AsSpan()] == 1);
+#endif
 
             var asList = (IList<JsonProperty>)obj;
             var asDict = (IDictionary<string, JsonValue>)obj;
