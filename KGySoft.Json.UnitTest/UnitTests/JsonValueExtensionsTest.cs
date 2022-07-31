@@ -249,6 +249,52 @@ namespace KGySoft.Json.UnitTests
         }
 #endif
 
+#if NET7_0_OR_GREATER
+        [TestCase("1", JsonValueType.Undefined, 1)]
+        [TestCase("1", JsonValueType.Number, 1)]
+        [TestCase("1", JsonValueType.String, null)]
+        [TestCase("\"1\"", JsonValueType.Undefined, 1)]
+        [TestCase("\"1\"", JsonValueType.Number, null)]
+        [TestCase("\"1\"", JsonValueType.String, 1)]
+        [TestCase("null", JsonValueType.Number, null)]
+        [TestCase("null", JsonValueType.String, null)]
+        [TestCase("1.23", JsonValueType.Number, null)]
+        [TestCase("\"x\"", JsonValueType.String, null)]
+        public void Int128Test(string json, JsonValueType expectedType, int? expectedInt)
+        {
+            Int128? expectedResult = expectedInt;
+            JsonValue value = JsonValue.Parse(json);
+            Assert.AreEqual(expectedResult, value.AsInt128(expectedType));
+            Assert.AreEqual(expectedResult.HasValue, value.TryGetInt128(out Int128 actualValue, expectedType));
+            Assert.AreEqual(expectedResult.GetValueOrDefault(), actualValue);
+            Assert.AreEqual(expectedResult.GetValueOrDefault(), value.GetInt128OrDefault(default, expectedType));
+            Assert.AreEqual(expectedResult, expectedResult.ToJson(false).AsInt128());
+            Assert.AreEqual(expectedResult, expectedResult.ToJson().AsInt128());
+        }
+
+        [TestCase("1", JsonValueType.Undefined, 1U)]
+        [TestCase("1", JsonValueType.Number, 1U)]
+        [TestCase("1", JsonValueType.String, null)]
+        [TestCase("\"1\"", JsonValueType.Undefined, 1U)]
+        [TestCase("\"1\"", JsonValueType.Number, null)]
+        [TestCase("\"1\"", JsonValueType.String, 1U)]
+        [TestCase("null", JsonValueType.Number, null)]
+        [TestCase("null", JsonValueType.String, null)]
+        [TestCase("1.23", JsonValueType.Number, null)]
+        [TestCase("\"x\"", JsonValueType.String, null)]
+        public void UInt128Test(string json, JsonValueType expectedType, uint? expectedUInt)
+        {
+            UInt128? expectedResult = expectedUInt;
+            JsonValue value = JsonValue.Parse(json);
+            Assert.AreEqual(expectedResult, value.AsUInt128(expectedType));
+            Assert.AreEqual(expectedResult.HasValue, value.TryGetUInt128(out UInt128 actualValue, expectedType));
+            Assert.AreEqual(expectedResult.GetValueOrDefault(), actualValue);
+            Assert.AreEqual(expectedResult.GetValueOrDefault(), value.GetUInt128OrDefault(default, expectedType));
+            Assert.AreEqual(expectedResult, expectedResult.ToJson(false).AsUInt128());
+            Assert.AreEqual(expectedResult, expectedResult.ToJson().AsUInt128());
+        }
+#endif
+
 #if NET5_0_OR_GREATER
         [TestCase("1", JsonValueType.Undefined, 1f)]
         [TestCase("1", JsonValueType.Number, 1f)]
