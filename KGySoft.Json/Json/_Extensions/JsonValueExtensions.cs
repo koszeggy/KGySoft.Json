@@ -2283,7 +2283,7 @@ namespace KGySoft.Json
         /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
         /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
         public static JsonValue ToJson(this DateTime value, string format)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, format CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, format CAN be null but MUST NOT be
             => value.ToString(format ?? Throw.ArgumentNullException<string>(nameof(format)), DateTimeFormatInfo.InvariantInfo);
 
         /// <summary>
@@ -2530,7 +2530,7 @@ namespace KGySoft.Json
         /// <returns>A <see cref="JsonValue"/> instance that is the JSON representation of the specified <paramref name="value"/>.</returns>
         /// <exception cref="FormatException"><paramref name="format"/> is invalid.</exception>
         public static JsonValue ToJson(this DateTimeOffset value, string format)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, format CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, format CAN be null but MUST NOT be
             => value.ToString(format ?? Throw.ArgumentNullException<string>(nameof(format)), DateTimeFormatInfo.InvariantInfo);
 
         /// <summary>
