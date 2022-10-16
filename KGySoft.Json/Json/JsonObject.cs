@@ -36,7 +36,6 @@ namespace KGySoft.Json
     /// Represents a JSON object, interpreted as a <see cref="string">string</see>-<see cref="JsonValue"/> dictionary
     /// and also as a list of <see cref="JsonProperty"/> elements.
     /// Use the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see> methods to convert it to JSON.
-    /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
     /// <remarks>
     /// <para>Just like in JavaScript, the <see cref="O:KGySoft.Json.JsonObject.ToString">ToString</see> (and <see cref="O:KGySoft.Json.JsonObject.WriteTo">WriteTo</see>)

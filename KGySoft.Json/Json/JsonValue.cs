@@ -33,7 +33,6 @@ namespace KGySoft.Json
     /// and it can be assigned also from <see cref="JsonArray"/> and <see cref="JsonObject"/> types.
     /// Its default value represents the JavaScript <see cref="JsonValueType.Undefined"/> value.
     /// Use the <see cref="O:KGySoft.Json.JsonValue.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonValue.WriteTo">WriteTo</see> methods to convert it to JSON.
-    /// <br/>See the <strong>Remarks</strong> section for details and examples.
     /// </summary>
     /// <remarks>
     /// <para>A <see cref="JsonValue"/> instance represents any JavaScript type that can appear in JSON (see also the <see cref="Type"/> property
@@ -375,7 +374,6 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets the <see cref="string">string</see> value of this <see cref="JsonValue"/> instance if it has <see cref="JsonValueType.String"/>&#160;<see cref="Type"/>;
         /// or <see langword="null"/>, if its <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <remarks>
         /// <para>This property returns <see langword="null"/> if this <see cref="JsonValue"/> represents a non-string primitive JavaScript literal.
@@ -390,7 +388,6 @@ namespace KGySoft.Json
         /// The returned value is a <see cref="double">double</see> to be conform with JSON <see cref="JsonValueType.Number"/> type.
         /// To retrieve the actual stored raw value use the <see cref="AsLiteral"/> property.
         /// To retrieve the value as .NET numeric types use the methods in the <see cref="JsonValueExtensions"/> class.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <remarks>
         /// <note type="warning">The JavaScript <see cref="JsonValueType.Number"/> type is
@@ -423,7 +420,6 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets this <see cref="JsonValue"/> instance as a <see cref="JsonArray"/> if it has <see cref="JsonValueType.Array"/>&#160;<see cref="Type"/>;
         /// or <see langword="null"/>, if its <see cref="Type"/> is not <see cref="JsonValueType.Array"/>.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <remarks>
         /// <para>To get array elements you can also read the numeric <see cref="this[int]">indexer</see> without obtaining the value as a <see cref="JsonArray"/>.</para>
@@ -434,7 +430,6 @@ namespace KGySoft.Json
         /// <summary>
         /// Gets this <see cref="JsonValue"/> instance as a <see cref="JsonObject"/> if it has <see cref="JsonValueType.Object"/>&#160;<see cref="Type"/>;
         /// or <see langword="null"/>, if its <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <remarks>
         /// <para>To get property values you can also read the string <see cref="this[string]">indexer</see> without obtaining the value as a <see cref="JsonObject"/>.</para>
@@ -795,7 +790,6 @@ namespace KGySoft.Json
         /// An implicit conversion from the <see cref="double">double</see> type also exists.
         /// Some .NET numeric types such as <see cref="long">long</see> and <see cref="decimal">decimal</see> are not recommended to be encoded as JSON numbers.
         /// Use the <see cref="O:KGySoft.Json.JsonValueExtensions.ToJson">ToJson</see> extension methods if you still want to do so.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <param name="value">The value to initialize the <see cref="JsonValue"/> from.</param>
         /// <remarks>
@@ -940,7 +934,6 @@ namespace KGySoft.Json
         /// <summary>
         /// Creates a <see cref="JsonValue"/> that forcibly treats <paramref name="value"/> as a JSON number,
         /// even if it cannot be represented as a valid number in JavaScript.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns><see cref="Null"/>, if <paramref name="value"/> was <see langword="null"/>; otherwise, a <see cref="JsonValue"/>
@@ -957,7 +950,6 @@ namespace KGySoft.Json
 
         /// <summary>
         /// Creates a <see cref="JsonValue"/> that forcibly treats <paramref name="value"/> as a JSON literal, even if it is invalid in JSON.
-        /// <br/>See the <strong>Remarks</strong> section for details.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns><see cref="Null"/>, if <paramref name="value"/> was <see langword="null"/>; otherwise, a <see cref="JsonValue"/>,

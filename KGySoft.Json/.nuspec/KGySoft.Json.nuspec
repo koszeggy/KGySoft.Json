@@ -65,7 +65,7 @@ Documentation: https://docs.kgysoft.net/json</description>
   </metadata>
   <files>
     <file src="..\..\LICENSE" />
-    <file src="..\Help\KGySoft.Json.chm" target="Help" />
+    <!--<file src="..\Help\KGySoft.Json.chm" target="Help" />-->
     <file src="Icon64.png" target="" />
     <file src="..\bin\Release\net35\KGySoft.Json.dll" target="lib\net35" />
     <file src="..\bin\Release\net35\KGySoft.Json.xml" target="lib\net35" />

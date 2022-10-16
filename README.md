@@ -31,7 +31,7 @@ KGy SOFT JSON Libraries offer a simple and fast way to build and parse JSON cont
 
 ## What is KGySoft.Json
 
-First of all, what it is **not**: It's _not_ a serializer (though see the **Examples** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type). It is rather a simple Domain Object Model (DOM) for JSON (or LINQ to JSON if you like), which makes possible to manipulate JSON content in memory in an object-oriented way (similarly to `XDocument` and its friends for XML).
+First of all, what it is **not**: It's _not_ a serializer (though see the **Examples** section of the [`JsonValue`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonValue.htm) type). It is rather a simple Domain Object Model (DOM) for JSON (or LINQ to JSON if you like), which makes possible to manipulate JSON content in memory in an object-oriented way (similarly to `XDocument` and its friends for XML).
 
 ### What's wrong with JSON.NET?
 
@@ -45,11 +45,11 @@ Well, it's a bit different thing. As an in-memory JSON tool, it is read-only (`J
 
 ## Examples
 
-> 💡 _Tip:_ See also the examples at the **Remarks** section of the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type.
+> 💡 _Tip:_ See also the examples at the **Remarks** section of the [`JsonValue`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonValue.htm) type.
 
 ### Simple Syntax
 
-The [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type is the base building block of JSON content, which can be considered as a representation of a JavaScript variable (see also the [`JsonValueType`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueType.htm) enumeration). It also behaves somewhat similarly to JavaScript:
+The [`JsonValue`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonValue.htm) type is the base building block of JSON content, which can be considered as a representation of a JavaScript variable (see also the [`JsonValueType`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonValueType.htm) enumeration). It also behaves somewhat similarly to JavaScript:
 
 #### `undefined`
 
@@ -151,7 +151,7 @@ Console.WriteLine(obj["UnknownProperty"]); // undefined
 
 #### Interop with common .NET types
 
-Though the [`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValue.htm) type has a JavaScript-like approach (eg. it has a single `AsNumber` property with nullable `double` return type for any numbers) the [`JsonValueExtensions`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonValueExtensions.htm) class provides .NET type specific conversions for most .NET numeric types, including `Int64`, `Decimal`, `BigInteger`, `Int128` and more. Additionally, it offers conversions for `Enum`, `DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly` and `Guid` types as well.
+Though the [`JsonValue`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonValue.htm) type has a JavaScript-like approach (eg. it has a single `AsNumber` property with nullable `double` return type for any numbers) the [`JsonValueExtensions`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonValueExtensions.htm) class provides .NET type specific conversions for most .NET numeric types, including `Int64`, `Decimal`, `BigInteger`, `Int128` and more. Additionally, it offers conversions for `Enum`, `DateTime`, `DateTimeOffset`, `TimeSpan`, `DateOnly`, `TimeOnly` and `Guid` types as well.
 
 ```cs
 // Use the ToJson extension methods to convert common .NET types to JsonValue
@@ -176,7 +176,7 @@ decimal? valueOrNull = obj["Balance"].AsDecimal(); // or: AsDecimal(JsonValueTyp
 decimal balance = obj["Balance"].GetDecimalOrDefault(); // or: GetDecimalOrDefault(-1m) to specify a default value
 ```
 
-> 💡 _Tip:_ There are several predefined formats for enums (see [`JsonEnumFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonEnumFormat.htm)), `DateTime`, `DateTimeOffset` and `DateOnly` types (see [`JsonDateTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonDateTimeFormat.htm)) and `TimeSpan`/`TimeOnly` values (see [`JsonTimeFormat`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonTimeFormat.htm)).
+> 💡 _Tip:_ There are several predefined formats for enums (see [`JsonEnumFormat`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonEnumFormat.htm)), `DateTime`, `DateTimeOffset` and `DateOnly` types (see [`JsonDateTimeFormat`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonDateTimeFormat.htm)) and `TimeSpan`/`TimeOnly` values (see [`JsonTimeFormat`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonTimeFormat.htm)).
 
 ### Writing JSON
 
@@ -217,7 +217,7 @@ The example above prints the following in the Console:
 
 ### Parsing JSON
 
-Use the [`JsonValue.Parse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_Parse.htm)/[`TryParse`](https://docs.kgysoft.net/json/?topic=html/Overload_KGySoft_Json_JsonValue_TryParse.htm) methods to parse a JSON document from `string`, `TextReader` or `Stream`. You can also specify an `Encoding` for the `Stream` overload. If you expect the result to be an array or an object, then you can find these methods on the [`JsonArray`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) types as well.
+Use the [`JsonValue.Parse`](https://docs.kgysoft.net/json/html/Overload_KGySoft_Json_JsonValue_Parse.htm)/[`TryParse`](https://docs.kgysoft.net/json/html/Overload_KGySoft_Json_JsonValue_TryParse.htm) methods to parse a JSON document from `string`, `TextReader` or `Stream`. You can also specify an `Encoding` for the `Stream` overload. If you expect the result to be an array or an object, then you can find these methods on the [`JsonArray`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonObject.htm) types as well.
 
 As you could see [above](#object) navigation in a parsed object graph is pretty straightforward. You can use the `int` indexer for arrays and the `string` indexer for objects. Using an invalid array index or property name returns an `undefined` value:
 
@@ -236,7 +236,7 @@ long id = json["data"][0]["id"].AsInt64() ?? throw new ArgumentException("Unexpe
 
 ### Manipulating JSON
 
-[`JsonValue`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonOValue.htm) is a read-only struct but [`JsonArray`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) types are mutable classes. They implement some generic collection interfaces so they support LINQ extension methods.
+[`JsonValue`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonOValue.htm) is a read-only struct but [`JsonArray`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonArray.htm) and [`JsonObject`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonObject.htm) types are mutable classes. They implement some generic collection interfaces so they support LINQ extension methods.
 
 ```cs
 JsonValue value = JsonValue.Parse(someStream);
@@ -250,7 +250,7 @@ toBeChanged["newProp"] = 123; // or: toBeChanged.Add("newProp", 123);
 Console.WriteLine(value["data"][0]["newProp"].Type) // Number
 ```
 
-> 💡 _Tip:_ [`JsonObject`](https://docs.kgysoft.net/json/?topic=html/T_KGySoft_Json_JsonObject.htm) implements both `IList<JsonProperty>` and `IDictionary<string, JsonValue>` so without casting or specifying some type arguments many LINQ methods might be ambiguous on a `JsonObject` instance. To avoid ambiguity and to keep also the syntax simple you can perform the LINQ operations on its `Entries` property.
+> 💡 _Tip:_ [`JsonObject`](https://docs.kgysoft.net/json/html/T_KGySoft_Json_JsonObject.htm) implements both `IList<JsonProperty>` and `IDictionary<string, JsonValue>` so without casting or specifying some type arguments many LINQ methods might be ambiguous on a `JsonObject` instance. To avoid ambiguity and to keep also the syntax simple you can perform the LINQ operations on its `Entries` property.
 
 ## Performance Comparisons
 
@@ -319,8 +319,8 @@ Find the project site at [kgysoft.net](https://kgysoft.net/json/).
 
 ## Documentation
 
-* [Online documentation](https://docs.kgysoft.net/json)
-* [Offline .chm documentation](https://github.com/koszeggy/KGySoft.Json/raw/master/KGySoft.Json/Help/KGySoft.Json.chm)
+* You can find the online KGy SOFT Core Libraries documentation [here](https://docs.kgysoft.net/json).
+* See [this](https://docs.kgysoft.net) link to access the online documentation of all KGy SOFT libraries.
 
 ## Release Notes
 

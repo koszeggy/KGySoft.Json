@@ -30,7 +30,6 @@ namespace KGySoft.Json
     /// <summary>
     /// Represents a JSON array, interpreted as a list of <see cref="JsonValue"/> elements.
     /// Use the <see cref="O:KGySoft.Json.JsonArray.ToString">ToString</see> or <see cref="O:KGySoft.Json.JsonArray.WriteTo">WriteTo</see> methods to convert it to JSON.
-    /// <br/>See the <strong>Remarks</strong> section for details.
     /// </summary>
     /// <remarks>
     /// <para>Just like in JavaScript, the <see cref="O:KGySoft.Json.JsonArray.ToString">ToString</see> (and <see cref="O:KGySoft.Json.JsonArray.WriteTo">WriteTo</see>)

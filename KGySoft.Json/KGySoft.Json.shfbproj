@@ -22,9 +22,9 @@
     <DocumentationSources>
       <DocumentationSource sourceFile="KGySoft.Json.csproj" xmlns="" />
     </DocumentationSources>
-    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
+    <HelpFileFormat>Website</HelpFileFormat>
     <SyntaxFilters>Standard</SyntaxFilters>
-    <PresentationStyle>VS2010</PresentationStyle>
+    <PresentationStyle>Default2022</PresentationStyle>
     <CleanIntermediates>True</CleanIntermediates>
     <KeepLogFile>False</KeepLogFile>
     <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
@@ -32,7 +32,7 @@
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <SaveComponentCacheCapacity>100</SaveComponentCacheCapacity>
     <HelpTitle>KGy SOFT JSON Libraries Help</HelpTitle>
-    <HelpFileVersion>2.1.0-preview.1</HelpFileVersion>
+    <HelpFileVersion>2.1.0-rc.1</HelpFileVersion>
     <NamingMethod>MemberName</NamingMethod>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <RootNamespaceContainer>False</RootNamespaceContainer>
@@ -59,21 +59,28 @@
     <IncludeFavorites>True</IncludeFavorites>
     <WebsiteSdkLinkType>Msdn</WebsiteSdkLinkType>
     <AppendMarkdownFileExtensionsToUrls>False</AppendMarkdownFileExtensionsToUrls>
-    <VisibleItems>Attributes, InheritedMembers, Protected, ProtectedInternalAsProtected</VisibleItems>
+    <VisibleItems>Attributes, InheritedMembers, Protected, ProtectedInternalAsProtected, NonBrowsable</VisibleItems>
     <WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
     <TransformComponentArguments>
-      <Argument Key="logoFile" Value="logo.png" />
-      <Argument Key="logoHeight" Value="" />
-      <Argument Key="logoWidth" Value="" />
-      <Argument Key="logoAltText" Value="KGy SOFT" />
-      <Argument Key="logoPlacement" Value="above" />
-      <Argument Key="logoAlignment" Value="left" />
-      <Argument Key="logoUrl" Value="https://kgysoft.net/json" />
-      <Argument Key="maxVersionParts" Value="" />
-      <Argument Key="defaultLanguage" Value="cs" />
-      <Argument Key="includeEnumValues" Value="true" />
-      <Argument Key="baseSourceCodeUrl" Value="" />
-      <Argument Key="requestExampleUrl" Value="" />
+      <Argument Key="RobotsMetadata" Value="" />
+      <Argument Key="BibliographyDataFile" Value="" />
+      <Argument Key="RootBreadcrumbTitleText" Value="KGy SOFT JSON Libraries" />
+      <Argument Key="CollapsibleSections" Value="True" />
+      <Argument Key="LogoFile" Value="logo.png" />
+      <Argument Key="LogoHeight" Value="" />
+      <Argument Key="LogoWidth" Value="" />
+      <Argument Key="LogoAltText" Value="KGy SOFT" />
+      <Argument Key="LogoPlacement" Value="above" />
+      <Argument Key="LogoAlignment" Value="left" />
+      <Argument Key="LogoUrl" Value="https://kgysoft.net/json" />
+      <Argument Key="MaxVersionParts" Value="" />
+      <Argument Key="DefaultLanguage" Value="cs" />
+      <Argument Key="IncludeEnumValues" Value="true" />
+      <Argument Key="EnumMemberSortOrder" Value="Value" />
+      <Argument Key="FlagsEnumValueFormat" Value="HexValue" />
+      <Argument Key="FlagsEnumSeparatorSize" Value="0" />
+      <Argument Key="BaseSourceCodeUrl" Value="" />
+      <Argument Key="RequestExampleUrl" Value="" />
     </TransformComponentArguments>
     <ComponentConfigurations>
     </ComponentConfigurations>

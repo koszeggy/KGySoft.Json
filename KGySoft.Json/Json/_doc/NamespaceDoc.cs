@@ -22,7 +22,7 @@ using System.Runtime.CompilerServices;
 namespace KGySoft.Json
 {
     /// <summary>
-    /// Contains types that make possible in-memory JSON manipulation (LINQ to JSON),
+    /// The <see cref="N:KGySoft.Json"/> namespace contains types that make possible in-memory JSON manipulation (LINQ to JSON),
     /// similarly to the <a href="https://docs.microsoft.com/en-us/dotnet/api/System.Xml.Linq" target="_blank">System.Xml.Linq</a>
     /// namespace for XML content.
     /// <br/>See the <strong>Remarks</strong> section of the <see cref="JsonValue"/> struct for details and examples.
