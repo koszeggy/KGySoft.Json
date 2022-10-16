@@ -16,17 +16,13 @@
 #region Usings
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-
-using KGySoft.Collections;
 #if !NET35
 using System.Numerics;
 #endif
+using System.Text;
 
 using KGySoft.CoreLibraries;
 
@@ -1603,8 +1599,14 @@ namespace KGySoft.Json
             {
                 // First trying to parse without removing characters. Will not work if the value contains hyphens, which is not valid in C# identifiers
                 // but will work if the original identifier also contains underscores.
+#if NETFRAMEWORK || NETSTANDARD2_0 || NETCOREAPP2_0
+                if (!s.Contains("-", StringComparison.Ordinal) && Enum<TEnum>.TryParse(s, flagsSeparator, ignoreFormat, out value))
+#else
                 if (!s.Contains('-') && Enum<TEnum>.TryParse(s, flagsSeparator, ignoreFormat, out value))
+#endif
+                {
                     return true;
+                }
 
                 // Trying to remove underscores and hyphens. Will not work if the original identifier contains underscores, which was formatted
                 // with adding underscores or hyphens. This could also work by replacing "__" to "_" first but such formatting is intentionally considered invalid.
