@@ -138,7 +138,7 @@ namespace KGySoft.Json
 
         #region Internal Methods
 
-        internal void Write(in JsonValue value)
+        internal void Write(JsonValue value)
         {
             switch (value.Type)
             {

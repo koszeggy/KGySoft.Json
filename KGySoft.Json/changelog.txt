@@ -6,7 +6,7 @@
 ===============================================================================
 
 ~~~~~~~~~
-! v2.1.0:
+! v3.0.0:
 ~~~~~~~~~
 
 ! Assembly changes:
@@ -16,13 +16,16 @@
   https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/KGySoft.CoreLibraries/changelog.txt
 * Targeting also .NET 7.0
 
-* KGySoft.Json namespace:
+! KGySoft.Json namespace:
 =========================
 + JsonValue struct:
   + New indexers with StringSegment and ReadOnlySpan<char> (.NET Core 2.1/.NET Standard 2.1 and above) parameter
 + JsonObject class:
   + New indexers with StringSegment and ReadOnlySpan<char> (.NET Core 2.1/.NET Standard 2.1 and above) parameter
-* JsonValueExtensions class:
+! JsonValueExtensions class:
+  ! The JsonValue parameter is no longer passed by reference (in modifier) in the extension methods. Marked as a
+    breaking change, though this is a recompile-compatible change if the 'in' modifier was not specified at the
+    caller side.
   + New TryGetInt128, AsInt128, GetInt128OrDefault methods (.NET 7.0 and above)
   + New TryGetUInt128, AsUInt128, GetUInt128OrDefault methods (.NET 7.0 and above)
   + New ToJson overloads for Int128 and UInt128 types (.NET 7.0 and above)

@@ -52,7 +52,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="bool"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static bool? AsBoolean(this in JsonValue json, JsonValueType expectedType = default)
+        public static bool? AsBoolean(this JsonValue json, JsonValueType expectedType = default)
         {
             if (expectedType != JsonValueType.Undefined && json.Type != expectedType || json.AsStringInternal is not string s)
                 return null;
@@ -85,7 +85,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetBoolean(this in JsonValue json, out bool value, JsonValueType expectedType = default)
+        public static bool TryGetBoolean(this JsonValue json, out bool value, JsonValueType expectedType = default)
         {
             bool? result = json.AsBoolean(expectedType);
             value = result ?? default;
@@ -105,7 +105,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="bool"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static bool GetBooleanOrDefault(this in JsonValue json, bool defaultValue = default, JsonValueType expectedType = default)
+        public static bool GetBooleanOrDefault(this JsonValue json, bool defaultValue = default, JsonValueType expectedType = default)
             => json.AsBoolean(expectedType) ?? defaultValue;
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type..</param>
         /// <returns>A <see cref="bool"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool GetBooleanOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static bool GetBooleanOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.AsBoolean(expectedType) ?? default;
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetByte(this in JsonValue json, out byte value, JsonValueType expectedType = default)
+        public static bool TryGetByte(this JsonValue json, out byte value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Byte.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -169,7 +169,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="byte"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static byte? AsByte(this in JsonValue json, JsonValueType expectedType = default)
+        public static byte? AsByte(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetByte(out byte result, expectedType) ? result : null;
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="byte"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static byte GetByteOrDefault(this in JsonValue json, byte defaultValue = default, JsonValueType expectedType = default)
+        public static byte GetByteOrDefault(this JsonValue json, byte defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetByte(out byte result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="byte"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
-        public static byte GetByteOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static byte GetByteOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetByte(out byte result, expectedType) ? result : (byte)0;
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         [CLSCompliant(false)]
-        public static bool TryGetSByte(this in JsonValue json, out sbyte value, JsonValueType expectedType = default)
+        public static bool TryGetSByte(this JsonValue json, out sbyte value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return SByte.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -256,7 +256,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="sbyte"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
         [CLSCompliant(false)]
-        public static sbyte? AsSByte(this in JsonValue json, JsonValueType expectedType = default)
+        public static sbyte? AsSByte(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetSByte(out sbyte result, expectedType) ? result : null;
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="sbyte"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
         [CLSCompliant(false)]
-        public static sbyte GetSByteOrDefault(this in JsonValue json, sbyte defaultValue = default, JsonValueType expectedType = default)
+        public static sbyte GetSByteOrDefault(this JsonValue json, sbyte defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetSByte(out sbyte result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="sbyte"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
         [CLSCompliant(false)]
-        public static sbyte GetSByteOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static sbyte GetSByteOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetSByte(out sbyte result, expectedType) ? result : (sbyte)0;
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetInt16(this in JsonValue json, out short value, JsonValueType expectedType = default)
+        public static bool TryGetInt16(this JsonValue json, out short value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Int16.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -346,7 +346,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="short"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static short? AsInt16(this in JsonValue json, JsonValueType expectedType = default)
+        public static short? AsInt16(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetInt16(out short result, expectedType) ? result : null;
 
         /// <summary>
@@ -361,7 +361,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="short"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static short GetInt16OrDefault(this in JsonValue json, short defaultValue = default, JsonValueType expectedType = default)
+        public static short GetInt16OrDefault(this JsonValue json, short defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetInt16(out short result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -373,7 +373,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type..</param>
         /// <returns>An <see cref="short"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
-        public static short GetInt16OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static short GetInt16OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetInt16(out short result, expectedType) ? result : (short)0;
 
         /// <summary>
@@ -413,7 +413,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         [CLSCompliant(false)]
-        public static bool TryGetUInt16(this in JsonValue json, out ushort value, JsonValueType expectedType = default)
+        public static bool TryGetUInt16(this JsonValue json, out ushort value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return UInt16.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -433,7 +433,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="ushort"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
         [CLSCompliant(false)]
-        public static ushort? AsUInt16(this in JsonValue json, JsonValueType expectedType = default)
+        public static ushort? AsUInt16(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetUInt16(out ushort result, expectedType) ? result : null;
 
         /// <summary>
@@ -449,7 +449,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="ushort"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
         [CLSCompliant(false)]
-        public static ushort GetUInt16OrDefault(this in JsonValue json, ushort defaultValue = default, JsonValueType expectedType = default)
+        public static ushort GetUInt16OrDefault(this JsonValue json, ushort defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetUInt16(out ushort result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -463,7 +463,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="ushort"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
         [CLSCompliant(false)]
-        public static ushort GetUInt16OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static ushort GetUInt16OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetUInt16(out ushort result, expectedType) ? result : (ushort)0;
 
         /// <summary>
@@ -504,7 +504,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetInt32(this in JsonValue json, out int value, JsonValueType expectedType = default)
+        public static bool TryGetInt32(this JsonValue json, out int value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Int32.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -523,7 +523,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="int"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static int? AsInt32(this in JsonValue json, JsonValueType expectedType = default)
+        public static int? AsInt32(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetInt32(out int result, expectedType) ? result : null;
 
         /// <summary>
@@ -538,7 +538,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="int"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static int GetInt32OrDefault(this in JsonValue json, int defaultValue = default, JsonValueType expectedType = default)
+        public static int GetInt32OrDefault(this JsonValue json, int defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetInt32(out int result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -550,7 +550,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>An <see cref="int"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
-        public static int GetInt32OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static int GetInt32OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetInt32(out int result, expectedType) ? result : 0;
 
         /// <summary>
@@ -590,7 +590,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         [CLSCompliant(false)]
-        public static bool TryGetUInt32(this in JsonValue json, out uint value, JsonValueType expectedType = default)
+        public static bool TryGetUInt32(this JsonValue json, out uint value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return UInt32.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -610,7 +610,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="uint"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
         [CLSCompliant(false)]
-        public static uint? AsUInt32(this in JsonValue json, JsonValueType expectedType = default)
+        public static uint? AsUInt32(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetUInt32(out uint result, expectedType) ? result : null;
 
         /// <summary>
@@ -626,7 +626,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="uint"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
         [CLSCompliant(false)]
-        public static uint GetUInt32OrDefault(this in JsonValue json, uint defaultValue = default, JsonValueType expectedType = default)
+        public static uint GetUInt32OrDefault(this JsonValue json, uint defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetUInt32(out uint result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -639,7 +639,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>An <see cref="uint"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
         [CLSCompliant(false)]
-        public static uint GetUInt32OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static uint GetUInt32OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetUInt32(out uint result, expectedType) ? result : 0U;
 
         /// <summary>
@@ -680,7 +680,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetInt64(this in JsonValue json, out long value, JsonValueType expectedType = default)
+        public static bool TryGetInt64(this JsonValue json, out long value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Int64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -699,7 +699,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="long"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static long? AsInt64(this in JsonValue json, JsonValueType expectedType = default)
+        public static long? AsInt64(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetInt64(out long result, expectedType) ? result : null;
 
         /// <summary>
@@ -714,7 +714,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="long"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static long GetInt64OrDefault(this in JsonValue json, long defaultValue = default, JsonValueType expectedType = default)
+        public static long GetInt64OrDefault(this JsonValue json, long defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetInt64(out long result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -726,7 +726,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>An <see cref="long"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
-        public static long GetInt64OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static long GetInt64OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetInt64(out long result, expectedType) ? result : 0L;
 
         /// <summary>
@@ -770,7 +770,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         [CLSCompliant(false)]
-        public static bool TryGetUInt64(this in JsonValue json, out ulong value, JsonValueType expectedType = default)
+        public static bool TryGetUInt64(this JsonValue json, out ulong value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return UInt64.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -790,7 +790,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="ulong"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
         [CLSCompliant(false)]
-        public static ulong? AsUInt64(this in JsonValue json, JsonValueType expectedType = default)
+        public static ulong? AsUInt64(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetUInt64(out ulong result, expectedType) ? result : null;
 
         /// <summary>
@@ -806,7 +806,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="ulong"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
         [CLSCompliant(false)]
-        public static ulong GetUInt64OrDefault(this in JsonValue json, ulong defaultValue = default, JsonValueType expectedType = default)
+        public static ulong GetUInt64OrDefault(this JsonValue json, ulong defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetUInt64(out ulong result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -819,7 +819,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>An <see cref="ulong"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
         [CLSCompliant(false)]
-        public static ulong GetUInt64OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static ulong GetUInt64OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetUInt64(out ulong result, expectedType) ? result : 0UL;
 
         /// <summary>
@@ -865,7 +865,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetBigInteger(this in JsonValue json, out BigInteger value, JsonValueType expectedType = default)
+        public static bool TryGetBigInteger(this JsonValue json, out BigInteger value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return BigInteger.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -884,7 +884,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="BigInteger"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static BigInteger? AsBigInteger(this in JsonValue json, JsonValueType expectedType = default)
+        public static BigInteger? AsBigInteger(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetBigInteger(out BigInteger result, expectedType) ? result : null;
 
         /// <summary>
@@ -899,7 +899,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="BigInteger"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static BigInteger GetBigIntegerOrDefault(this in JsonValue json, BigInteger defaultValue = default, JsonValueType expectedType = default)
+        public static BigInteger GetBigIntegerOrDefault(this JsonValue json, BigInteger defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetBigInteger(out BigInteger result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -911,7 +911,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="BigInteger"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
-        public static BigInteger GetBigIntegerOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static BigInteger GetBigIntegerOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetBigInteger(out BigInteger result, expectedType) ? result : default;
 
         /// <summary>
@@ -956,7 +956,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetInt128(this in JsonValue json, out Int128 value, JsonValueType expectedType = default)
+        public static bool TryGetInt128(this JsonValue json, out Int128 value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Int128.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -975,7 +975,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="Int128"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static Int128? AsInt128(this in JsonValue json, JsonValueType expectedType = default)
+        public static Int128? AsInt128(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetInt128(out Int128 result, expectedType) ? result : null;
 
         /// <summary>
@@ -990,7 +990,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="Int128"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static Int128 GetInt128OrDefault(this in JsonValue json, Int128 defaultValue = default, JsonValueType expectedType = default)
+        public static Int128 GetInt128OrDefault(this JsonValue json, Int128 defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetInt128(out Int128 result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1002,7 +1002,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>An <see cref="Int128"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
-        public static Int128 GetInt128OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static Int128 GetInt128OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetInt128(out Int128 result, expectedType) ? result : default;
 
         /// <summary>
@@ -1048,7 +1048,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
         [CLSCompliant(false)]
-        public static bool TryGetUInt128(this in JsonValue json, out UInt128 value, JsonValueType expectedType = default)
+        public static bool TryGetUInt128(this JsonValue json, out UInt128 value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return UInt128.TryParse(s, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out value);
@@ -1068,7 +1068,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="ulong"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
         [CLSCompliant(false)]
-        public static UInt128? AsUInt128(this in JsonValue json, JsonValueType expectedType = default)
+        public static UInt128? AsUInt128(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetUInt128(out UInt128 result, expectedType) ? result : null;
 
         /// <summary>
@@ -1084,7 +1084,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>An <see cref="UInt128"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
         [CLSCompliant(false)]
-        public static UInt128 GetUInt128OrDefault(this in JsonValue json, UInt128 defaultValue = default, JsonValueType expectedType = default)
+        public static UInt128 GetUInt128OrDefault(this JsonValue json, UInt128 defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetUInt128(out UInt128 result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1097,7 +1097,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>An <see cref="UInt128"/> value if <paramref name="json"/> could be converted; otherwise, <c>0</c>.</returns>
         [CLSCompliant(false)]
-        public static UInt128 GetUInt128OrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static UInt128 GetUInt128OrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetUInt128(out UInt128 result, expectedType) ? result : default;
 
         /// <summary>
@@ -1144,7 +1144,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetHalf(this in JsonValue json, out Half value, JsonValueType expectedType = default)
+        public static bool TryGetHalf(this JsonValue json, out Half value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Half.TryParse(s, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out value);
@@ -1163,7 +1163,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="Half"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static Half? AsHalf(this in JsonValue json, JsonValueType expectedType = default)
+        public static Half? AsHalf(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetHalf(out Half result, expectedType) ? result : null;
 
         /// <summary>
@@ -1178,7 +1178,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="Half"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static Half GetHalfOrDefault(this in JsonValue json, Half defaultValue = default, JsonValueType expectedType = default)
+        public static Half GetHalfOrDefault(this JsonValue json, Half defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetHalf(out Half result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1190,7 +1190,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="Half"/> value if <paramref name="json"/> could be converted; otherwise, <c>0.0</c>.</returns>
-        public static Half GetHalfOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static Half GetHalfOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetHalf(out Half result, expectedType) ? result : (Half)0f;
 
         /// <summary>
@@ -1230,7 +1230,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetSingle(this in JsonValue json, out float value, JsonValueType expectedType = default)
+        public static bool TryGetSingle(this JsonValue json, out float value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Single.TryParse(s, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out value);
@@ -1249,7 +1249,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="float"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static float? AsSingle(this in JsonValue json, JsonValueType expectedType = default)
+        public static float? AsSingle(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetSingle(out float result, expectedType) ? result : null;
 
         /// <summary>
@@ -1264,7 +1264,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="float"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static float GetSingleOrDefault(this in JsonValue json, float defaultValue = default, JsonValueType expectedType = default)
+        public static float GetSingleOrDefault(this JsonValue json, float defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetSingle(out float result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1276,7 +1276,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="float"/> value if <paramref name="json"/> could be converted; otherwise, <c>0.0</c>.</returns>
-        public static float GetSingleOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static float GetSingleOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetSingle(out float result, expectedType) ? result : 0f;
 
         /// <summary>
@@ -1315,7 +1315,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDouble(this in JsonValue json, out double value, JsonValueType expectedType = default)
+        public static bool TryGetDouble(this JsonValue json, out double value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Double.TryParse(s, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out value);
@@ -1334,7 +1334,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="double"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static double? AsDouble(this in JsonValue json, JsonValueType expectedType = default)
+        public static double? AsDouble(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetDouble(out double result, expectedType) ? result : null;
 
         /// <summary>
@@ -1349,7 +1349,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="double"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static double GetDoubleOrDefault(this in JsonValue json, double defaultValue = default, JsonValueType expectedType = default)
+        public static double GetDoubleOrDefault(this JsonValue json, double defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetDouble(out double result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1361,7 +1361,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="double"/> value if <paramref name="json"/> could be converted; otherwise, <c>0.0</c>.</returns>
-        public static double GetDoubleOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static double GetDoubleOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetDouble(out double result, expectedType) ? result : 0d;
 
         /// <summary>
@@ -1400,7 +1400,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDecimal(this in JsonValue json, out decimal value, JsonValueType expectedType = default)
+        public static bool TryGetDecimal(this JsonValue json, out decimal value, JsonValueType expectedType = default)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
                 return Decimal.TryParse(s, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out value);
@@ -1419,7 +1419,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="decimal"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static decimal? AsDecimal(this in JsonValue json, JsonValueType expectedType = default)
+        public static decimal? AsDecimal(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetDecimal(out decimal result, expectedType) ? result : null;
 
         /// <summary>
@@ -1434,7 +1434,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="decimal"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static decimal GetDecimalOrDefault(this in JsonValue json, decimal defaultValue = default, JsonValueType expectedType = default)
+        public static decimal GetDecimalOrDefault(this JsonValue json, decimal defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetDecimal(out decimal result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1446,7 +1446,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="decimal"/> value if <paramref name="json"/> could be converted; otherwise, <c>0.0</c>.</returns>
-        public static decimal GetDecimalOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static decimal GetDecimalOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetDecimal(out decimal result, expectedType) ? result : 0m;
 
         /// <summary>
@@ -1492,7 +1492,7 @@ namespace KGySoft.Json
         /// but the actual <see cref="JsonValue.Type"/> is <see cref="JsonValueType.Null"/>; otherwise, <see langword="false"/>. This parameter is optional.
         /// <br/>Default value: <see langword="false"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetString(this in JsonValue json, out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
+        public static bool TryGetString(this JsonValue json, out string? value, JsonValueType expectedType = default, bool allowNullIfStringIsExpected = false)
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && json.AsStringInternal is string s)
             {
@@ -1514,7 +1514,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="string"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static string? AsString(this in JsonValue json, JsonValueType expectedType = default)
+        public static string? AsString(this JsonValue json, JsonValueType expectedType = default)
             => json.TryGetString(out string? result, expectedType) ? result : null;
 
         /// <summary>
@@ -1529,7 +1529,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="string"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static string? GetStringOrDefault(this in JsonValue json, string? defaultValue = default, JsonValueType expectedType = default)
+        public static string? GetStringOrDefault(this JsonValue json, string? defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetString(out string? result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1541,7 +1541,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="string"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static string? GetStringOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static string? GetStringOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetString(out string? result, expectedType) ? result : default;
 
         /// <summary>
@@ -1567,7 +1567,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetEnum<TEnum>(this in JsonValue json, out TEnum value, JsonValueType expectedType = default)
+        public static bool TryGetEnum<TEnum>(this JsonValue json, out TEnum value, JsonValueType expectedType = default)
             where TEnum : struct, Enum
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
@@ -1592,7 +1592,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreFormat, out TEnum value, string? flagsSeparator = null, JsonValueType expectedType = default)
+        public static bool TryGetEnum<TEnum>(this JsonValue json, bool ignoreFormat, out TEnum value, string? flagsSeparator = null, JsonValueType expectedType = default)
             where TEnum : struct, Enum
         {
             if ((expectedType == JsonValueType.Undefined || json.Type == expectedType) && !json.IsNull && json.AsStringInternal is string s)
@@ -1634,7 +1634,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetEnum<TEnum>(this in JsonValue json, bool ignoreFormat, out TEnum value, JsonValueType expectedType) where TEnum : struct, Enum
+        public static bool TryGetEnum<TEnum>(this JsonValue json, bool ignoreFormat, out TEnum value, JsonValueType expectedType) where TEnum : struct, Enum
             => TryGetEnum(json, ignoreFormat, out value, null, expectedType);
 
         /// <summary>
@@ -1648,7 +1648,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TEnum? AsEnum<TEnum>(this in JsonValue json, JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum? AsEnum<TEnum>(this JsonValue json, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(out TEnum result, expectedType) ? result : null;
 
         /// <summary>
@@ -1665,7 +1665,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreFormat, string? flagsSeparator = null, JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum? AsEnum<TEnum>(this JsonValue json, bool ignoreFormat, string? flagsSeparator = null, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : null;
 
         /// <summary>
@@ -1679,7 +1679,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TEnum? AsEnum<TEnum>(this in JsonValue json, bool ignoreFormat, JsonValueType expectedType) where TEnum : struct, Enum
+        public static TEnum? AsEnum<TEnum>(this JsonValue json, bool ignoreFormat, JsonValueType expectedType) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, null, expectedType) ? result : null;
 
         /// <summary>
@@ -1695,7 +1695,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, TEnum defaultValue = default, JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this JsonValue json, TEnum defaultValue = default, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(out TEnum result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1708,7 +1708,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, the default value of <typeparamref name="TEnum"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, JsonValueType expectedType) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this JsonValue json, JsonValueType expectedType) where TEnum : struct, Enum
             => json.TryGetEnum(out TEnum result, expectedType) ? result : default;
 
         /// <summary>
@@ -1727,7 +1727,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, TEnum defaultValue = default, string? flagsSeparator = null, JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this JsonValue json, bool ignoreFormat, TEnum defaultValue = default, string? flagsSeparator = null, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1743,7 +1743,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, the default value of <typeparamref name="TEnum"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, string? flagsSeparator, JsonValueType expectedType = default) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this JsonValue json, bool ignoreFormat, string? flagsSeparator, JsonValueType expectedType = default) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, flagsSeparator, expectedType) ? result : default;
 
         /// <summary>
@@ -1758,7 +1758,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, TEnum defaultValue, JsonValueType expectedType) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this JsonValue json, bool ignoreFormat, TEnum defaultValue, JsonValueType expectedType) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, null, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -1772,7 +1772,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <typeparamref name="TEnum"/> value if <paramref name="json"/> could be converted; otherwise, the default value of <typeparamref name="TEnum"/>.</returns>
-        public static TEnum GetEnumOrDefault<TEnum>(this in JsonValue json, bool ignoreFormat, JsonValueType expectedType) where TEnum : struct, Enum
+        public static TEnum GetEnumOrDefault<TEnum>(this JsonValue json, bool ignoreFormat, JsonValueType expectedType) where TEnum : struct, Enum
             => json.TryGetEnum(ignoreFormat, out TEnum result, null, expectedType) ? result : default;
 
         /// <summary>
@@ -1947,7 +1947,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTime(this in JsonValue json, out DateTime value, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
+        public static bool TryGetDateTime(this JsonValue json, out DateTime value, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
             => json.TryGetDateTime(JsonDateTimeFormat.Auto, out value, desiredKind, expectedType);
 
         /// <summary>
@@ -1962,7 +1962,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTime(this in JsonValue json, out DateTime value, JsonValueType expectedType)
+        public static bool TryGetDateTime(this JsonValue json, out DateTime value, JsonValueType expectedType)
             => json.TryGetDateTime(JsonDateTimeFormat.Auto, out value, null, expectedType);
 
         /// <summary>
@@ -1982,7 +1982,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTime(this in JsonValue json, JsonDateTimeFormat format, out DateTime value, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
+        public static bool TryGetDateTime(this JsonValue json, JsonDateTimeFormat format, out DateTime value, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
@@ -2019,7 +2019,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTime(this in JsonValue json, JsonDateTimeFormat format, out DateTime value, JsonValueType expectedType)
+        public static bool TryGetDateTime(this JsonValue json, JsonDateTimeFormat format, out DateTime value, JsonValueType expectedType)
             => json.TryGetDateTime(format, out value, null, expectedType);
 
         /// <summary>
@@ -2036,7 +2036,7 @@ namespace KGySoft.Json
         /// while changing to or from <see cref="DateTimeKind.Unspecified"/> just changes the <see cref="DateTime.Kind"/> property without converting the value. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTime(this in JsonValue json, string format, out DateTime value, DateTimeKind? desiredKind = null)
+        public static bool TryGetDateTime(this JsonValue json, string format, out DateTime value, DateTimeKind? desiredKind = null)
         {
             if (format == null!)
                 Throw.ArgumentNullException(nameof(format));
@@ -2079,7 +2079,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateTime? AsDateTime(this in JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
+        public static DateTime? AsDateTime(this JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
             => json.TryGetDateTime(format, out DateTime result, desiredKind, expectedType) ? result : null;
 
         /// <summary>
@@ -2093,7 +2093,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateTime? AsDateTime(this in JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
+        public static DateTime? AsDateTime(this JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
             => json.TryGetDateTime(format, out DateTime result, null, expectedType) ? result : null;
 
         /// <summary>
@@ -2109,7 +2109,7 @@ namespace KGySoft.Json
         /// while changing to or from <see cref="DateTimeKind.Unspecified"/> just changes the <see cref="DateTime.Kind"/> property without converting the value. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateTime? AsDateTime(this in JsonValue json, string format, DateTimeKind? desiredKind = null)
+        public static DateTime? AsDateTime(this JsonValue json, string format, DateTimeKind? desiredKind = null)
             => json.TryGetDateTime(format, out DateTime result, desiredKind) ? result : null;
 
         /// <summary>
@@ -2130,7 +2130,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, DateTime defaultValue = default, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, DateTime defaultValue = default, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
             => json.TryGetDateTime(JsonDateTimeFormat.Auto, out DateTime result, desiredKind, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2145,7 +2145,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, DateTime defaultValue, JsonValueType expectedType)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, DateTime defaultValue, JsonValueType expectedType)
             => json.TryGetDateTime(JsonDateTimeFormat.Auto, out DateTime result, null, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2164,7 +2164,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>, which is the default value of <see cref="DateTime"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, DateTimeKind? desiredKind, JsonValueType expectedType = default)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, DateTimeKind? desiredKind, JsonValueType expectedType = default)
             => json.TryGetDateTime(JsonDateTimeFormat.Auto, out DateTime result, desiredKind, expectedType) ? result : default;
 
         /// <summary>
@@ -2179,7 +2179,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>, which is the default value of <see cref="DateTime"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetDateTime(JsonDateTimeFormat.Auto, out DateTime result, null, expectedType) ? result : default;
 
         /// <summary>
@@ -2200,7 +2200,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateTime defaultValue = default, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, JsonDateTimeFormat format, DateTime defaultValue = default, DateTimeKind? desiredKind = null, JsonValueType expectedType = default)
             => json.TryGetDateTime(format, out DateTime result, desiredKind, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2215,7 +2215,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateTime defaultValue, JsonValueType expectedType)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, JsonDateTimeFormat format, DateTime defaultValue, JsonValueType expectedType)
             => json.TryGetDateTime(format, out DateTime result, null, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2233,7 +2233,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>, which is the default value of <see cref="DateTime"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateTimeKind? desiredKind, JsonValueType expectedType = default)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, JsonDateTimeFormat format, DateTimeKind? desiredKind, JsonValueType expectedType = default)
             => json.TryGetDateTime(format, out DateTime result, desiredKind, expectedType) ? result : default;
 
         /// <summary>
@@ -2246,7 +2246,7 @@ namespace KGySoft.Json
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>, which is the default value of <see cref="DateTime"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
             => json.TryGetDateTime(format, out DateTime result, null, expectedType) ? result : default;
 
         /// <summary>
@@ -2264,7 +2264,7 @@ namespace KGySoft.Json
         /// while changing to or from <see cref="DateTimeKind.Unspecified"/> just changes the <see cref="DateTime.Kind"/> property without converting the value. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, string format, DateTime defaultValue = default, DateTimeKind? desiredKind = null)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, string format, DateTime defaultValue = default, DateTimeKind? desiredKind = null)
             => json.TryGetDateTime(format, out DateTime result, desiredKind) ? result : defaultValue;
 
         /// <summary>
@@ -2280,7 +2280,7 @@ namespace KGySoft.Json
         /// while changing to or from <see cref="DateTimeKind.Unspecified"/> just changes the <see cref="DateTime.Kind"/> property without converting the value. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>, which is the default value of <see cref="DateTime"/>.</returns>
-        public static DateTime GetDateTimeOrDefault(this in JsonValue json, string format, DateTimeKind? desiredKind)
+        public static DateTime GetDateTimeOrDefault(this JsonValue json, string format, DateTimeKind? desiredKind)
             => json.TryGetDateTime(format, out DateTime result, desiredKind) ? result : default;
 
         /// <summary>
@@ -2381,7 +2381,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTimeOffset(this in JsonValue json, out DateTimeOffset value, JsonValueType expectedType = default)
+        public static bool TryGetDateTimeOffset(this JsonValue json, out DateTimeOffset value, JsonValueType expectedType = default)
             => json.TryGetDateTimeOffset(JsonDateTimeFormat.Auto, out value, expectedType);
 
         /// <summary>
@@ -2396,7 +2396,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTimeOffset(this in JsonValue json, JsonDateTimeFormat format, out DateTimeOffset value, JsonValueType expectedType = default)
+        public static bool TryGetDateTimeOffset(this JsonValue json, JsonDateTimeFormat format, out DateTimeOffset value, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
@@ -2417,7 +2417,7 @@ namespace KGySoft.Json
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="DateTimeOffset.MinValue"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateTimeOffset(this in JsonValue json, string format, out DateTimeOffset value)
+        public static bool TryGetDateTimeOffset(this JsonValue json, string format, out DateTimeOffset value)
         {
             if (format == null!)
                 Throw.ArgumentNullException(nameof(format));
@@ -2442,7 +2442,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateTimeOffset? AsDateTimeOffset(this in JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, JsonValueType expectedType = default)
+        public static DateTimeOffset? AsDateTimeOffset(this JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, JsonValueType expectedType = default)
             => json.TryGetDateTimeOffset(format, out DateTimeOffset result, expectedType) ? result : null;
 
         /// <summary>
@@ -2453,7 +2453,7 @@ namespace KGySoft.Json
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateTimeOffset"/>.</param>
         /// <param name="format">Specifies the exact format of the date-time offset value in the <see cref="JsonValue"/>.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateTimeOffset? AsDateTimeOffset(this in JsonValue json, string format)
+        public static DateTimeOffset? AsDateTimeOffset(this JsonValue json, string format)
             => json.TryGetDateTimeOffset(format, out DateTimeOffset result) ? result : null;
 
         /// <summary>
@@ -2469,7 +2469,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, DateTimeOffset defaultValue = default, JsonValueType expectedType = default)
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this JsonValue json, DateTimeOffset defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetDateTimeOffset(JsonDateTimeFormat.Auto, out DateTimeOffset result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2484,7 +2484,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="DateTimeOffset.MinValue">DateTimeOffset.MinValue</see>, which is the default value of <see cref="DateTimeOffset"/>.</returns>
-        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetDateTimeOffset(JsonDateTimeFormat.Auto, out DateTimeOffset result, expectedType) ? result : default;
 
         /// <summary>
@@ -2500,7 +2500,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateTimeOffset defaultValue = default, JsonValueType expectedType = default)
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this JsonValue json, JsonDateTimeFormat format, DateTimeOffset defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetDateTimeOffset(format, out DateTimeOffset result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2514,7 +2514,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="DateTimeOffset.MinValue">DateTimeOffset.MinValue</see>, which is the default value of <see cref="DateTimeOffset"/>.</returns>
-        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
             => json.TryGetDateTimeOffset(format, out DateTimeOffset result, expectedType) ? result : default;
 
         /// <summary>
@@ -2527,7 +2527,7 @@ namespace KGySoft.Json
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see cref="DateTimeOffset.MinValue"/>.</param>
         /// <returns>A <see cref="DateTimeOffset"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateTimeOffset GetDateTimeOffsetOrDefault(this in JsonValue json, string format, DateTimeOffset defaultValue = default)
+        public static DateTimeOffset GetDateTimeOffsetOrDefault(this JsonValue json, string format, DateTimeOffset defaultValue = default)
             => json.TryGetDateTimeOffset(format, out DateTimeOffset result) ? result : defaultValue;
 
         /// <summary>
@@ -2619,7 +2619,7 @@ namespace KGySoft.Json
         /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="TryGetTimeSpan(in JsonValue, JsonTimeFormat, out TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="TryGetTimeSpan(JsonValue, JsonTimeFormat, out TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
@@ -2628,7 +2628,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetTimeSpan(this in JsonValue json, out TimeSpan value, JsonValueType expectedType = default)
+        public static bool TryGetTimeSpan(this JsonValue json, out TimeSpan value, JsonValueType expectedType = default)
             => json.TryGetTimeSpan(JsonTimeFormat.Auto, out value, expectedType);
 
         /// <summary>
@@ -2643,7 +2643,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetTimeSpan(this in JsonValue json, JsonTimeFormat format, out TimeSpan value, JsonValueType expectedType = default)
+        public static bool TryGetTimeSpan(this JsonValue json, JsonTimeFormat format, out TimeSpan value, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonTimeFormat.Text)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
@@ -2666,14 +2666,14 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TimeSpan? AsTimeSpan(this in JsonValue json, JsonTimeFormat format = JsonTimeFormat.Auto, JsonValueType expectedType = default)
+        public static TimeSpan? AsTimeSpan(this JsonValue json, JsonTimeFormat format = JsonTimeFormat.Auto, JsonValueType expectedType = default)
             => json.TryGetTimeSpan(format, out TimeSpan result, expectedType) ? result : null;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeSpan"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeSpan"/>;
         /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeFormat, TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="GetTimeSpanOrDefault(JsonValue, JsonTimeFormat, TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -2682,7 +2682,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, TimeSpan defaultValue = default, JsonValueType expectedType = default)
+        public static TimeSpan GetTimeSpanOrDefault(this JsonValue json, TimeSpan defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetTimeSpan(JsonTimeFormat.Auto, out TimeSpan result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2690,14 +2690,14 @@ namespace KGySoft.Json
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeSpan"/>;
         /// otherwise, returns <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="GetTimeSpanOrDefault(in JsonValue, JsonTimeFormat, TimeSpan, JsonValueType)"/> overload instead.
+        /// <see cref="GetTimeSpanOrDefault(JsonValue, JsonTimeFormat, TimeSpan, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeSpan"/>.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.</returns>
-        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static TimeSpan GetTimeSpanOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetTimeSpan(JsonTimeFormat.Auto, out TimeSpan result, expectedType) ? result : default;
 
         /// <summary>
@@ -2713,7 +2713,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonTimeFormat format, TimeSpan defaultValue = default, JsonValueType expectedType = default)
+        public static TimeSpan GetTimeSpanOrDefault(this JsonValue json, JsonTimeFormat format, TimeSpan defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetTimeSpan(format, out TimeSpan result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2727,7 +2727,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="TimeSpan"/> value if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="TimeSpan.Zero">TimeSpan.Zero</see>, which is the default value of <see cref="TimeSpan"/>.</returns>
-        public static TimeSpan GetTimeSpanOrDefault(this in JsonValue json, JsonTimeFormat format, JsonValueType expectedType)
+        public static TimeSpan GetTimeSpanOrDefault(this JsonValue json, JsonTimeFormat format, JsonValueType expectedType)
             => json.TryGetTimeSpan(format, out TimeSpan result, expectedType) ? result : default;
 
         /// <summary>
@@ -2804,7 +2804,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateOnly(this in JsonValue json, out DateOnly value, JsonValueType expectedType = default)
+        public static bool TryGetDateOnly(this JsonValue json, out DateOnly value, JsonValueType expectedType = default)
             => json.TryGetDateOnly(JsonDateTimeFormat.Auto, out value, expectedType);
 
         /// <summary>
@@ -2819,7 +2819,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateOnly(this in JsonValue json, JsonDateTimeFormat format, out DateOnly value, JsonValueType expectedType = default)
+        public static bool TryGetDateOnly(this JsonValue json, JsonDateTimeFormat format, out DateOnly value, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonDateTimeFormat.MicrosoftLegacy)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
@@ -2852,7 +2852,7 @@ namespace KGySoft.Json
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="DateOnly.MinValue"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetDateOnly(this in JsonValue json, string format, out DateOnly value)
+        public static bool TryGetDateOnly(this JsonValue json, string format, out DateOnly value)
         {
             if (format == null!)
                 Throw.ArgumentNullException(nameof(format));
@@ -2885,7 +2885,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateOnly? AsDateOnly(this in JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, JsonValueType expectedType = default)
+        public static DateOnly? AsDateOnly(this JsonValue json, JsonDateTimeFormat format = JsonDateTimeFormat.Auto, JsonValueType expectedType = default)
             => json.TryGetDateOnly(format, out DateOnly result, expectedType) ? result : null;
 
         /// <summary>
@@ -2896,7 +2896,7 @@ namespace KGySoft.Json
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="DateOnly"/>.</param>
         /// <param name="format">Specifies the exact format of the date-time value in the <see cref="JsonValue"/>.</param>
         /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static DateOnly? AsDateOnly(this in JsonValue json, string format)
+        public static DateOnly? AsDateOnly(this JsonValue json, string format)
             => json.TryGetDateOnly(format, out DateOnly result) ? result : null;
 
         /// <summary>
@@ -2912,7 +2912,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, DateOnly defaultValue = default, JsonValueType expectedType = default)
+        public static DateOnly GetDateOnlyOrDefault(this JsonValue json, DateOnly defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetDateOnly(JsonDateTimeFormat.Auto, out DateOnly result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2927,7 +2927,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="DateTime"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateTime.MinValue">DateTime.MinValue</see>,
         /// which is the default value of <see cref="DateOnly"/>.</returns>
-        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static DateOnly GetDateOnlyOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetDateOnly(JsonDateTimeFormat.Auto, out DateOnly result, expectedType) ? result : default;
 
         /// <summary>
@@ -2943,7 +2943,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, JsonDateTimeFormat format, DateOnly defaultValue = default, JsonValueType expectedType = default)
+        public static DateOnly GetDateOnlyOrDefault(this JsonValue json, JsonDateTimeFormat format, DateOnly defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetDateOnly(format, out DateOnly result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -2957,7 +2957,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see cref="DateOnly.MinValue">DateOnly.MinValue</see>,
         /// which is the default value of <see cref="DateOnly"/>.</returns>
-        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
+        public static DateOnly GetDateOnlyOrDefault(this JsonValue json, JsonDateTimeFormat format, JsonValueType expectedType)
             => json.TryGetDateOnly(format, out DateOnly result, expectedType) ? result : default;
 
         /// <summary>
@@ -2970,7 +2970,7 @@ namespace KGySoft.Json
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see cref="DateOnly.MinValue"/>.</param>
         /// <returns>A <see cref="DateOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static DateOnly GetDateOnlyOrDefault(this in JsonValue json, string format, DateOnly defaultValue = default)
+        public static DateOnly GetDateOnlyOrDefault(this JsonValue json, string format, DateOnly defaultValue = default)
             => json.TryGetDateOnly(format, out DateOnly result) ? result : defaultValue;
 
         /// <summary>
@@ -3043,7 +3043,7 @@ namespace KGySoft.Json
         /// Tries to get the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="TryGetTimeOnly(in JsonValue, JsonTimeFormat, out TimeOnly, JsonValueType)"/> overload instead.
+        /// <see cref="TryGetTimeOnly(JsonValue, JsonTimeFormat, out TimeOnly, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
@@ -3052,7 +3052,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetTimeOnly(this in JsonValue json, out TimeOnly value, JsonValueType expectedType = default)
+        public static bool TryGetTimeOnly(this JsonValue json, out TimeOnly value, JsonValueType expectedType = default)
             => json.TryGetTimeOnly(JsonTimeFormat.Auto, out value, expectedType);
 
         /// <summary>
@@ -3067,7 +3067,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetTimeOnly(this in JsonValue json, JsonTimeFormat format, out TimeOnly value, JsonValueType expectedType = default)
+        public static bool TryGetTimeOnly(this JsonValue json, JsonTimeFormat format, out TimeOnly value, JsonValueType expectedType = default)
         {
             if ((uint)format > (uint)JsonTimeFormat.Text)
                 Throw.ArgumentOutOfRangeException(PublicResources.EnumOutOfRange(format), nameof(format));
@@ -3096,14 +3096,14 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static TimeOnly? AsTimeOnly(this in JsonValue json, JsonTimeFormat format = JsonTimeFormat.Auto, JsonValueType expectedType = default)
+        public static TimeOnly? AsTimeOnly(this JsonValue json, JsonTimeFormat format = JsonTimeFormat.Auto, JsonValueType expectedType = default)
             => json.TryGetTimeOnly(format, out TimeOnly result, expectedType) ? result : null;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="TimeOnly"/> value if <paramref name="expectedType"/> is <see cref="JsonValueType.Undefined"/>
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeOnly"/>;
         /// otherwise, returns <paramref name="defaultValue"/>. The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="GetTimeOnlyOrDefault(in JsonValue, JsonTimeFormat, TimeOnly, JsonValueType)"/> overload instead.
+        /// <see cref="GetTimeOnlyOrDefault(JsonValue, JsonTimeFormat, TimeOnly, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
@@ -3112,7 +3112,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, TimeOnly defaultValue = default, JsonValueType expectedType = default)
+        public static TimeOnly GetTimeOnlyOrDefault(this JsonValue json, TimeOnly defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetTimeOnly(JsonTimeFormat.Auto, out TimeOnly result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -3120,14 +3120,14 @@ namespace KGySoft.Json
         /// or matches the <see cref="JsonValue.Type"/> property of the specified <paramref name="json"/> parameter and it can be converted to <see cref="TimeOnly"/>;
         /// otherwise, returns <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.
         /// The actual format is attempted to be auto detected. If you know exact format use the
-        /// <see cref="GetTimeOnlyOrDefault(in JsonValue, JsonTimeFormat, TimeOnly, JsonValueType)"/> overload instead.
+        /// <see cref="GetTimeOnlyOrDefault(JsonValue, JsonTimeFormat, TimeOnly, JsonValueType)"/> overload instead.
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="TimeOnly"/>.</param>
         /// <param name="expectedType">The expected <see cref="JsonValue.Type"/> of the specified <paramref name="json"/> parameter,
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.</returns>
-        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, JsonValueType expectedType)
+        public static TimeOnly GetTimeOnlyOrDefault(this JsonValue json, JsonValueType expectedType)
             => json.TryGetTimeOnly(JsonTimeFormat.Auto, out TimeOnly result, expectedType) ? result : default;
 
         /// <summary>
@@ -3143,7 +3143,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type. This parameter is optional.
         /// <br/>Default value: <see cref="JsonValueType.Undefined"/>.</param>
         /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, JsonTimeFormat format, TimeOnly defaultValue = default, JsonValueType expectedType = default)
+        public static TimeOnly GetTimeOnlyOrDefault(this JsonValue json, JsonTimeFormat format, TimeOnly defaultValue = default, JsonValueType expectedType = default)
             => json.TryGetTimeOnly(format, out TimeOnly result, expectedType) ? result : defaultValue;
 
         /// <summary>
@@ -3157,7 +3157,7 @@ namespace KGySoft.Json
         /// or <see cref="JsonValueType.Undefined"/> to allow any type.</param>
         /// <returns>A <see cref="TimeOnly"/> value if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="TimeOnly.MinValue">TimeOnly.MinValue</see>, which is the default value of <see cref="TimeOnly"/>.</returns>
-        public static TimeOnly GetTimeOnlyOrDefault(this in JsonValue json, JsonTimeFormat format, JsonValueType expectedType)
+        public static TimeOnly GetTimeOnlyOrDefault(this JsonValue json, JsonTimeFormat format, JsonValueType expectedType)
             => json.TryGetTimeOnly(format, out TimeOnly result, expectedType) ? result : default;
 
         /// <summary>
@@ -3207,7 +3207,7 @@ namespace KGySoft.Json
         /// <param name="value">When this method returns, the result of the conversion, if <paramref name="json"/> could be converted;
         /// otherwise, <see cref="Guid.Empty"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the specified <see cref="JsonValue"/> could be converted; otherwise, <see langword="false"/>.</returns>
-        public static bool TryGetGuid(this in JsonValue json, out Guid value)
+        public static bool TryGetGuid(this JsonValue json, out Guid value)
         {
 #if NET35
             if (json.AsString is string { Length: 36 } s && s[8] == '-')
@@ -3235,7 +3235,7 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="json">The <see cref="JsonValue"/> to be converted to <see cref="Guid"/>.</param>
         /// <returns>A <see cref="Guid"/> value if <paramref name="json"/> could be converted; otherwise, <see langword="null"/>.</returns>
-        public static Guid? AsGuid(this in JsonValue json) => json.TryGetGuid(out Guid result) ? result : null;
+        public static Guid? AsGuid(this JsonValue json) => json.TryGetGuid(out Guid result) ? result : null;
 
         /// <summary>
         /// Gets the specified <see cref="JsonValue"/> as a <see cref="Guid"/> value
@@ -3246,7 +3246,7 @@ namespace KGySoft.Json
         /// <param name="defaultValue">The value to be returned if the conversion fails. This parameter is optional.
         /// <br/>Default value: <see cref="Guid.Empty"/>.</param>
         /// <returns>A <see cref="Guid"/> value if <paramref name="json"/> could be converted; otherwise, <paramref name="defaultValue"/>.</returns>
-        public static Guid GetGuidOrDefault(this in JsonValue json, Guid defaultValue = default) => json.TryGetGuid(out Guid result) ? result : defaultValue;
+        public static Guid GetGuidOrDefault(this JsonValue json, Guid defaultValue = default) => json.TryGetGuid(out Guid result) ? result : defaultValue;
 
         /// <summary>
         /// Converts the specified <paramref name="value"/> to <see cref="JsonValue"/>.
