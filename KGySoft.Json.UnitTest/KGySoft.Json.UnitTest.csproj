@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KGySoft.Json\KGySoft.Json.csproj" />H
+    <ProjectReference Include="..\KGySoft.Json\KGySoft.Json.csproj" />
   </ItemGroup>
 
 </Project>
