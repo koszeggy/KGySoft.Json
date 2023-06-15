@@ -6,6 +6,17 @@
 ===============================================================================
 
 ~~~~~~~~~
+- v3.0.1:
+~~~~~~~~~
+
+- KGySoft.Json namespace:
+=========================
+- JsonValue struct: WriteTo(Stream, Encoding, string) overload flushes the internally created StreamWriter
+- JsonArray class: WriteTo(Stream, Encoding, string) overload flushes the internally created StreamWriter
+- JsonObject class: WriteTo(Stream, Encoding, string) overload flushes the internally created StreamWriter
+
+
+~~~~~~~~~
 ! v3.0.0:
 ~~~~~~~~~
 

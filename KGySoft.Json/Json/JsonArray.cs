@@ -116,7 +116,7 @@ namespace KGySoft.Json
         /// </summary>
         /// <param name="items">The items to be added to this <see cref="JsonArray"/>.</param>
         public JsonArray(IEnumerable<JsonValue> items)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, items CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, items CAN be null but MUST NOT be
             : this(new List<JsonValue>(items ?? Throw.ArgumentNullException<List<JsonValue>>(nameof(items))))
         {
         }
@@ -141,7 +141,7 @@ namespace KGySoft.Json
         /// <param name="reader">A <see cref="TextReader"/> that will be read for the <see cref="JsonArray"/> content.</param>
         /// <returns>A <see cref="JsonArray"/> that contains the JSON array data that was read from the specified <see cref="TextReader"/>.</returns>
         public static JsonArray Parse(TextReader reader)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, reader CAN be null but MUST NOT be
             => JsonParser.ParseArray(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)));
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>A <see cref="JsonArray"/> that contains the JSON array data that was read from the specified <paramref name="stream"/>.</returns>
         public static JsonArray Parse(Stream stream, Encoding? encoding = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
             => Parse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8));
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace KGySoft.Json
         /// <param name="s">A string that will be read for the <see cref="JsonArray"/> content.</param>
         /// <returns>A <see cref="JsonArray"/> that contains the JSON array data that was read from the specified string.</returns>
         public static JsonArray Parse(string s)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, s CAN be null but MUST NOT be
             => Parse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))));
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace KGySoft.Json
         /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(TextReader reader, [MaybeNullWhen(false)]out JsonArray value)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, reader CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, reader CAN be null but MUST NOT be
             => JsonParser.TryParseArray(reader ?? Throw.ArgumentNullException<TextReader>(nameof(reader)), out value);
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace KGySoft.Json
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(Stream stream, [MaybeNullWhen(false)]out JsonArray value, Encoding? encoding = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
             => TryParse(new StreamReader(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), out value);
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace KGySoft.Json
         /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the parsing was successful; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string s, [MaybeNullWhen(false)]out JsonArray value)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, s CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, s CAN be null but MUST NOT be
             => TryParse(new StringReader(s ?? Throw.ArgumentNullException<string>(nameof(s))), out value);
 
         #endregion
@@ -336,7 +336,7 @@ namespace KGySoft.Json
         /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         public void WriteTo(TextWriter writer, string? indent = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, writer CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, writer CAN be null but MUST NOT be
             => new JsonWriter(writer ?? Throw.ArgumentNullException<TextWriter>(nameof(writer)), indent).Write(this);
 
         /// <summary>
@@ -358,7 +358,6 @@ namespace KGySoft.Json
                 return;
             }
 
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
             new JsonWriter(new StringWriter(builder), indent).Write(this);
         }
 
@@ -373,8 +372,11 @@ namespace KGySoft.Json
         /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         public void WriteTo(Stream stream, Encoding? encoding = null, string? indent = null)
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, stream CAN be null but MUST NOT be
-            => new JsonWriter(new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), indent).Write(this);
+        {
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
+            using var writer = new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8);
+            new JsonWriter(writer, indent).Write(this);
+        }
 
         #endregion
 

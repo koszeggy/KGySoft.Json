@@ -663,7 +663,6 @@ namespace KGySoft.Json
                 return;
             }
 
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, builder CAN be null but MUST NOT be
             new JsonWriter(new StringWriter(builder), indent).Write(this);
         }
 
@@ -678,8 +677,11 @@ namespace KGySoft.Json
         /// If <see langword="null"/> or empty, then a minimized JSON is returned. Using non-whitespace characters may produce an invalid JSON. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         public void WriteTo(Stream stream, Encoding? encoding = null, string? indent = null)
+        {
             // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, stream CAN be null but MUST NOT be
-            => new JsonWriter(new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8), indent).Write(this);
+            using var writer = new StreamWriter(stream ?? Throw.ArgumentNullException<Stream>(nameof(stream)), encoding ?? Encoding.UTF8);
+            new JsonWriter(writer, indent).Write(this);
+        }
 
         #endregion
 

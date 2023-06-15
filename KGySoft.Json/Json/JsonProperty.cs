@@ -106,7 +106,7 @@ namespace KGySoft.Json
         /// <exception cref="ArgumentNullException"><paramref name="name"/> is <see langword="null"/>.</exception>
         public JsonProperty(string name, JsonValue value)
         {
-            // ReSharper disable once ConstantNullCoalescingCondition - false alarm, name CAN be null but MUST NOT be
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, name CAN be null but MUST NOT be
             Name = name ?? Throw.ArgumentNullException<string>(nameof(name));
             Value = value;
         }
