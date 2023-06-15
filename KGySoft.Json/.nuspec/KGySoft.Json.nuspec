@@ -29,37 +29,37 @@ Documentation: https://docs.kgysoft.net/json</description>
     <repository type="git" url="https://github.com/koszeggy/KGySoft.Json" />
     <dependencies>
       <group targetFramework="net35">
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="net40">
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="net45">
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="net472">
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="netstandard2.0" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="netstandard2.1" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="netcoreapp2.0" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="netcoreapp2.1" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="net5.0" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="net6.0" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
       <group targetFramework="net7.0" >
-        <dependency id="KGySoft.CoreLibraries" version="7.0.0" />
+        <dependency id="KGySoft.CoreLibraries" version="7.2.0" />
       </group>
     </dependencies>
   </metadata>
